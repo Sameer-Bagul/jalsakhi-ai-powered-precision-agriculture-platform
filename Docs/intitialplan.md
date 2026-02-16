@@ -49,6 +49,7 @@ Self-learning village water intelligence system that creates a digital twin of v
 * Farmers
 * Village Water Admin
 * Agriculture Officers
+* Developers/System Administrators
 
 ---
 
@@ -73,19 +74,37 @@ Self-learning village water intelligence system that creates a digital twin of v
 * Run simulations
 * View crop pattern suggestions
 
+## Developer
+
+* Monitor ML model performance
+* View system logs
+* Test API endpoints
+* Check service health status
+* View database metrics
+* Retrain models
+* Debug prediction errors
+* View real-time analytics
+
 ---
 
 # 6. HIGH LEVEL ARCHITECTURE
 
-Mobile App (React Native)
-Web App (React)
+Farmer Mobile App (React Native)
+Admin Mobile App (React Native)
+Developer Controls App (React - Simple Web Dashboard)
 ↓
-Node.js Backend (API Gateway + Business Logic)
+Node.js Backend (Connector + API Gateway + Business Logic)
 ↓
 Python ML Inference Services
 ↓
 Database + Cache
 
+**Total Apps Required: 3 Apps**
+- Farmer App (React Native) - For farmers
+- Admin App (React Native) - For village admins
+- Developer App (React Web) - For developers/system monitoring
+
+Node.js acts as a connector between the apps and ML models.
 ML models are independent microservices.
 
 ---
@@ -216,12 +235,18 @@ Collect Data
 # 15. DEPLOYMENT STRATEGY
 
 * ML: Python FastAPI Microservices
-* Backend: Node.js Express
-* Frontend: React + React Native
+* Backend: Node.js Express (Connector Service)
+* Mobile Apps: 2 React Native Apps (Farmer + Admin)
+* Developer App: React Web App (Vite)
 * Database: MongoDB / PostgreSQL
 * Cache: Redis
 * Containerization: Docker
 * Orchestration (optional): Kubernetes
+
+**App Distribution:**
+- Farmer Mobile: Google Play Store / Apple App Store
+- Admin Mobile: Google Play Store / Apple App Store
+- Developer Web: Internal hosting / localhost for development
 
 ---
 
@@ -281,7 +306,7 @@ Collect Data
 village-water-intelligence/
 │
 ├── apps/
-│   ├── mobile/                         # React Native farmer application
+│   ├── farmer-mobile/                  # React Native farmer application
 │   │   ├── src/
 │   │   │   ├── components/             # Reusable UI components
 │   │   │   ├── screens/                # App screens
@@ -293,13 +318,22 @@ village-water-intelligence/
 │   │   │   └── assets/                 # Images icons
 │   │   └── app.config.js               # App configuration
 │   │
-│   ├── web/                            # React admin & analytics portal
+│   ├── admin-mobile/                   # React Native admin & analytics app
 │   │   ├── src/
 │   │   │   ├── components/             # UI blocks
-│   │   │   ├── pages/                  # Routes
+│   │   │   ├── screens/                # Dashboard screens
 │   │   │   ├── services/               # API wrappers
 │   │   │   ├── charts/                 # Graph components
 │   │   │   ├── store/                  # State management
+│   │   │   ├── navigation/             # Navigation setup
+│   │   │   └── utils/                  # Helpers
+│   │   └── app.config.js               # App configuration
+│   │
+│   ├── developer-app/                  # React developer controls & monitoring
+│   │   ├── src/
+│   │   │   ├── components/             # UI components
+│   │   │   ├── pages/                  # Control panels
+│   │   │   ├── services/               # API clients
 │   │   │   └── utils/                  # Helpers
 │   │   └── vite.config.js              # Build config
 │
@@ -372,13 +406,14 @@ village-water-intelligence/
 
 # 22. API COMMUNICATION FLOW
 
-Frontend → Node
-Node → ML Service
-ML → Node
-Node → Optimization Engine
-Node → Frontend
+Mobile App (Farmer/Admin) → Node.js Connector
+Node.js Connector → ML Service
+ML Service → Node.js Connector
+Node.js Connector → Optimization Engine
+Node.js Connector → Mobile App
 
-No direct frontend to ML communication.
+No direct mobile app to ML communication.
+Node.js acts as the connector and gateway between mobile apps and ML services.
 
 ---
 
@@ -469,27 +504,31 @@ No fluff, no code, purely structural and implementation-ready.
 # 1) SYSTEM ARCHITECTURE DIAGRAM
 
 ```
- ┌──────────────────────────┐
- │   Farmer Mobile App      │
- │   (React Native)         │
- └─────────────┬────────────┘
-               │
- ┌─────────────▼────────────┐
- │   Web Admin Dashboard    │
- │   (React)                │
- └─────────────┬────────────┘
-               │ HTTPS
-               ▼
- ┌──────────────────────────┐
- │     Node.js API Gateway  │
- │  - Auth                  │
- │  - Validation            │
- │  - Business Logic        │
- │  - Optimization Engine   │
- └───────┬─────────┬────────┘
-         │         │
-         │         │
-         ▼         ▼
+ ┌──────────────────────────┐  ┌──────────────────────────┐
+ │   Farmer Mobile App      │  │   Admin Mobile App       │
+ │   (React Native)         │  │   (React Native)         │
+ └─────────────┬────────────┘  └─────────────┬────────────┘
+               │                             │
+               │        ┌────────────────────┴────────────┐
+               │        │  Developer Controls App         │
+               │        │  (React Web - Simple Dashboard) │
+               │        └────────────┬────────────────────┘
+               │                     │
+               └──────────┬──────────┘
+                          │ HTTPS
+                          ▼
+               ┌──────────────────────────┐
+               │  Node.js API Gateway     │
+               │  (Connector Service)     │
+               │  - Auth                  │
+               │  - Validation            │
+               │  - Business Logic        │
+               │  - Optimization Engine   │
+               │  - Developer APIs        │
+               └───────┬─────────┬────────┘
+                       │         │
+                       │         │
+                       ▼         ▼
  ┌──────────────┐  ┌─────────────────────┐
  │ ML Water     │  │ ML Anomaly Detection│
  │ Prediction   │  │ Service (Python)    │
