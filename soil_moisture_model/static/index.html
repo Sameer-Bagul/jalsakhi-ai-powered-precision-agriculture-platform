@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soil Moisture Model - Test UI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 1.25rem; }
+    section { margin-bottom: 24px; padding: 16px; border: 1px solid #ccc; border-radius: 8px; }
+    label { display: block; margin-top: 8px; font-weight: 500; }
+    input, select { width: 100%; padding: 6px 8px; margin-top: 2px; }
+    button { margin-top: 12px; padding: 8px 16px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #555; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .row > * { flex: 1 1 120px; }
+    #result { margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 6px; white-space: pre-wrap; font-size: 14px; }
+    .error { color: #c00; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tabs button { margin: 0; }
+    .tabs button.active { background: #333; color: #fff; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
+</head>
+<body>
+  <h1>Soil Moisture Prediction – Test UI</h1>
+  <p>Predict soil moisture (%) for the next 3–7 days. Choose Sensor or Location.</p>
+
+  <div class="tabs">
+    <button type="button" class="active" data-tab="sensor">Sensor</button>
+    <button type="button" data-tab="location">Location</button>
+  </div>
+
+  <div id="sensor-panel" class="tab-panel active">
+    <section>
+      <h2>Sensor inputs</h2>
+      <div class="row">
+        <label>avg_pm1 <input type="number" step="any" id="avg_pm1" value="2.5"></label>
+        <label>avg_pm2 <input type="number" step="any" id="avg_pm2" value="4"></label>
+        <label>avg_pm3 <input type="number" step="any" id="avg_pm3" value="80"></label>
+      </div>
+      <div class="row">
+        <label>avg_am <input type="number" step="any" id="avg_am" value="0"></label>
+        <label>avg_lum <input type="number" step="any" id="avg_lum" value="3000"></label>
+        <label>avg_temp <input type="number" step="any" id="avg_temp" value="23"></label>
+      </div>
+      <div class="row">
+        <label>avg_humd <input type="number" step="any" id="avg_humd" value="85"></label>
+        <label>avg_pres <input type="number" step="any" id="avg_pres" value="93000"></label>
+      </div>
+      <div class="row">
+        <label>avg_sm_lag1 <input type="number" step="any" id="avg_sm_lag1" value="7000" placeholder="optional"></label>
+        <label>avg_sm_lag2 <input type="number" step="any" id="avg_sm_lag2" value="7100" placeholder="optional"></label>
+      </div>
+      <button type="button" id="btn-sensor">Predict (sensor)</button>
+    </section>
+  </div>
+
+  <div id="location-panel" class="tab-panel">
+    <section>
+      <h2>Location inputs</h2>
+      <label>State <input type="text" id="state" value="Rajasthan" placeholder="e.g. Rajasthan"></label>
+      <label>District <input type="text" id="district" value="Udaipur" placeholder="e.g. Udaipur"></label>
+      <label>Month (1–12) <input type="number" id="month" min="1" max="12" value="2"></label>
+      <label>SM history (7 values, oldest → newest)</label>
+      <div class="row">
+        <input type="number" step="any" id="sm1" placeholder="t-7" value="9.4">
+        <input type="number" step="any" id="sm2" placeholder="t-6" value="9.35">
+        <input type="number" step="any" id="sm3" placeholder="t-5" value="9.18">
+        <input type="number" step="any" id="sm4" placeholder="t-4" value="9.16">
+        <input type="number" step="any" id="sm5" placeholder="t-3" value="9.03">
+        <input type="number" step="any" id="sm6" placeholder="t-2" value="9.02">
+        <input type="number" step="any" id="sm7" placeholder="t-1" value="8.95">
+      </div>
+      <button type="button" id="btn-location">Predict (location)</button>
+    </section>
+  </div>
+
+  <section>
+    <h2>Result</h2>
+    <div id="result">Submit a prediction to see results.</div>
+  </section>
+
+  <script>
+    const resultEl = document.getElementById('result');
+    const base = window.location.origin;
+
+    function showResult(text, isError) {
+      resultEl.textContent = text;
+      resultEl.className = isError ? 'error' : '';
+    }
+
+    document.querySelectorAll('.tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + '-panel').classList.add('active');
+      });
+    });
+
+    document.getElementById('btn-sensor').addEventListener('click', async () => {
+      showResult('Loading…');
+      const body = {
+        avg_pm1: parseFloat(document.getElementById('avg_pm1').value),
+        avg_pm2: parseFloat(document.getElementById('avg_pm2').value),
+        avg_pm3: parseFloat(document.getElementById('avg_pm3').value),
+        avg_am: parseFloat(document.getElementById('avg_am').value),
+        avg_lum: parseFloat(document.getElementById('avg_lum').value),
+        avg_temp: parseFloat(document.getElementById('avg_temp').value),
+        avg_humd: parseFloat(document.getElementById('avg_humd').value),
+        avg_pres: parseFloat(document.getElementById('avg_pres').value),
+        avg_sm_lag1: parseFloat(document.getElementById('avg_sm_lag1').value) || 0,
+        avg_sm_lag2: parseFloat(document.getElementById('avg_sm_lag2').value) || 0,
+      };
+      try {
+        const r = await fetch(base + '/predict/sensor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || r.statusText);
+        showResult('Predictions (%):\n' + data.days_ahead.map((d, i) => '  Day +' + d + ': ' + data.predictions[i].toFixed(2) + '%').join('\n'));
+      } catch (e) {
+        showResult('Error: ' + e.message, true);
+      }
+    });
+
+    document.getElementById('btn-location').addEventListener('click', async () => {
+      showResult('Loading…');
+      const sm_history = [1,2,3,4,5,6,7].map(i => parseFloat(document.getElementById('sm' + i).value));
+      if (sm_history.some(isNaN)) { showResult('Please fill all 7 SM history values.', true); return; }
+      const body = { state: document.getElementById('state').value.trim(), district: document.getElementById('district').value.trim(), sm_history, month: parseInt(document.getElementById('month').value, 10) };
+      try {
+        const r = await fetch(base + '/predict/location', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || r.statusText);
+        showResult('Predictions (%):\n' + data.days_ahead.map((d, i) => '  Day +' + d + ': ' + data.predictions[i].toFixed(2) + '%').join('\n'));
+      } catch (e) {
+        showResult('Error: ' + e.message, true);
+      }
+    });
+  </script>
+</body>
+</html>
