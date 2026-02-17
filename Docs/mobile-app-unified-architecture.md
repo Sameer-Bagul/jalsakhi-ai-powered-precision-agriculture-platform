@@ -80,9 +80,15 @@ Instead of building two separate mobile apps (one for farmers, one for admins), 
    ↓
 2. Splash Screen (checks stored auth)
    ↓
-3. If Not Logged In → Login Screen
+3. If Not Logged In → Role-Based Auth Screen
+   ├─ Language Selector (Dropdown: English/Hindi/Marathi)
+   ├─ Phone Number Input (+91)
+   └─ Continue Button
    ↓
-4. User Enters Phone + OTP
+4. OTP Verification (Same Screen)
+   ├─ Enter 6-digit OTP
+   ├─ Verify Button
+   └─ Resend OTP (after 30s)
    ↓
 5. Backend Authenticates
    ↓
@@ -96,9 +102,9 @@ Instead of building two separate mobile apps (one for farmers, one for admins), 
    - AsyncStorage (persistence)
    - JWT Token Payload
    ↓
-8. Navigate to Role-Specific Navigator
+8. Navigate to Role-Specific Dashboard (Bento Grid Hub)
    ↓
-9. Show Role-Specific Bottom Tabs
+9. User interacts with Bento tiles to navigate
 ```
 
 ### JWT Token Structure
