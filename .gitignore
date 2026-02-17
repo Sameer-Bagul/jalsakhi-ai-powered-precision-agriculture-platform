@@ -1,0 +1,6 @@
+# Trained model artifacts (large; regenerate with train.py)
+soil_moisture_model/*.joblib
+# Python
+__pycache__/
+*.pyc
+*.pyo
