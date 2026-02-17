@@ -46,16 +46,16 @@ Self-learning village water intelligence system that creates a digital twin of v
 
 # 4. PRIMARY USERS
 
-* Farmers
-* Village Water Admin
-* Agriculture Officers
-* Developers/System Administrators
+* Farmers (Mobile App - Farmer Role)
+* Village Water Admin (Mobile App - Admin Role)
+* Agriculture Officers (Mobile App - Admin Role)
+* Developers/System Administrators (Web App)
 
 ---
 
 # 5. SYSTEM CAPABILITIES
 
-## Farmer
+## Mobile App - Farmer Role
 
 * Register land, crop, soil
 * Receive daily water amount
@@ -65,7 +65,7 @@ Self-learning village water intelligence system that creates a digital twin of v
 * View water credits
 * Receive alerts
 
-## Admin
+## Mobile App - Admin Role
 
 * View village water availability
 * View total allocation
@@ -73,8 +73,10 @@ Self-learning village water intelligence system that creates a digital twin of v
 * Approve special requests
 * Run simulations
 * View crop pattern suggestions
+* Monitor all farmers
+* Manage water sources
 
-## Developer
+## Developer App
 
 * Monitor ML model performance
 * View system logs
@@ -89,8 +91,9 @@ Self-learning village water intelligence system that creates a digital twin of v
 
 # 6. HIGH LEVEL ARCHITECTURE
 
-Farmer Mobile App (React Native)
-Admin Mobile App (React Native)
+Unified Mobile App (React Native) - Role-Based
+  - Farmer Role
+  - Village Admin Role
 Developer Controls App (React - Simple Web Dashboard)
 ↓
 Node.js Backend (Connector + API Gateway + Business Logic)
@@ -99,13 +102,22 @@ Python ML Inference Services
 ↓
 Database + Cache
 
-**Total Apps Required: 3 Apps**
-- Farmer App (React Native) - For farmers
-- Admin App (React Native) - For village admins
-- Developer App (React Web) - For developers/system monitoring
+**Total Apps Required: 2 Apps**
+- **Mobile App (React Native)** - Single app with role-based access
+  - Farmer features (when logged in as Farmer)
+  - Admin features (when logged in as Village Admin)
+  - Shared components and navigation
+  - Role detected at login
+- **Developer App (React Web)** - For developers/system monitoring
 
 Node.js acts as a connector between the apps and ML models.
 ML models are independent microservices.
+
+**Role-Based Access:**
+- User role determined at authentication
+- Different bottom tabs/navigation based on role
+- Shared screens: Profile, Settings, Help
+- Role-specific screens loaded dynamically
 
 ---
 
@@ -236,7 +248,7 @@ Collect Data
 
 * ML: Python FastAPI Microservices
 * Backend: Node.js Express (Connector Service)
-* Mobile Apps: 2 React Native Apps (Farmer + Admin)
+* Mobile App: 1 React Native App (Role-Based: Farmer + Admin)
 * Developer App: React Web App (Vite)
 * Database: MongoDB / PostgreSQL
 * Cache: Redis
@@ -244,8 +256,10 @@ Collect Data
 * Orchestration (optional): Kubernetes
 
 **App Distribution:**
-- Farmer Mobile: Google Play Store / Apple App Store
-- Admin Mobile: Google Play Store / Apple App Store
+- Mobile App: Google Play Store / Apple App Store
+  - Single APK/IPA with role-based features
+  - Role determined at login
+  - Dynamic UI based on user role
 - Developer Web: Internal hosting / localhost for development
 
 ---
@@ -253,14 +267,72 @@ Collect Data
 # 16. SECURITY
 
 * JWT Authentication
-* Role-based Access
+* Role-based Access Control (RBAC)
+  - Farmer role permissions
+  - Admin role permissions
+  - Role validation on every API call
 * HTTPS
 * Input Validation
 * Rate Limiting
+* Session Management
 
 ---
 
-# 17. SCALABILITY STRATEGY
+# 17. ROLE-BASED ACCESS CONTROL
+
+## User Roles
+
+### Farmer Role
+- Access to own farms and crops
+- View own irrigation schedule
+- Log own irrigation records
+- View own water credits
+- Cannot access village-level data
+- Cannot view other farmers' data
+
+### Admin Role
+- Access to all village data
+- View all farmers and farms
+- Manage water sources
+- Approve requests
+- Run simulations
+- Generate reports
+- Cannot modify farmer's personal data without approval
+
+### Role Detection
+- Role stored in user profile
+- Assigned during registration
+- Can be upgraded (Farmer → Admin) by system admin
+- Cannot self-assign admin role
+- Role included in JWT token
+
+### Navigation Based on Role
+```javascript
+// Farmer Bottom Tabs
+- Home (Dashboard)
+- Farms
+- Schedule
+- Wallet (Credits)
+- Profile
+
+// Admin Bottom Tabs
+- Dashboard (Village Overview)
+- Farmers
+- Water (Management)
+- Analytics
+- Profile
+```
+
+### Shared Screens
+- Login/Register
+- Profile
+- Settings
+- Notifications
+- Help & Support
+
+---
+
+# 18. SCALABILITY STRATEGY
 
 * Stateless services
 * Horizontal scaling
@@ -270,7 +342,7 @@ Collect Data
 
 ---
 
-# 18. FAILURE HANDLING
+# 19. FAILURE HANDLING
 
 * Fallback rule-based irrigation
 * Retry logic
@@ -279,17 +351,19 @@ Collect Data
 
 ---
 
-# 19. MVP SCOPE
+# 20. MVP SCOPE
 
 * Water Prediction
 * Weather Scheduling
 * Village Allocation
-* Dashboard
-* Credits (basic)
+* Bento Grid Dashboard (Role-based)
+* Simplified Navigation (Hub-and-Spoke)
+* Role Selection at Login
+* Multi-language Support (English, Hindi, Marathi)
 
 ---
 
-# 20. FUTURE SCOPE
+# 21. FUTURE SCOPE
 
 * IoT Sensors
 * Satellite Data
@@ -306,27 +380,34 @@ Collect Data
 village-water-intelligence/
 │
 ├── apps/
-│   ├── farmer-mobile/                  # React Native farmer application
+│   ├── mobile/                         # Unified React Native app (Farmer + Admin)
 │   │   ├── src/
 │   │   │   ├── components/             # Reusable UI components
+│   │   │   │   ├── shared/             # Shared across roles
+│   │   │   │   ├── farmer/             # Farmer-specific components
+│   │   │   │   └── admin/              # Admin-specific components
 │   │   │   ├── screens/                # App screens
+│   │   │   │   ├── auth/               # Login, Register
+│   │   │   │   ├── shared/             # Profile, Settings
+│   │   │   │   ├── farmer/             # Farmer screens
+│   │   │   │   └── admin/              # Admin screens
 │   │   │   ├── navigation/             # Navigation setup
+│   │   │   │   ├── FarmerNavigator.tsx # Farmer navigation
+│   │   │   │   ├── AdminNavigator.tsx  # Admin navigation
+│   │   │   │   └── RootNavigator.tsx   # Role-based routing
 │   │   │   ├── services/               # API clients
 │   │   │   ├── store/                  # State management
+│   │   │   │   ├── slices/             # Redux slices
+│   │   │   │   │   ├── authSlice.ts    # Auth & role
+│   │   │   │   │   ├── farmerSlice.ts  # Farmer state
+│   │   │   │   │   └── adminSlice.ts   # Admin state
 │   │   │   ├── hooks/                  # Custom hooks
+│   │   │   │   └── useRole.ts          # Role detection hook
 │   │   │   ├── utils/                  # Helpers
+│   │   │   │   └── roleUtils.ts        # Role-based utilities
+│   │   │   ├── constants/              # Constants
+│   │   │   │   └── roles.ts            # Role definitions
 │   │   │   └── assets/                 # Images icons
-│   │   └── app.config.js               # App configuration
-│   │
-│   ├── admin-mobile/                   # React Native admin & analytics app
-│   │   ├── src/
-│   │   │   ├── components/             # UI blocks
-│   │   │   ├── screens/                # Dashboard screens
-│   │   │   ├── services/               # API wrappers
-│   │   │   ├── charts/                 # Graph components
-│   │   │   ├── store/                  # State management
-│   │   │   ├── navigation/             # Navigation setup
-│   │   │   └── utils/                  # Helpers
 │   │   └── app.config.js               # App configuration
 │   │
 │   ├── developer-app/                  # React developer controls & monitoring
@@ -406,7 +487,8 @@ village-water-intelligence/
 
 # 22. API COMMUNICATION FLOW
 
-Mobile App (Farmer/Admin) → Node.js Connector
+Mobile App (Role-Based: Farmer/Admin) → Node.js Connector
+Node.js Connector → Role-based Access Control
 Node.js Connector → ML Service
 ML Service → Node.js Connector
 Node.js Connector → Optimization Engine
@@ -414,6 +496,13 @@ Node.js Connector → Mobile App
 
 No direct mobile app to ML communication.
 Node.js acts as the connector and gateway between mobile apps and ML services.
+
+**Role-Based Flow:**
+1. User logs in → Role identified (Farmer/Admin)
+2. JWT token includes role information
+3. API requests include role-based authorization
+4. Backend validates role before processing
+5. Response tailored to user role
 
 ---
 
