@@ -5,12 +5,15 @@ import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomInput } from '../../components/shared/CustomInput';
 import { CustomButton } from '../../components/shared/CustomButton';
 import { Logger } from '../../utils/Logger';
+import { useAuth } from '../../context/AuthContext';
+import { Alert } from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function FarmerSignupScreen() {
     const router = useRouter();
     const [form, setForm] = useState({
+        email: '',
         mobile: '',
         state: '',
         district: '',
@@ -18,10 +21,24 @@ export default function FarmerSignupScreen() {
         farmSize: '',
     });
 
-    const handleSignup = () => {
-        Logger.info('FarmerSignup', 'Sign up pressed', form);
-        // Simulate signup success
-        router.replace('/(auth)/language');
+    const { register } = useAuth();
+    const [loading, setLoading] = useState(false);
+
+    const handleSignup = async () => {
+        if (!form.email || !form.mobile) {
+            Alert.alert('Error', 'Please fill required fields');
+            return;
+        }
+
+        setLoading(true);
+        const result = await register({ ...form, role: 'farmer' });
+        setLoading(false);
+
+        if (result.success) {
+            router.replace('/(auth)/otp');
+        } else {
+            Alert.alert('Signup Failed', result.message);
+        }
     };
 
     return (
@@ -37,6 +54,15 @@ export default function FarmerSignupScreen() {
                     </View>
 
                     <View style={styles.form}>
+                        <CustomInput
+                            label="Email Address"
+                            placeholder="your@email.com"
+                            keyboardType="email-address"
+                            value={form.email}
+                            onChangeText={(text) => setForm({ ...form, email: text })}
+                            leftIcon={<Feather name="mail" size={20} color={Theme.colors.moss} />}
+                        />
+
                         <CustomInput
                             label="Mobile Number"
                             placeholder="+91 XXXXX XXXXX"
