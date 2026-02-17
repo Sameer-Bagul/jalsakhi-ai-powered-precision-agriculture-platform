@@ -4,31 +4,39 @@ import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
 import { Logger } from '../../utils/Logger';
+import { useAuth } from '../../context/AuthContext';
+import { Alert } from 'react-native';
 
 export default function OTPScreen() {
     const router = useRouter();
+    const { verifyOtp, user } = useAuth();
     const [otp, setOtp] = React.useState('');
     const [loading, setLoading] = React.useState(false);
 
-    const handleVerify = () => {
+    const handleVerify = async () => {
         if (otp.length < 6) return;
 
         setLoading(true);
-        Logger.info('OTPScreen', 'Verifying OTP...');
+        const result = await verifyOtp(otp);
+        setLoading(false);
 
-        // Simulate verification
-        setTimeout(() => {
-            setLoading(false);
-            // In a real app, we check the previously selected role
-            router.replace('/(farmer)');
-        }, 1500);
+        if (result.success) {
+            // Check role to redirect
+            if (user?.role === 'admin') {
+                router.replace('/(admin)');
+            } else {
+                router.replace('/(farmer)');
+            }
+        } else {
+            Alert.alert('Verification Failed', result.message);
+        }
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Verify OTP</Text>
-                <Text style={styles.subtitle}>Enter the 6-digit code sent to your phone</Text>
+                <Text style={styles.subtitle}>Enter the 6-digit code sent to your email</Text>
             </View>
 
             <View style={styles.otpContainer}>

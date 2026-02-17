@@ -6,13 +6,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js'; // Import the user model
 import transporter from '../config/nodemailer.js'; // Import the email transporter
-import {EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE} from '../config/emailTemplates.js';
+import { EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE } from '../config/emailTemplates.js';
 
 export const register = async (req, res) => {
   // Function to register/create a new user
-  const { name, email, password } = req.body; // Destructure the data from the request body
-  if (!name || !email || !password) {
-    return res.json({ success: false, message: 'Please fill all the fields' });
+  const { name, email, password, role, mobile, state, district, taluka, village, farmSize } = req.body;
+  if (!email || !role) {
+    return res.json({ success: false, message: 'Email and role are required' });
   }
   try {
     const existingUser = await userModel.findOne({ email }); // Check if the user already exists in the database
@@ -20,13 +20,19 @@ export const register = async (req, res) => {
       return res.json({ success: false, message: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12); // Hash the password before saving it in the database
-    // 12 is the number of salt rounds, which determines the complexity of the hashing process
+    const hashedPassword = await bcrypt.hash(password || 'defaultPassword123', 12);
 
     const user = new userModel({
-      name,
+      name: name || email.split('@')[0],
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role,
+      mobile,
+      state,
+      district,
+      taluka,
+      village,
+      farmSize
     });
 
     await user.save(); // Save the user in the database using Mongoose's save() method
@@ -174,7 +180,7 @@ export const isAuthenticated = async (req, res, next) => {
 
 // send password reset OTP 
 export const sendResetOtp = async (req, res) => {
-  
+
   const email = req.body.email; // Destructure the email from the request body
 
   if (!email) {
@@ -200,26 +206,26 @@ export const sendResetOtp = async (req, res) => {
       // text: `Your OTP for resetin your password is: ${otp}`,
       html: PASSWORD_RESET_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email)
     };
-    
+
     await transporter.sendMail(mailOption); // Send the email to the user
     res.json({ success: true, message: 'OTP sent successfully' }); // Send a success response
   } catch (error) {
-    res.json({ success: false, message: error.message });  
+    res.json({ success: false, message: error.message });
   }
 }
 
 // reset password 
 export const resetPassword = async (req, res) => {
-  const {email, otp, newPassword} = req.body;
+  const { email, otp, newPassword } = req.body;
 
   if (!email || !otp || !newPassword) {
     return res.json({ success: false, message: 'Please fill all the fields' });
   }
 
   try {
-    
+
     const user = await userModel.findOne({ email }); // Find the user by email
-    
+
     if (!user) {
       return res.json({ success: false, message: 'User not found' });
     }
@@ -238,7 +244,7 @@ export const resetPassword = async (req, res) => {
     user.resetOtpExpireAt = 0; // Reset the expiry time
     await user.save(); // Save the user in the database using Mongoose's save() method
     res.json({ success: true, message: 'Password reset successfully' }); // Send a success response
-    
+
 
   } catch (error) {
     res.json({ success: false, message: error.message });

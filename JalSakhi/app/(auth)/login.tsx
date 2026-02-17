@@ -7,24 +7,28 @@ import { CustomButton } from '../../components/shared/CustomButton';
 import { Logger } from '../../utils/Logger';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../../context/AuthContext';
+import { Alert } from 'react-native';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [phone, setPhone] = useState('');
+    const { login } = useAuth();
+    const [email, setEmail] = useState('');
     const [role, setRole] = useState<'farmer' | 'admin'>('farmer');
     const [loading, setLoading] = useState(false);
 
-    const handleSendOTP = () => {
-        if (phone.length < 10) return;
+    const handleSendOTP = async () => {
+        if (!email.includes('@')) return;
 
         setLoading(true);
-        Logger.info('LoginScreen', `Requesting OTP for: ${phone} as ${role}`);
+        const result = await login(email);
+        setLoading(false);
 
-        // Simulate API call
-        setTimeout(() => {
-            setLoading(false);
+        if (result.success) {
             router.push('/(auth)/otp');
-        }, 1500);
+        } else {
+            Alert.alert('Login Failed', result.message);
+        }
     };
 
     return (
@@ -61,13 +65,12 @@ export default function LoginScreen() {
 
                     <View style={styles.form}>
                         <CustomInput
-                            label="Phone Number"
-                            placeholder="98765 43210"
-                            keyboardType="phone-pad"
-                            value={phone}
-                            onChangeText={setPhone}
-                            leftIcon={<Text style={styles.prefix}>+91</Text>}
-                            maxLength={10}
+                            label="Email Address"
+                            placeholder="your@email.com"
+                            keyboardType="email-address"
+                            value={email}
+                            onChangeText={setEmail}
+                            leftIcon={<Feather name="mail" size={20} color={Theme.colors.moss} />}
                         />
 
                         <Text style={styles.infoText}>
@@ -78,7 +81,7 @@ export default function LoginScreen() {
                             title="Send OTP"
                             onPress={handleSendOTP}
                             loading={loading}
-                            disabled={phone.length < 10}
+                            disabled={!email.includes('@')}
                             size="lg"
                             style={styles.button}
                             icon={<Feather name="shield" size={18} color="white" />}

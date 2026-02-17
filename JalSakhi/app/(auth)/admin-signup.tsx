@@ -7,6 +7,8 @@ import { CustomButton } from '../../components/shared/CustomButton';
 import { Logger } from '../../utils/Logger';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../../context/AuthContext';
+import { Alert } from 'react-native';
 
 export default function AdminSignupScreen() {
     const router = useRouter();
@@ -20,10 +22,24 @@ export default function AdminSignupScreen() {
         village: '',
     });
 
-    const handleSignup = () => {
-        Logger.info('AdminSignup', 'Sign up pressed', form);
-        // Simulate signup success
-        router.replace('/(auth)/language');
+    const { register } = useAuth();
+    const [loading, setLoading] = useState(false);
+
+    const handleSignup = async () => {
+        if (!form.email || !form.name) {
+            Alert.alert('Error', 'Please fill required fields');
+            return;
+        }
+
+        setLoading(true);
+        const result = await register({ ...form, role: 'admin' });
+        setLoading(false);
+
+        if (result.success) {
+            router.replace('/(auth)/otp');
+        } else {
+            Alert.alert('Signup Failed', result.message);
+        }
     };
 
     return (
@@ -106,6 +122,7 @@ export default function AdminSignupScreen() {
                         <CustomButton
                             title="Create Account"
                             onPress={handleSignup}
+                            loading={loading}
                             style={styles.submitButton}
                         />
                     </View>
