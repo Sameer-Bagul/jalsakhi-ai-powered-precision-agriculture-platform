@@ -1,48 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
-import { Logger } from '../../utils/Logger';
-import { useAuth } from '../../context/AuthContext';
-import { Alert } from 'react-native';
 
 export default function OTPScreen() {
     const router = useRouter();
-    const { verifyOtp, user } = useAuth();
-    const [otp, setOtp] = React.useState('');
-    const [loading, setLoading] = React.useState(false);
+    const [otp, setOtp] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleVerify = async () => {
         if (otp.length < 6) return;
 
         setLoading(true);
-        const result = await verifyOtp(otp);
-        setLoading(false);
 
-        if (result.success) {
-            // Check role to redirect
-            if (user?.role === 'admin') {
-                router.replace('/(admin)');
-            } else {
-                router.replace('/(farmer)');
-            }
-        } else {
-            Alert.alert('Verification Failed', result.message);
-        }
+        // Simulate OTP verification
+        setTimeout(() => {
+            setLoading(false);
+            // Redirect to farmer dashboard
+            router.replace('/farmer/dashboard');
+        }, 1500);
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Verify OTP</Text>
-                <Text style={styles.subtitle}>Enter the 6-digit code sent to your email</Text>
+                <Text style={styles.subtitle}>Enter the 6-digit code sent to your mobile</Text>
             </View>
 
             <View style={styles.otpContainer}>
                 <TextInput
                     style={[styles.otpInput, { letterSpacing: 10 }]}
-                    placeholder="000 000"
+                    placeholder="000000"
                     keyboardType="number-pad"
                     maxLength={6}
                     value={otp}
