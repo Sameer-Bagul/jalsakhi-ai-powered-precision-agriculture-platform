@@ -79,7 +79,7 @@ export default function SimulationEngine() {
 
                 <TouchableOpacity
                     style={styles.runBtn}
-                    onPress={() => router.push({ pathname: '/(admin)/run-simulation', params: { rainfall, population, cropMix: cropMix ? 'High' : 'Normal' } })}
+                    onPress={() => router.push({ pathname: '/admin/run-simulation', params: { rainfall, population, cropMix: cropMix ? 'High' : 'Normal' } })}
                 >
                     <MaterialCommunityIcons name="play" size={24} color="white" />
                     <Text style={styles.runBtnText}>Run Simulation</Text>
