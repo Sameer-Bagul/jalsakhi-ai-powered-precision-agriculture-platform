@@ -20,7 +20,7 @@ export default function OTPScreen() {
         setTimeout(() => {
             setLoading(false);
             // In a real app, we check the previously selected role
-            router.replace('/(farmer)');
+            router.replace('/farmer');
         }, 1500);
     };
 
