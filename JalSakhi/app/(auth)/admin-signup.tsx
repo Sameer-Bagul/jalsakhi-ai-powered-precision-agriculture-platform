@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-    StyleSheet,
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
-    TextInput,
-    KeyboardAvoidingView,
-    Platform
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomInput } from '../../components/shared/CustomInput';
@@ -23,7 +13,6 @@ export default function AdminSignup() {
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState<'FORM' | 'OTP'>('FORM');
 
-    // Form State
     const [fullName, setFullName] = useState('');
     const [aadhar, setAadhar] = useState('');
     const [email, setEmail] = useState('');
@@ -32,12 +21,11 @@ export default function AdminSignup() {
     const [village, setVillage] = useState('');
     const [mobile, setMobile] = useState('');
 
-    // OTP State
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
     const handleRegister = async () => {
         if (!fullName || !mobile) {
-            Alert.alert('Missing Fields', 'Please fill at least Name and Mobile.');
+            Alert.alert('Missing Fields', 'Please fill at least Name and Mobile for testing.');
             return;
         }
 
@@ -59,7 +47,6 @@ export default function AdminSignup() {
 
     const handleVerifyOtp = async () => {
         const otpString = otp.join('');
-
         if (otpString.length < 6) {
             Alert.alert('Invalid OTP', 'Please enter 6 digit OTP.');
             return;
@@ -67,18 +54,12 @@ export default function AdminSignup() {
 
         setLoading(true);
         try {
-            const result = await AuthService.verifyOtp(
-                mobile,
-                otpString,
-                'ADMIN',
-                aadhar
-            );
-
+            const result = await AuthService.verifyOtp(mobile, otpString, 'ADMIN', aadhar);
             if (result.success) {
                 Alert.alert('Success', 'Admin Registration Successful!');
                 router.replace('/admin/dashboard');
             } else {
-                Alert.alert('Error', 'Invalid OTP.');
+                Alert.alert('Error', 'Invalid OTP. Try 123456');
             }
         } catch (error) {
             Alert.alert('Error', 'Registration failed.');
@@ -96,10 +77,7 @@ export default function AdminSignup() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
-            >
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <Feather name="arrow-left" size={24} color="white" />
@@ -112,64 +90,32 @@ export default function AdminSignup() {
                         <View style={styles.formCard}>
                             <Text style={styles.sectionTitle}>Identity & Contact</Text>
 
-                            <CustomInput
-                                label="Full Name"
-                                placeholder="Amit Patil"
-                                value={fullName}
-                                onChangeText={setFullName}
-                            />
+                            <CustomInput label="Full Name" placeholder="Amit Patil" value={fullName} onChangeText={setFullName} />
 
                             <CustomInput
                                 label="Aadhar Number"
-                                placeholder="123456789012"
+                                placeholder="1234 5678 9012"
                                 keyboardType="number-pad"
                                 maxLength={12}
                                 value={aadhar}
                                 onChangeText={setAadhar}
-                                leftIcon={
-                                    <MaterialIcons
-                                        name="fingerprint"
-                                        size={20}
-                                        color={Theme.colors.textMuted}
-                                    />
-                                }
+                                leftIcon={<MaterialIcons name="fingerprint" size={20} color={Theme.colors.textMuted} />}
                             />
 
-                            <CustomInput
-                                label="Email ID"
-                                placeholder="admin@grampanchayat.com"
-                                keyboardType="email-address"
-                                value={email}
-                                onChangeText={setEmail}
-                            />
+                            <CustomInput label="Email ID" placeholder="admin@grampanchayat.com" keyboardType="email-address" value={email} onChangeText={setEmail} />
 
                             <Text style={styles.sectionTitle}>Jurisdiction</Text>
 
                             <View style={styles.row}>
                                 <View style={styles.halfInput}>
-                                    <CustomInput
-                                        label="State"
-                                        placeholder="Maharashtra"
-                                        value={state}
-                                        onChangeText={setState}
-                                    />
+                                    <CustomInput label="State" placeholder="Maharashtra" value={state} onChangeText={setState} />
                                 </View>
                                 <View style={styles.halfInput}>
-                                    <CustomInput
-                                        label="District"
-                                        placeholder="Pune"
-                                        value={district}
-                                        onChangeText={setDistrict}
-                                    />
+                                    <CustomInput label="District" placeholder="Pune" value={district} onChangeText={setDistrict} />
                                 </View>
                             </View>
 
-                            <CustomInput
-                                label="Village/Gram Panchayat"
-                                placeholder="Indapur"
-                                value={village}
-                                onChangeText={setVillage}
-                            />
+                            <CustomInput label="Village/Gram Panchayat" placeholder="Indapur" value={village} onChangeText={setVillage} />
 
                             <Text style={styles.sectionTitle}>Mobile Verification</Text>
 
@@ -193,24 +139,18 @@ export default function AdminSignup() {
                     ) : (
                         <View style={styles.otpContainer}>
                             <Text style={styles.otpTitle}>Verify Admin Mobile</Text>
-                            <Text style={styles.otpSub}>
-                                Enter OTP sent to +91 {mobile}
-                            </Text>
+                            <Text style={styles.otpSub}>Enter OTP sent to +91 {mobile}</Text>
 
                             <View style={styles.otpRow}>
                                 {otp.map((digit, index) => (
                                     <TextInput
                                         key={index}
-                                        style={[
-                                            styles.otpBox,
-                                            digit ? styles.otpBoxFilled : null
-                                        ]}
+                                        style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
                                         keyboardType="number-pad"
                                         maxLength={1}
                                         value={digit}
-                                        onChangeText={(text) =>
-                                            handleOtpChange(text, index)
-                                        }
+                                        onChangeText={(text) => handleOtpChange(text, index)}
+                                        autoFocus={index === 0}
                                     />
                                 ))}
                             </View>
@@ -221,10 +161,7 @@ export default function AdminSignup() {
                                 loading={loading}
                             />
 
-                            <TouchableOpacity
-                                onPress={() => setStep('FORM')}
-                                style={styles.changeMobile}
-                            >
+                            <TouchableOpacity onPress={() => setStep('FORM')} style={styles.changeMobile}>
                                 <Text style={styles.linkText}>Edit Details</Text>
                             </TouchableOpacity>
                         </View>
@@ -241,11 +178,11 @@ const styles = StyleSheet.create({
         backgroundColor: Theme.colors.bg,
     },
     header: {
-        backgroundColor: Theme.colors.primary,
-        padding: 20,
-        paddingVertical: 24,
         flexDirection: 'row',
         alignItems: 'center',
+        padding: 24,
+        paddingTop: 48,
+        backgroundColor: Theme.colors.primary,
     },
     backBtn: {
         marginRight: 16,
@@ -256,36 +193,36 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     scrollContent: {
-        padding: 20,
+        padding: 24,
     },
     formCard: {
         backgroundColor: 'white',
         borderRadius: 16,
         padding: 20,
-        elevation: 3,
-        marginBottom: 40,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
-        color: Theme.colors.forest,
-        marginTop: 16,
+        color: Theme.colors.text,
         marginBottom: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: Theme.colors.border,
-        paddingBottom: 8,
+        marginTop: 8,
     },
     row: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 16,
     },
     halfInput: {
         flex: 1,
     },
     prefix: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
-        color: Theme.colors.primary,
+        color: Theme.colors.text,
         marginRight: 8,
     },
     submitBtn: {
@@ -296,40 +233,42 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 24,
         alignItems: 'center',
-        marginTop: 40,
+        elevation: 2,
     },
     otpTitle: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: Theme.colors.forest,
+        color: Theme.colors.text,
         marginBottom: 8,
     },
     otpSub: {
+        fontSize: 14,
         color: Theme.colors.textMuted,
-        marginBottom: 32,
+        marginBottom: 24,
     },
     otpRow: {
         flexDirection: 'row',
-        gap: 10,
-        marginBottom: 32,
+        gap: 12,
+        marginBottom: 24,
     },
     otpBox: {
-        width: 45,
-        height: 50,
-        borderWidth: 2,
+        width: 48,
+        height: 56,
+        borderRadius: 12,
+        borderWidth: 1,
         borderColor: Theme.colors.border,
-        borderRadius: 8,
         textAlign: 'center',
         fontSize: 20,
         fontWeight: 'bold',
-        color: Theme.colors.primary,
+        color: Theme.colors.text,
     },
     otpBoxFilled: {
         borderColor: Theme.colors.primary,
-        backgroundColor: Theme.colors.primaryPale,
+        backgroundColor: '#ecfdf5',
     },
     changeMobile: {
-        marginTop: 20,
+        marginTop: 16,
+        padding: 8,
     },
     linkText: {
         color: Theme.colors.primary,

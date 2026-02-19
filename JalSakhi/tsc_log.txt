@@ -1,0 +1,81 @@
+﻿app/(auth)/admin-signup.tsx(78,30): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(81,30): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(82,76): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(85,34): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(88,52): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(90,38): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(91,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(107,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(109,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(110,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(113,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(120,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(129,56): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(136,40): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(140,38): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(141,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(142,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(144,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(148,49): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(148,72): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(164,86): error TS2304: Cannot find name 'styles'.
+app/(auth)/admin-signup.tsx(165,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(79,30): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(83,30): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(84,76): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(87,34): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(90,52): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(92,38): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(93,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(104,33): error TS2322: Type '{ label: string; placeholder: string; keyboardType: "number-pad"; maxLength: number; value: string; onChangeText: Dispatch<SetStateAction<string>>; icon: Element; }' is not assignable to type 'IntrinsicAttributes & CustomInputProps'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & CustomInputProps'.
+app/(auth)/farmer-signup.tsx(107,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(108,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(112,49): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(112,83): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(115,55): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(115,90): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(120,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(122,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(123,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(126,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(139,33): error TS2322: Type '{ label: string; placeholder: string; keyboardType: "numeric"; value: string; onChangeText: Dispatch<SetStateAction<string>>; icon: Element; }' is not assignable to type 'IntrinsicAttributes & CustomInputProps'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & CustomInputProps'.
+app/(auth)/farmer-signup.tsx(142,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(151,56): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(158,40): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(162,38): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(163,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(164,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(166,42): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(170,49): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(170,72): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(186,86): error TS2304: Cannot find name 'styles'.
+app/(auth)/farmer-signup.tsx(187,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(70,30): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(76,52): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(77,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(81,34): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(82,38): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(83,38): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(90,34): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(93,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(94,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(95,50): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(97,48): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(109,44): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(114,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(115,46): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(119,53): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(119,76): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(131,44): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(133,92): error TS2304: Cannot find name 'styles'.
+app/(auth)/login.tsx(134,50): error TS2304: Cannot find name 'styles'.
+app/admin/farmers-list.tsx(21,76): error TS2820: Type '"/(admin)/farmer-details"' is not assignable to type 'RelativePathString | ExternalPathString | "/" | "/placeholder" | "/../services/ml" | "/../services/weather" | "/../utils/api" | ... 74 more ... | "/farmer/weather"'. Did you mean '"/admin/farmer-details"'?
+app/admin/simulation.tsx(82,50): error TS2820: Type '"/(admin)/run-simulation"' is not assignable to type 'RelativePathString | ExternalPathString | "/" | "/placeholder" | "/../services/ml" | "/../services/weather" | "/../utils/api" | ... 74 more ... | "/farmer/weather"'. Did you mean '"/admin/run-simulation"'?
+components/parallax-scroll-view.tsx(11,32): error TS2307: Cannot find module '@/hooks/use-color-scheme' or its corresponding type declarations.
+components/parallax-scroll-view.tsx(12,31): error TS2307: Cannot find module '@/hooks/use-theme-color' or its corresponding type declarations.
+components/parallax-scroll-view.tsx(55,30): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ dark: string; light: string; }'.
+components/themed-text.tsx(3,31): error TS2307: Cannot find module '@/hooks/use-theme-color' or its corresponding type declarations.
+components/themed-view.tsx(3,31): error TS2307: Cannot find module '@/hooks/use-theme-color' or its corresponding type declarations.
+components/ui/collapsible.tsx(8,32): error TS2307: Cannot find module '@/hooks/use-color-scheme' or its corresponding type declarations.

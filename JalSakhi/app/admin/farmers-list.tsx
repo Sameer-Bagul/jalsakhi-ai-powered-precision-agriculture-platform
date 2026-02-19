@@ -18,7 +18,7 @@ export default function FarmersList() {
     const router = useRouter();
 
     const renderItem = ({ item }: { item: typeof FARMERS[0] }) => (
-        <TouchableOpacity style={styles.card} onPress={() => router.push({ pathname: '/(admin)/farmer-details', params: { id: item.id } })}>
+        <TouchableOpacity style={styles.card} onPress={() => router.push({ pathname: '/admin/farmer-details', params: { id: item.id } })}>
             <View style={[styles.avatar, { backgroundColor: item.avatarColor[0] }]}>
                 <Text style={styles.avatarText}>{item.name.split(' ').map(n => n[0]).join('')}</Text>
             </View>

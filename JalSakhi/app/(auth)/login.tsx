@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-    StyleSheet,
-    View,
-    Text,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
-    TextInput
-} from 'react-native';
+import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
@@ -46,7 +36,6 @@ export default function LoginScreen() {
 
     const handleVerifyOTP = async () => {
         const otpString = otp.join('');
-
         if (otpString.length < 6) {
             Alert.alert('Invalid OTP', 'Enter 6 digit OTP');
             return;
@@ -55,7 +44,6 @@ export default function LoginScreen() {
         setLoading(true);
         try {
             const result = await AuthService.verifyOtp(phone, otpString, role);
-
             if (result.success) {
                 if (role === 'FARMER') {
                     router.replace('/farmer/dashboard');
@@ -63,7 +51,7 @@ export default function LoginScreen() {
                     router.replace('/admin/dashboard');
                 }
             } else {
-                Alert.alert('Error', 'Invalid OTP.');
+                Alert.alert('Error', 'Invalid OTP. Try 123456');
             }
         } catch (error) {
             Alert.alert('Error', 'Verification failed.');
@@ -86,30 +74,16 @@ export default function LoginScreen() {
                 style={{ flex: 1 }}
             >
                 <ScrollView contentContainerStyle={styles.scrollContent}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => router.back()}
-                    >
-                        <Feather
-                            name="arrow-left"
-                            size={24}
-                            color={Theme.colors.forest}
-                        />
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                        <Feather name="arrow-left" size={24} color={Theme.colors.forest} />
                     </TouchableOpacity>
 
                     <View style={styles.header}>
                         <Text style={styles.title}>Welcome Back</Text>
                         <Text style={styles.subtitle}>
-                            Login to your{' '}
-                            <Text
-                                style={{
-                                    fontWeight: 'bold',
-                                    color: Theme.colors.primary
-                                }}
-                            >
+                            Login to your <Text style={{ fontWeight: 'bold', color: Theme.colors.primary }}>
                                 {role === 'FARMER' ? 'Farmer' : 'Admin'}
-                            </Text>{' '}
-                            account
+                            </Text> account
                         </Text>
                     </View>
 
@@ -117,7 +91,6 @@ export default function LoginScreen() {
                         {!otpStep ? (
                             <>
                                 <Text style={styles.label}>Mobile Number</Text>
-
                                 <View style={styles.inputContainer}>
                                     <Text style={styles.prefix}>+91</Text>
                                     <TextInput
@@ -129,7 +102,6 @@ export default function LoginScreen() {
                                         onChangeText={setPhone}
                                     />
                                 </View>
-
                                 <CustomButton
                                     title="Get OTP"
                                     onPress={handleSendOTP}
@@ -139,42 +111,27 @@ export default function LoginScreen() {
                             </>
                         ) : (
                             <>
-                                <Text style={styles.label}>
-                                    Enter OTP Sent to {phone}
-                                </Text>
-
+                                <Text style={styles.label}>Enter OTP Sent to {phone}</Text>
                                 <View style={styles.otpRow}>
                                     {otp.map((digit, index) => (
                                         <TextInput
                                             key={index}
-                                            style={[
-                                                styles.otpBox,
-                                                digit ? styles.otpBoxFilled : null
-                                            ]}
+                                            style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
                                             keyboardType="number-pad"
                                             maxLength={1}
                                             value={digit}
-                                            onChangeText={(text) =>
-                                                handleOtpChange(text, index)
-                                            }
+                                            onChangeText={(text) => handleOtpChange(text, index)}
                                         />
                                     ))}
                                 </View>
-
                                 <CustomButton
                                     title="Verify & Login"
                                     onPress={handleVerifyOTP}
                                     loading={loading}
                                     style={styles.button}
                                 />
-
-                                <TouchableOpacity
-                                    onPress={() => setOtpStep(false)}
-                                    style={styles.linkBtn}
-                                >
-                                    <Text style={styles.linkText}>
-                                        Change Mobile Number
-                                    </Text>
+                                <TouchableOpacity onPress={() => setOtpStep(false)} style={styles.linkBtn}>
+                                    <Text style={styles.linkText}>Change Mobile Number</Text>
                                 </TouchableOpacity>
                             </>
                         )}
