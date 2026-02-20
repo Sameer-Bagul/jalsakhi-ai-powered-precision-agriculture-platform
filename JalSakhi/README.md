@@ -1,50 +1,209 @@
-# Welcome to your Expo app 👋
+# 🌊 JalSakhi - Smart Water Management System
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A comprehensive water management solution for farmers and village administrators, built with Expo and React Native.
 
-## Get started
+## 📱 Quick Start
 
-1. Install dependencies
+### For Development (Expo Go)
 
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. **Start the development server**
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Run on device**
+   - Scan QR code with Expo Go app (Android/iOS)
+   - Press `a` for Android emulator
+   - Press `i` for iOS simulator
+   - Press `w` for web
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### For Debugging (Development Build)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+**Want full debugging capabilities?** See **[DEBUG_GUIDE.md](./DEBUG_GUIDE.md)** for instructions on building and installing a debug version on your Android device.
 
-## Get a fresh project
-
-When you're ready, run:
-
+**Quick debug build:**
 ```bash
-npm run reset-project
+# Connect your Android device via USB, then:
+npm run android:dev
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This gives you:
+- ✅ Chrome DevTools debugging
+- ✅ React Native Debugger support
+- ✅ Network inspector
+- ✅ Hot reload & Fast Refresh
+- ✅ Error overlays with stack traces
 
-## Learn more
+## 🏗️ Project Structure
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+JalSakhi/
+├── app/                    # App screens (file-based routing)
+│   ├── (auth)/            # Authentication screens
+│   ├── farmer/            # Farmer dashboard & features
+│   └── admin/             # Admin dashboard & features
+├── components/            # Reusable UI components
+├── services/              # API services (auth, ML, weather)
+├── utils/                 # Utility functions (API, Logger)
+├── constants/             # Theme and constants
+└── assets/                # Images and static files
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🎯 Features
 
-## Join the community
+### For Farmers
+- 🌾 Crop water requirement prediction
+- 💧 Soil moisture forecasting
+- 🌤️ Weather updates and alerts
+- 📊 Usage history tracking
+- 🚜 Farm management
+- ⏰ Irrigation scheduling
 
-Join our community of developers creating universal apps.
+### For Administrators
+- 👥 Farmer management
+- 💾 Water reservoir monitoring
+- 📈 Village analytics
+- ⚡ Water allocation optimization
+- 🔔 Anomaly detection
+- 📊 Simulation and planning tools
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🛠️ Available Scripts
+
+### Development
+```bash
+npm start              # Start Expo development server
+npm run dev            # Same as start
+npm run dev:build      # Start with development client
+npm run android        # Run on Android (Expo Go)
+npm run android:dev    # Run on Android (dev build)
+npm run ios            # Run on iOS (Expo Go)
+npm run web            # Run in web browser
+```
+
+### Building
+```bash
+npm run build:dev      # Build development APK (EAS)
+npm run build:preview  # Build preview APK (EAS)
+npm run build:prod     # Build production APK (EAS)
+```
+
+### Utilities
+```bash
+npm run lint           # Run ESLint
+npm run reset-project  # Reset to blank project
+```
+
+## 📚 Documentation
+
+- **[DEBUG_GUIDE.md](./DEBUG_GUIDE.md)** - Quick start for debugging
+- **[BUILD_DEBUG.md](./BUILD_DEBUG.md)** - Comprehensive build guide
+- **[SETUP_COMPLETE.md](./SETUP_COMPLETE.md)** - Setup status and configuration
+
+## 🔧 Tech Stack
+
+- **Framework:** Expo SDK 54
+- **Language:** TypeScript
+- **Navigation:** Expo Router (file-based routing)
+- **UI:** React Native
+- **State Management:** React Context API
+- **API Client:** Axios
+- **Charts:** React Native Chart Kit
+- **Icons:** Expo Vector Icons
+
+## 🌐 Backend Integration
+
+The app connects to a Node.js backend. Configure the API endpoint in `utils/api.ts`:
+
+```typescript
+const API_URL = "http://YOUR_SERVER:3000/api";
+```
+
+For local development, use your computer's IP address:
+```bash
+# Find your IP
+ip addr show | grep "inet "
+
+# Update API_URL
+const API_URL = "http://192.168.1.X:3000/api";
+```
+
+## 🐛 Debugging
+
+### View Logs
+```bash
+# Device logs
+adb logcat | grep -E "ReactNative|JalSakhi"
+
+# Check project health
+npx expo-doctor
+```
+
+### Common Issues
+
+**Metro bundler issues:**
+```bash
+npm start -- --clear
+```
+
+**Build issues:**
+```bash
+rm -rf node_modules .expo
+npm install
+```
+
+**Device not detected:**
+```bash
+adb kill-server
+adb start-server
+adb devices
+```
+
+## 📦 Key Dependencies
+
+- `expo` - Expo framework
+- `expo-router` - File-based routing
+- `expo-dev-client` - Development builds with debugging
+- `react-native-chart-kit` - Data visualization
+- `axios` - HTTP client
+- `expo-linear-gradient` - Gradient components
+- `expo-location` - Location services
+
+## 🤝 Development Workflow
+
+1. **Start development server:** `npm start`
+2. **Make changes** to files in `app/` directory
+3. **Fast Refresh** updates automatically
+4. **Debug** using Chrome DevTools (with dev build)
+5. **Test** on multiple devices simultaneously
+
+## 📱 Testing
+
+- **Expo Go:** Quick testing during development
+- **Development Build:** Full debugging and native features
+- **Preview Build:** Test production-like builds
+- **Production Build:** Final release version
+
+## 🚀 Deployment
+
+See **[BUILD_DEBUG.md](./BUILD_DEBUG.md)** for detailed instructions on:
+- Building debug APKs for testing
+- Building preview APKs for stakeholders
+- Building production APKs for release
+
+## 📄 License
+
+This project is part of the Techathon 2026 competition.
+
+## 👥 Team
+
+JalSakhi Team - Techathon 2026
+
+---
+
+**Need help?** Check the documentation files or run `npx expo-doctor` to diagnose issues.
+
