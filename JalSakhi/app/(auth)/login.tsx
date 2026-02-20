@@ -1,34 +1,69 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
+import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
-import { CustomInput } from '../../components/shared/CustomInput';
 import { CustomButton } from '../../components/shared/CustomButton';
-import { Logger } from '../../utils/Logger';
-import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../../context/AuthContext';
-import { Alert } from 'react-native';
+import { AuthService } from '../../services/auth';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const { login } = useAuth();
-    const [email, setEmail] = useState('');
-    const [role, setRole] = useState<'farmer' | 'admin'>('farmer');
+    const params = useLocalSearchParams();
+    const role = (params.role as 'FARMER' | 'ADMIN') || 'FARMER';
+
+    const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
+    const [otpStep, setOtpStep] = useState(false);
+    const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
     const handleSendOTP = async () => {
-        if (!email.includes('@')) return;
+        if (phone.length < 10) {
+            Alert.alert('Invalid Phone', 'Please enter a valid 10-digit phone number.');
+            return;
+        }
 
         setLoading(true);
-        const result = await login(email);
-        setLoading(false);
-
-        if (result.success) {
-            router.push('/(auth)/otp');
-        } else {
-            Alert.alert('Login Failed', result.message);
+        try {
+            await AuthService.sendOtp(phone);
+            setOtpStep(true);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to send OTP.');
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleVerifyOTP = async () => {
+        const otpString = otp.join('');
+        if (otpString.length < 6) {
+            Alert.alert('Invalid OTP', 'Enter 6 digit OTP');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const result = await AuthService.verifyOtp(phone, otpString, role);
+            if (result.success) {
+                if (role === 'FARMER') {
+                    router.replace('/farmer/dashboard');
+                } else {
+                    router.replace('/admin/dashboard');
+                }
+            } else {
+                Alert.alert('Error', 'Invalid OTP. Try 123456');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Verification failed.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOtpChange = (text: string, index: number) => {
+        const newOtp = [...otp];
+        newOtp[index] = text;
+        setOtp(newOtp);
     };
 
     return (
@@ -44,48 +79,62 @@ export default function LoginScreen() {
                     </TouchableOpacity>
 
                     <View style={styles.header}>
-                        <Text style={styles.title}>Welcome back</Text>
-                        <Text style={styles.subtitle}>Sign in to your JalSakhi account</Text>
-                    </View>
-
-                    <View style={styles.roleSwitcher}>
-                        <TouchableOpacity
-                            style={[styles.roleTab, role === 'farmer' && styles.activeTab]}
-                            onPress={() => setRole('farmer')}
-                        >
-                            <Text style={[styles.tabText, role === 'farmer' && styles.activeTabText]}>Farmer</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.roleTab, role === 'admin' && styles.activeTab]}
-                            onPress={() => setRole('admin')}
-                        >
-                            <Text style={[styles.tabText, role === 'admin' && styles.activeTabText]}>Admin</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.title}>Welcome Back</Text>
+                        <Text style={styles.subtitle}>
+                            Login to your <Text style={{ fontWeight: 'bold', color: Theme.colors.primary }}>
+                                {role === 'FARMER' ? 'Farmer' : 'Admin'}
+                            </Text> account
+                        </Text>
                     </View>
 
                     <View style={styles.form}>
-                        <CustomInput
-                            label="Email Address"
-                            placeholder="your@email.com"
-                            keyboardType="email-address"
-                            value={email}
-                            onChangeText={setEmail}
-                            leftIcon={<Feather name="mail" size={20} color={Theme.colors.moss} />}
-                        />
-
-                        <Text style={styles.infoText}>
-                            We will send you an OTP (One Time Password) for verification.
-                        </Text>
-
-                        <CustomButton
-                            title="Send OTP"
-                            onPress={handleSendOTP}
-                            loading={loading}
-                            disabled={!email.includes('@')}
-                            size="lg"
-                            style={styles.button}
-                            icon={<Feather name="shield" size={18} color="white" />}
-                        />
+                        {!otpStep ? (
+                            <>
+                                <Text style={styles.label}>Mobile Number</Text>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.prefix}>+91</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter mobile number"
+                                        keyboardType="phone-pad"
+                                        maxLength={10}
+                                        value={phone}
+                                        onChangeText={setPhone}
+                                    />
+                                </View>
+                                <CustomButton
+                                    title="Get OTP"
+                                    onPress={handleSendOTP}
+                                    loading={loading}
+                                    style={styles.button}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <Text style={styles.label}>Enter OTP Sent to {phone}</Text>
+                                <View style={styles.otpRow}>
+                                    {otp.map((digit, index) => (
+                                        <TextInput
+                                            key={index}
+                                            style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
+                                            keyboardType="number-pad"
+                                            maxLength={1}
+                                            value={digit}
+                                            onChangeText={(text) => handleOtpChange(text, index)}
+                                        />
+                                    ))}
+                                </View>
+                                <CustomButton
+                                    title="Verify & Login"
+                                    onPress={handleVerifyOTP}
+                                    loading={loading}
+                                    style={styles.button}
+                                />
+                                <TouchableOpacity onPress={() => setOtpStep(false)} style={styles.linkBtn}>
+                                    <Text style={styles.linkText}>Change Mobile Number</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -106,7 +155,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: Theme.colors.card,
+        backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 32,
@@ -117,62 +166,77 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     title: {
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: 'bold',
         color: Theme.colors.forest,
+        marginBottom: 8,
     },
     subtitle: {
         fontSize: 16,
         color: Theme.colors.moss,
-        marginTop: 8,
-    },
-    roleSwitcher: {
-        flexDirection: 'row',
-        backgroundColor: Theme.colors.dew,
-        padding: 4,
-        borderRadius: 12,
-        marginBottom: 32,
-    },
-    roleTab: {
-        flex: 1,
-        paddingVertical: 10,
-        alignItems: 'center',
-        borderRadius: 8,
-    },
-    activeTab: {
-        backgroundColor: '#FFFFFF',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    tabText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: Theme.colors.moss,
-    },
-    activeTabText: {
-        color: Theme.colors.emerald,
     },
     form: {
-        flex: 1,
+        backgroundColor: 'white',
+        padding: 24,
+        borderRadius: 24,
+        elevation: 2,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 12,
+        textTransform: 'uppercase',
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Theme.colors.border,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        height: 56,
+        marginBottom: 24,
     },
     prefix: {
         fontSize: 16,
-        fontWeight: '600',
-        color: Theme.colors.forest,
-        marginRight: 4,
+        fontWeight: 'bold',
+        color: Theme.colors.primary,
+        marginRight: 12,
     },
-    infoText: {
-        fontSize: 13,
-        color: Theme.colors.moss,
-        textAlign: 'center',
-        marginVertical: 24,
-        paddingHorizontal: 20,
-        lineHeight: 20,
+    input: {
+        flex: 1,
+        fontSize: 16,
+        fontWeight: '600',
     },
     button: {
         marginTop: 8,
+    },
+    otpRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 24,
+    },
+    otpBox: {
+        width: 44,
+        height: 52,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: Theme.colors.border,
+        textAlign: 'center',
+        fontSize: 20,
+        fontWeight: '800',
+        color: Theme.colors.primary,
+    },
+    otpBoxFilled: {
+        borderColor: Theme.colors.primary,
+        backgroundColor: Theme.colors.primaryPale,
+    },
+    linkBtn: {
+        marginTop: 16,
+        alignItems: 'center',
+    },
+    linkText: {
+        color: Theme.colors.primary,
+        fontWeight: '600',
     },
 });

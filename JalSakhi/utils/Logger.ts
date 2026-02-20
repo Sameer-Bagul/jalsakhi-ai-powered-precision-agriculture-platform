@@ -3,6 +3,8 @@
  * Provides tagged and leveled logging for easier debugging.
  */
 
+declare var __DEV__: boolean;
+
 const LOG_LEVELS = {
     DEBUG: 0,
     INFO: 1,

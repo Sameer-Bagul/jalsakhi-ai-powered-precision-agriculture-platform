@@ -3,13 +3,11 @@ import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
-import { Logger } from '../../utils/Logger';
 import { useAuth } from '../../context/AuthContext';
-import { Alert } from 'react-native';
 
 export default function OTPScreen() {
     const router = useRouter();
-    const { verifyOtp, user } = useAuth();
+    const { verifyOtp } = useAuth();
     const [otp, setOtp] = React.useState('');
     const [loading, setLoading] = React.useState(false);
 
@@ -17,26 +15,21 @@ export default function OTPScreen() {
         if (otp.length < 6) return;
 
         setLoading(true);
-        const result = await verifyOtp(otp);
-        setLoading(false);
 
-        if (result.success) {
-            // Check role to redirect
-            if (user?.role === 'admin') {
-                router.replace('/(admin)');
-            } else {
-                router.replace('/(farmer)');
-            }
-        } else {
-            Alert.alert('Verification Failed', result.message);
-        }
+        // Simulate verification
+        setTimeout(() => {
+            setLoading(false);
+            router.replace('/farmer');
+        }, 1500);
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Verify OTP</Text>
-                <Text style={styles.subtitle}>Enter the 6-digit code sent to your email</Text>
+                <Text style={styles.subtitle}>
+                    Enter the 6-digit code sent to your email
+                </Text>
             </View>
 
             <View style={styles.otpContainer}>
@@ -52,7 +45,8 @@ export default function OTPScreen() {
             </View>
 
             <Text style={styles.resendText}>
-                Didn't receive code? <Text style={styles.resendLink}>Resend in 00:30</Text>
+                Didn't receive code?{' '}
+                <Text style={styles.resendLink}>Resend in 00:30</Text>
             </Text>
 
             <View style={styles.footer}>
