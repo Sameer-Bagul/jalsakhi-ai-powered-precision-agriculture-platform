@@ -1,7 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Theme } from '../../constants/JalSakhiTheme';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AdminLayout() {
     return (

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { WeatherWidget } from '../../components/WeatherWidget';
 import { LineChart } from 'react-native-chart-kit';
-import { Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BentoTile } from '../../components/bento/BentoTile';
@@ -155,51 +155,35 @@ export default function FarmerDashboard() {
                     <Text style={styles.sectionTitle}>Smart Farm Tools</Text>
                     <View style={styles.toolsGridBento}>
                         <BentoTile
-                            title="Crop Water"
-                            subtitle="Water needs"
-                            icon={<MaterialCommunityIcons name="water-pump" size={20} color={Theme.colors.primary} />}
+                            title="Crop Water Prediction"
+                            subtitle="Input data → Results"
+                            icon={<MaterialCommunityIcons name="water-pump" size={22} color="white" />}
                             onPress={() => router.push('/farmer/crop-water-input')}
-                            size="small"
+                            size="large"
                         />
 
                         <BentoTile
-                            title="Soil Moisture"
-                            subtitle="Forecast"
-                            icon={<MaterialCommunityIcons name="chart-bell-curve-cumulative" size={20} color={Theme.colors.primary} />}
+                            title="Soil Moisture Forecast"
+                            subtitle="Forecast → Advice"
+                            icon={<MaterialCommunityIcons name="chart-bell-curve-cumulative" size={22} color="white" />}
                             onPress={() => router.push('/farmer/soil-moisture-forecast')}
-                            size="small"
+                            size="large"
                         />
 
                         <BentoTile
                             title="Water Allocation"
-                            subtitle="Weekly quota"
-                            icon={<MaterialCommunityIcons name="water-outline" size={20} color={Theme.colors.primary} />}
+                            subtitle="Village optimizer"
+                            icon={<MaterialCommunityIcons name="water-outline" size={22} color="white" />}
                             onPress={() => router.push('/farmer/water-allocation-view')}
-                            size="small"
+                            size="large"
                         />
 
                         <BentoTile
-                            title="My Farms"
-                            subtitle="Manage your farms"
-                            icon={<MaterialIcons name="farm" size={20} color={Theme.colors.primary} />}
-                            onPress={() => router.push('/farmer/my-farms')}
-                            size="small"
-                        />
-
-                        <BentoTile
-                            title="Usage History"
-                            subtitle="Water usage"
-                            icon={<Feather name="bar-chart-2" size={20} color={Theme.colors.primary} />}
-                            onPress={() => router.push('/farmer/usage-history')}
-                            size="small"
-                        />
-
-                        <BentoTile
-                            title="Alerts"
-                            subtitle="Notifications"
-                            icon={<Feather name="bell" size={20} color={Theme.colors.primary} />}
-                            onPress={() => router.push('/farmer/alerts')}
-                            size="small"
+                            title="Chat with FarmAI"
+                            subtitle="Ask about crops & irrigation"
+                            icon={<Feather name="message-circle" size={22} color={Theme.colors.primary} />}
+                            onPress={() => router.push('/farmer/chatbot')}
+                            size="medium"
                         />
 
                     </View>
