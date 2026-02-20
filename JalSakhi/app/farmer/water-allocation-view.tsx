@@ -17,13 +17,9 @@ export default function WaterAllocationView() {
   }, []);
 
   const fetchAllocation = async () => {
-    try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch('http://YOUR_SERVER_IP:5000/api/farmer/water-allocation');
-      const data = await response.json();
-      
-      // Sample data structure
-      const sampleData = {
+    setLoading(true);
+    // Sample data structure used as a safe fallback
+    const sampleData = {
         farmerId: 'F001',
         farmerName: 'Ramesh Kumar',
         village: 'Khadki',
@@ -49,38 +45,26 @@ export default function WaterAllocationView() {
         priority: 'medium',
         crops: ['Rice', 'Wheat'],
         lastUpdated: new Date().toISOString(),
-      };
-      
-      setAllocation(data || sampleData);
+    };
+
+    try {
+      // try fetching but abort if the request hangs (timeout)
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      // TODO: Replace with actual API endpoint
+      const response = await fetch('http://YOUR_SERVER_IP:5000/api/farmer/water-allocation', { signal: controller.signal } as any);
+      clearTimeout(timeout);
+
+      if (response && response.ok) {
+        const data = await response.json();
+        setAllocation(data || sampleData);
+      } else {
+        // fallback to sample if response not ok
+        setAllocation(sampleData);
+      }
     } catch (error) {
-      console.error('Error fetching allocation:', error);
-      setAllocation({
-        farmerId: 'F001',
-        farmerName: 'Ramesh Kumar',
-        village: 'Khadki',
-        totalLand: 2.5,
-        currentAllocation: {
-          amount: 1250,
-          validFrom: '2025-01-15',
-          validUntil: '2025-01-21',
-          status: 'active',
-        },
-        schedule: [
-          { date: 'Jan 15', slot: 'Morning 6-8 AM', amount: 200, status: 'completed' },
-          { date: 'Jan 16', slot: 'Morning 6-8 AM', amount: 200, status: 'pending' },
-          { date: 'Jan 18', slot: 'Evening 5-7 PM', amount: 250, status: 'pending' },
-          { date: 'Jan 20', slot: 'Morning 6-8 AM', amount: 300, status: 'pending' },
-          { date: 'Jan 21', slot: 'Evening 5-7 PM', amount: 300, status: 'pending' },
-        ],
-        reservoirStatus: {
-          capacity: 50000,
-          currentLevel: 38500,
-          percentage: 77,
-        },
-        priority: 'medium',
-        crops: ['Rice', 'Wheat'],
-        lastUpdated: new Date().toISOString(),
-      });
+      console.error('Error fetching allocation (fallback to sample):', error);
+      setAllocation(sampleData);
     } finally {
       setLoading(false);
     }
@@ -141,7 +125,7 @@ export default function WaterAllocationView() {
             <View style={styles.allocationHeader}>
               <View>
                 <Text style={styles.allocationLabel}>Current Weekly Allocation</Text>
-                <Text style={styles.allocationValue}>{allocation.currentAllocation.amount} L</Text>
+                <Text style={styles.allocationValue}>{allocation?.currentAllocation?.amount ?? 0} L</Text>
               </View>
               <View style={styles.allocationIcon}>
                 <Feather name="droplet" size={32} color={Theme.colors.primary} />
@@ -152,21 +136,21 @@ export default function WaterAllocationView() {
               <View style={styles.detailRow}>
                 <Feather name="calendar" size={16} color={Theme.colors.textSecondary} />
                 <Text style={styles.detailText}>
-                  Valid: {new Date(allocation.currentAllocation.validFrom).toLocaleDateString()} - {new Date(allocation.currentAllocation.validUntil).toLocaleDateString()}
+                  Valid: {allocation?.currentAllocation?.validFrom ? new Date(allocation.currentAllocation.validFrom).toLocaleDateString() : '-'} - {allocation?.currentAllocation?.validUntil ? new Date(allocation.currentAllocation.validUntil).toLocaleDateString() : '-'}
                 </Text>
               </View>
 
               <View style={styles.detailRow}>
                 <Feather name="map-pin" size={16} color={Theme.colors.textSecondary} />
                 <Text style={styles.detailText}>
-                  Land: {allocation.totalLand} acres • Crops: {allocation.crops.join(', ')}
+                  Land: {allocation?.totalLand ?? '-'} acres • Crops: {Array.isArray(allocation?.crops) ? allocation.crops.join(', ') : '-'}
                 </Text>
               </View>
 
               <View style={styles.detailRow}>
                 <Feather name="flag" size={16} color={getPriorityColor(allocation.priority)} />
-                <Text style={[styles.detailText, { color: getPriorityColor(allocation.priority) }]}>
-                  {getPriorityLabel(allocation.priority)}
+                <Text style={[styles.detailText, { color: getPriorityColor(allocation?.priority ?? '') }]}> 
+                  {getPriorityLabel(allocation?.priority ?? '')}
                 </Text>
               </View>
             </View>
@@ -223,7 +207,7 @@ export default function WaterAllocationView() {
             <Text style={styles.sectionTitle}>📅 Your Irrigation Schedule</Text>
             <Text style={styles.sectionSubtitle}>Optimized by village admin</Text>
 
-            {allocation.schedule.map((item: any, index: number) => (
+            {(allocation?.schedule || []).map((item: any, index: number) => (
               <View key={index} style={styles.scheduleItem}>
                 <View style={[
                   styles.scheduleStatus,

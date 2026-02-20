@@ -30,6 +30,7 @@ export default function FarmerLayout() {
                     tabBarIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
                 }}
             />
+            {/* Keep minimal visible tabs: Dashboard, My Farms, Profile */}
             <Tabs.Screen
                 name="my-farms"
                 options={{
@@ -37,21 +38,8 @@ export default function FarmerLayout() {
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="sprout-outline" size={24} color={color} />,
                 }}
             />
-            <Tabs.Screen
-                name="irrigation-details"
-                options={{
-                    title: 'Irrigation',
-                    tabBarIcon: ({ color }) => <Feather name="droplet" size={24} color={color} />,
-                }}
-            />
-            <Tabs.Screen
-                name="weather"
-                options={{
-                    title: 'Weather',
-                    tabBarIcon: ({ color }) => <Feather name="cloud" size={24} color={color} />,
-                    href: null, // Hide from tab bar if not needed, or keep it.
-                }}
-            />
+            <Tabs.Screen name="irrigation-details" options={{ href: null }} />
+            <Tabs.Screen name="weather" options={{ href: null }} />
             <Tabs.Screen
                 name="index"
                 options={{
@@ -87,7 +75,7 @@ export default function FarmerLayout() {
                 options={{
                     title: 'Profile',
                     tabBarIcon: ({ color }) => <Feather name="user" size={24} color={color} />,
-                    href: '/profile', // Explicitly point to the shared profile route
+                    href: '/profile',
                 }}
             />
         </Tabs>

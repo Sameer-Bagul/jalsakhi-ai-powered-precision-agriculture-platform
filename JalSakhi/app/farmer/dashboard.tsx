@@ -7,6 +7,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BentoTile } from '../../components/bento/BentoTile';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -152,61 +153,54 @@ export default function FarmerDashboard() {
                 {/* ML Models Integration */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Smart Farm Tools</Text>
-                    <View style={styles.toolsGrid}>
-
-                        {/* Crop Water Model */}
-                        <TouchableOpacity
-                            style={styles.toolCard}
+                    <View style={styles.toolsGridBento}>
+                        <BentoTile
+                            title="Crop Water"
+                            subtitle="Water needs"
+                            icon={<MaterialCommunityIcons name="water-pump" size={20} color={Theme.colors.primary} />}
                             onPress={() => router.push('/farmer/crop-water-input')}
-                        >
-                            <LinearGradient
-                                colors={['#0ea5e9', '#0284c7']}
-                                style={styles.toolIconBox}
-                            >
-                                <MaterialCommunityIcons name="water-pump" size={32} color="white" />
-                            </LinearGradient>
-                            <Text style={styles.toolTitle}>Crop Water Prediction</Text>
-                            <Text style={styles.toolDesc}>Calculate exact water needs for your crop</Text>
-                            <View style={styles.toolArrow}>
-                                <Feather name="arrow-right" size={20} color={Theme.colors.primary} />
-                            </View>
-                        </TouchableOpacity>
+                            size="small"
+                        />
 
-                        {/* Soil Moisture Model */}
-                        <TouchableOpacity
-                            style={styles.toolCard}
+                        <BentoTile
+                            title="Soil Moisture"
+                            subtitle="Forecast"
+                            icon={<MaterialCommunityIcons name="chart-bell-curve-cumulative" size={20} color={Theme.colors.primary} />}
                             onPress={() => router.push('/farmer/soil-moisture-forecast')}
-                        >
-                            <LinearGradient
-                                colors={['#8b5cf6', '#7c3aed']}
-                                style={styles.toolIconBox}
-                            >
-                                <MaterialCommunityIcons name="chart-bell-curve-cumulative" size={32} color="white" />
-                            </LinearGradient>
-                            <Text style={styles.toolTitle}>Soil Moisture Forecast</Text>
-                            <Text style={styles.toolDesc}>Check moisture levels & irrigation advice</Text>
-                            <View style={styles.toolArrow}>
-                                <Feather name="arrow-right" size={20} color={Theme.colors.primary} />
-                            </View>
-                        </TouchableOpacity>
+                            size="small"
+                        />
 
-                        {/* Water Allocation View */}
-                        <TouchableOpacity
-                            style={styles.toolCard}
+                        <BentoTile
+                            title="Water Allocation"
+                            subtitle="Weekly quota"
+                            icon={<MaterialCommunityIcons name="water-outline" size={20} color={Theme.colors.primary} />}
                             onPress={() => router.push('/farmer/water-allocation-view')}
-                        >
-                            <LinearGradient
-                                colors={['#10b981', '#059669']}
-                                style={styles.toolIconBox}
-                            >
-                                <MaterialCommunityIcons name="water-outline" size={32} color="white" />
-                            </LinearGradient>
-                            <Text style={styles.toolTitle}>Water Allocation</Text>
-                            <Text style={styles.toolDesc}>View your weekly water quota</Text>
-                            <View style={styles.toolArrow}>
-                                <Feather name="arrow-right" size={20} color={Theme.colors.primary} />
-                            </View>
-                        </TouchableOpacity>
+                            size="small"
+                        />
+
+                        <BentoTile
+                            title="My Farms"
+                            subtitle="Manage your farms"
+                            icon={<MaterialIcons name="farm" size={20} color={Theme.colors.primary} />}
+                            onPress={() => router.push('/farmer/my-farms')}
+                            size="small"
+                        />
+
+                        <BentoTile
+                            title="Usage History"
+                            subtitle="Water usage"
+                            icon={<Feather name="bar-chart-2" size={20} color={Theme.colors.primary} />}
+                            onPress={() => router.push('/farmer/usage-history')}
+                            size="small"
+                        />
+
+                        <BentoTile
+                            title="Alerts"
+                            subtitle="Notifications"
+                            icon={<Feather name="bell" size={20} color={Theme.colors.primary} />}
+                            onPress={() => router.push('/farmer/alerts')}
+                            size="small"
+                        />
 
                     </View>
                 </View>
@@ -511,6 +505,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 16,
+    },
+    toolsGridBento: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 4,
+        gap: 12,
     },
     toolCard: {
         flex: 1,
