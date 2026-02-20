@@ -59,6 +59,10 @@ export default function FarmerSignup() {
             if (result.success) {
                 Alert.alert('Success', 'Registration Successful!');
                 router.replace('/farmer/dashboard');
+            } else if (__DEV__) {
+                // Dev bypass for dummy UI: allow navigation when backend/mocks are not available
+                console.warn('OTP verification failed — dev bypass enabled. Proceeding to dashboard.');
+                router.replace('/farmer/dashboard');
             } else {
                 Alert.alert('Error', 'Invalid OTP. Try 123456');
             }

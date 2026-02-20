@@ -157,7 +157,7 @@ export default function FarmerDashboard() {
                         {/* Crop Water Model */}
                         <TouchableOpacity
                             style={styles.toolCard}
-                            onPress={() => router.push('/farmer/crop-water-prediction')}
+                            onPress={() => router.push('/farmer/crop-water-input')}
                         >
                             <LinearGradient
                                 colors={['#0ea5e9', '#0284c7']}
@@ -185,6 +185,24 @@ export default function FarmerDashboard() {
                             </LinearGradient>
                             <Text style={styles.toolTitle}>Soil Moisture Forecast</Text>
                             <Text style={styles.toolDesc}>Check moisture levels & irrigation advice</Text>
+                            <View style={styles.toolArrow}>
+                                <Feather name="arrow-right" size={20} color={Theme.colors.primary} />
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Water Allocation View */}
+                        <TouchableOpacity
+                            style={styles.toolCard}
+                            onPress={() => router.push('/farmer/water-allocation-view')}
+                        >
+                            <LinearGradient
+                                colors={['#10b981', '#059669']}
+                                style={styles.toolIconBox}
+                            >
+                                <MaterialCommunityIcons name="water-outline" size={32} color="white" />
+                            </LinearGradient>
+                            <Text style={styles.toolTitle}>Water Allocation</Text>
+                            <Text style={styles.toolDesc}>View your weekly water quota</Text>
                             <View style={styles.toolArrow}>
                                 <Feather name="arrow-right" size={20} color={Theme.colors.primary} />
                             </View>
@@ -491,6 +509,7 @@ const styles = StyleSheet.create({
     },
     toolsGrid: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: 16,
     },
     toolCard: {
