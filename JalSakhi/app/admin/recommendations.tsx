@@ -67,7 +67,7 @@ export default function CropRecommendations() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg },
+    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
     content: { flex: 1, padding: 16 },
     infoCard: {
         flexDirection: 'row',

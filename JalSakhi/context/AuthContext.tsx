@@ -1,28 +1,71 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthService, UserProfile, RegisterData, LoginData } from '../services/auth';
+import { TOKEN_KEY } from '../utils/api';
 import { Logger } from '../utils/Logger';
 
 interface AuthContextType {
-    user: any;
+    user: UserProfile | null;
+    token: string | null;
     isLoading: boolean;
-    register: (data: any) => Promise<any>;
-    login: (email: string) => Promise<any>;
-    verifyOtp: (otp: string) => Promise<any>;
+    isAuthenticated: boolean;
+    register: (data: RegisterData) => Promise<{ success: boolean; message: string }>;
+    login: (data: LoginData) => Promise<{ success: boolean; message: string }>;
+    verifyAccount: (otp: string) => Promise<{ success: boolean; message: string }>;
+    sendVerifyOtp: () => Promise<{ success: boolean; message: string }>;
     logout: () => Promise<void>;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [user, setUser] = useState<UserProfile | null>(null);
+    const [token, setToken] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const register = async (data: any) => {
+    // On mount, check for existing token and load user data
+    useEffect(() => {
+        const init = async () => {
+            try {
+                const savedToken = await AsyncStorage.getItem(TOKEN_KEY);
+                if (savedToken) {
+                    setToken(savedToken);
+                    // Verify token is still valid
+                    const authCheck = await AuthService.isAuthenticated();
+                    if (authCheck.success) {
+                        const userData = await AuthService.getUserData();
+                        if (userData.success && userData.userData) {
+                            setUser(userData.userData);
+                        }
+                    } else {
+                        // Token expired or invalid
+                        await AsyncStorage.removeItem(TOKEN_KEY);
+                        setToken(null);
+                    }
+                }
+            } catch (error) {
+                Logger.error('AuthContext', 'Init error', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        init();
+    }, []);
+
+    const register = async (data: RegisterData) => {
         setIsLoading(true);
         try {
-            const response = await api.post('/register', data);
-            Logger.info('AuthContext', 'Register response', response.data);
-            return response.data;
+            const result = await AuthService.register(data);
+            if (result.success && result.token) {
+                setToken(result.token);
+                // Fetch user data after registration
+                const userData = await AuthService.getUserData();
+                if (userData.success && userData.userData) {
+                    setUser(userData.userData);
+                }
+            }
+            return result;
         } catch (error: any) {
             Logger.error('AuthContext', 'Register error', error);
             return { success: false, message: error.message };
@@ -31,17 +74,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const login = async (email: string) => {
+    const login = async (data: LoginData) => {
         setIsLoading(true);
         try {
-            // Since the server login requires a password, but we want OTP-only flow,
-            // we will use the 'send-reset-otp' or a custom endpoint if needed.
-            // For now, let's assume we use 'login' with a default password if the user exists,
-            // or we implement a proper OTP login on the server.
-            // Given the server code, let's try to find if user exists first.
-            const response = await api.post('/login', { email, password: 'defaultPassword123' });
-            Logger.info('AuthContext', 'Login response', response.data);
-            return response.data;
+            const result = await AuthService.login(data);
+            if (result.success && result.token) {
+                setToken(result.token);
+                // Fetch user data after login
+                const userData = await AuthService.getUserData();
+                if (userData.success && userData.userData) {
+                    setUser(userData.userData);
+                }
+            }
+            return result;
         } catch (error: any) {
             Logger.error('AuthContext', 'Login error', error);
             return { success: false, message: error.message };
@@ -50,50 +95,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const verifyOtp = async (otp: string) => {
+    const verifyAccount = async (otp: string) => {
         setIsLoading(true);
         try {
-            const response = await api.post('/verify-account', { otp });
-            Logger.info('AuthContext', 'Verify OTP response', response.data);
-            if (response.data.success) {
-                // Fetch user data after verification
-                await checkAuth();
+            const result = await AuthService.verifyAccount(otp);
+            if (result.success) {
+                // Refresh user data to get updated verification status
+                await refreshUser();
             }
-            return response.data;
+            return result;
         } catch (error: any) {
-            Logger.error('AuthContext', 'Verify OTP error', error);
+            Logger.error('AuthContext', 'Verify account error', error);
             return { success: false, message: error.message };
         } finally {
             setIsLoading(false);
         }
     };
 
-    const checkAuth = async () => {
+    const sendVerifyOtp = async () => {
         try {
-            const response = await api.get('/is-auth');
-            if (response.data.success) {
-                setUser(response.data.user);
-            }
-        } catch (error) {
-            setUser(null);
+            return await AuthService.sendVerifyOtp();
+        } catch (error: any) {
+            Logger.error('AuthContext', 'Send OTP error', error);
+            return { success: false, message: error.message };
         }
     };
 
     const logout = async () => {
+        await AuthService.logout();
+        setUser(null);
+        setToken(null);
+    };
+
+    const refreshUser = async () => {
         try {
-            await api.post('/logout');
-            setUser(null);
+            const userData = await AuthService.getUserData();
+            if (userData.success && userData.userData) {
+                setUser(userData.userData);
+            }
         } catch (error) {
-            Logger.error('AuthContext', 'Logout error', error);
+            Logger.error('AuthContext', 'Refresh user error', error);
         }
     };
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
-
     return (
-        <AuthContext.Provider value={{ user, isLoading, register, login, verifyOtp, logout }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                token,
+                isLoading,
+                isAuthenticated: !!token && !!user,
+                register,
+                login,
+                verifyAccount,
+                sendVerifyOtp,
+                logout,
+                refreshUser,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

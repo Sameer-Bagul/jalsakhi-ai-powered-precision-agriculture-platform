@@ -1,54 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, StatusBar, TextInput, Animated, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, StatusBar, Animated, Dimensions, ImageBackground } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../constants/JalSakhiTheme';
-import { LanguageSelector } from '../components/LanguageSelector';
-import { AuthService } from '../services/auth';
-import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { Feather, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Logger } from '../utils/Logger';
+
+const { width, height } = Dimensions.get('window');
 
 export default function Index() {
     const router = useRouter();
-
-    // State
     const [splashLoading, setSplashLoading] = useState(true);
-    const [selectedRole, setSelectedRole] = useState<'FARMER' | 'ADMIN'>('FARMER');
+    const [selectedRole, setSelectedRole] = useState<'FARMER' | 'ADMIN' | null>(null);
 
-    // Animation
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const slideAnim = useRef(new Animated.Value(20)).current;
-    const scaleAnim = useRef(new Animated.Value(0.95)).current;
+    const slideAnim = useRef(new Animated.Value(30)).current;
 
-    // Splash Effect
     useEffect(() => {
         Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 1000,
-                useNativeDriver: true,
-            }),
-            Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 800,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 6,
-                useNativeDriver: true,
-            })
+            Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+            Animated.timing(slideAnim, { toValue: 0, duration: 800, useNativeDriver: true }),
         ]).start();
 
-        const timer = setTimeout(() => {
-            setSplashLoading(false);
-        }, 3000); // Reduced splash time for better UX
-
+        const timer = setTimeout(() => setSplashLoading(false), 2500);
         return () => clearTimeout(timer);
     }, []);
 
-    const handleNewUser = () => {
+    const handleContinue = () => {
+        if (!selectedRole) return;
         if (selectedRole === 'FARMER') {
             router.push('/(auth)/farmer-signup');
         } else {
@@ -56,362 +35,245 @@ export default function Index() {
         }
     };
 
-    const handleOldUser = () => {
-        // Pass the selected role to the login screen params if possible, 
-        // or just navigate and let user select there/auto-select.
-        router.push({ pathname: '/(auth)/login', params: { role: selectedRole } });
-    };
-
-    // Render Splash Screen
     if (splashLoading) {
         return (
             <View style={styles.splashContainer}>
-                <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
-                <LinearGradient
-                    colors={['#052e16', '#14532d', '#166534', '#15803d']}
-                    style={styles.splashGradient}
-                >
+                <StatusBar barStyle="light-content" backgroundColor="#052e16" />
+                <LinearGradient colors={['#052e16', '#14532d', '#166534']} style={styles.splashGradient}>
                     <View style={styles.splashBlobTop} />
                     <View style={styles.splashBlobBottom} />
-
                     <Animated.View style={[styles.splashContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-                        <View style={styles.splashLogoContainer}>
-                            <Image
-                                source={require('../assets/images/logo.png')}
-                                style={styles.splashLogo}
-                                resizeMode="contain"
-                            />
+                        <View style={styles.splashLogoWrap}>
+                            <Image source={require('../assets/images/logo.png')} style={styles.splashLogo} resizeMode="contain" />
                         </View>
-                        <Text style={styles.splashTitle}>Jalसखी</Text>
-
-                        <View style={styles.splashLoader}>
-                            <View style={styles.splashLoaderFill} />
-                        </View>
-
-                        <Text style={styles.splashVersion}>v1.0.0</Text>
+                        <Text style={styles.splashTitle}>JalSakhi</Text>
+                        <Text style={styles.splashTagline}>Smart Water for Every Farm</Text>
+                        <View style={styles.splashBar}><View style={styles.splashBarFill} /></View>
                     </Animated.View>
                 </LinearGradient>
             </View>
         );
     }
 
-    // Render Landing Screen
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ImageBackground
+            source={require('../assets/images/background.jpeg')}
+            style={styles.container}
+            imageStyle={{ opacity: 0.12 }}
+        >
+            <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+            <SafeAreaView style={styles.safeArea}>
+                {/* Top section — branding */}
+                <View style={styles.topSection}>
+                    <Image source={require('../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+                    <Text style={styles.appName}>JalSakhi</Text>
+                    <Text style={styles.tagline}>Smart Water Management for Indian Agriculture</Text>
+                </View>
 
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={styles.headerRow}>
-                        <Image
-                            source={require('../assets/images/logo.png')}
-                            style={styles.headerLogoLarge}
-                        />
-                        <View style={styles.headerTextContainer}>
-                            <Text style={styles.headerTitle}>Welcome to Jalसखी</Text>
-                        </View>
+                {/* Role selection */}
+                <View style={styles.roleSection}>
+                    <Text style={styles.roleLabel}>I am a</Text>
+
+                    <View style={styles.roleRow}>
+                        {/* Farmer Card */}
+                        <TouchableOpacity
+                            style={[styles.roleCard, selectedRole === 'FARMER' && styles.roleCardSelected]}
+                            onPress={() => setSelectedRole('FARMER')}
+                            activeOpacity={0.85}
+                        >
+                            <View style={[styles.roleIconWrap, selectedRole === 'FARMER' && styles.roleIconSelected]}>
+                                <MaterialCommunityIcons
+                                    name="sprout"
+                                    size={32}
+                                    color={selectedRole === 'FARMER' ? '#fff' : Theme.colors.primary}
+                                />
+                            </View>
+                            <Text style={[styles.roleTitle, selectedRole === 'FARMER' && styles.roleTitleSelected]}>
+                                Farmer
+                            </Text>
+                            <Text style={styles.roleDesc}>Manage crops & water</Text>
+                            {selectedRole === 'FARMER' && (
+                                <View style={styles.checkBadge}>
+                                    <Feather name="check" size={14} color="#fff" />
+                                </View>
+                            )}
+                        </TouchableOpacity>
+
+                        {/* Admin Card */}
+                        <TouchableOpacity
+                            style={[styles.roleCard, selectedRole === 'ADMIN' && styles.roleCardSelected]}
+                            onPress={() => setSelectedRole('ADMIN')}
+                            activeOpacity={0.85}
+                        >
+                            <View style={[styles.roleIconWrap, selectedRole === 'ADMIN' && styles.roleIconSelected]}>
+                                <MaterialIcons
+                                    name="admin-panel-settings"
+                                    size={32}
+                                    color={selectedRole === 'ADMIN' ? '#fff' : Theme.colors.primary}
+                                />
+                            </View>
+                            <Text style={[styles.roleTitle, selectedRole === 'ADMIN' && styles.roleTitleSelected]}>
+                                Admin
+                            </Text>
+                            <Text style={styles.roleDesc}>Village water admin</Text>
+                            {selectedRole === 'ADMIN' && (
+                                <View style={styles.checkBadge}>
+                                    <Feather name="check" size={14} color="#fff" />
+                                </View>
+                            )}
+                        </TouchableOpacity>
                     </View>
-                    <Text style={styles.headerSubtitle}>Choose your role to continue</Text>
                 </View>
 
-                {/* Role Cards */}
-                <View style={styles.cardsContainer}>
+                {/* Bottom actions */}
+                <View style={styles.bottomSection}>
                     <TouchableOpacity
-                        style={[styles.roleCard, selectedRole === 'FARMER' && styles.roleCardActive]}
-                        onPress={() => setSelectedRole('FARMER')}
-                        activeOpacity={0.9}
+                        style={[styles.primaryBtn, !selectedRole && styles.primaryBtnDisabled]}
+                        onPress={handleContinue}
+                        disabled={!selectedRole}
+                        activeOpacity={0.8}
                     >
-                        <View style={[styles.roleIconContainer, selectedRole === 'FARMER' && styles.roleIconActive]}>
-                            <MaterialIcons name="agriculture" size={48} color={selectedRole === 'FARMER' ? 'white' : Theme.colors.primary} />
-                        </View>
-                        <Text style={[styles.roleTitle, selectedRole === 'FARMER' && styles.roleTitleActive]}>Farmer</Text>
-                        <Text style={[styles.roleDesc, selectedRole === 'FARMER' && styles.roleDescActive]}>
-                            Manage crops & water
-                        </Text>
-                        {selectedRole === 'FARMER' && (
-                            <View style={styles.checkIcon}>
-                                <Feather name="check-circle" size={24} color="white" />
-                            </View>
-                        )}
+                        <Text style={styles.primaryBtnText}>Get Started</Text>
+                        <Feather name="arrow-right" size={20} color="#fff" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={[styles.roleCard, selectedRole === 'ADMIN' && styles.roleCardActive]}
-                        onPress={() => setSelectedRole('ADMIN')}
-                        activeOpacity={0.9}
+                        style={styles.secondaryBtn}
+                        onPress={() => router.push({ pathname: '/(auth)/login', params: { role: selectedRole || 'FARMER' } })}
                     >
-                        <View style={[styles.roleIconContainer, selectedRole === 'ADMIN' && styles.roleIconActive]}>
-                            <MaterialIcons name="admin-panel-settings" size={48} color={selectedRole === 'ADMIN' ? 'white' : Theme.colors.primary} />
-                        </View>
-                        <Text style={[styles.roleTitle, selectedRole === 'ADMIN' && styles.roleTitleActive]}>Admin</Text>
-                        <Text style={[styles.roleDesc, selectedRole === 'ADMIN' && styles.roleDescActive]}>
-                            Village administration
-                        </Text>
-                        {selectedRole === 'ADMIN' && (
-                            <View style={styles.checkIcon}>
-                                <Feather name="check-circle" size={24} color="white" />
-                            </View>
-                        )}
-                    </TouchableOpacity>
-                </View>
-
-                {/* Actions */}
-                <View style={styles.actionsContainer}>
-                    <TouchableOpacity style={styles.btnPrimary} onPress={handleNewUser}>
-                        <Text style={styles.btnText}>New User Sign Up</Text>
-                        <Feather name="arrow-right" size={20} color="white" />
+                        <Text style={styles.secondaryBtnText}>Already have an account? <Text style={{ fontWeight: '800' }}>Sign In</Text></Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.btnSecondary} onPress={handleOldUser}>
-                        <Text style={styles.btnTextSecondary}>Old User Login</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.footerText}>Empowering villages, saving water 💧</Text>
                 </View>
-
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Empowering Villages, saving Water</Text>
-                </View>
-
-            </ScrollView>
-        </SafeAreaView>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
-
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Theme.colors.bg,
+    // Splash
+    splashContainer: { flex: 1 },
+    splashGradient: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    splashContent: { alignItems: 'center' },
+    splashLogoWrap: {
+        width: 160, height: 160, borderRadius: 80,
+        backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
+        marginBottom: 24,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 10,
     },
-    scrollContent: {
-        flexGrow: 1,
-        paddingBottom: 40,
-    },
-    // Splash Styles
-    splashContainer: {
-        flex: 1,
-    },
-    splashGradient: {
-        flex: 1,
+    splashLogo: { width: 110, height: 110 },
+    splashTitle: { fontSize: 40, fontWeight: '900', color: '#fff', letterSpacing: -1 },
+    splashTagline: { fontSize: 15, color: 'rgba(255,255,255,0.6)', marginTop: 8 },
+    splashBar: { width: 100, height: 3, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 2, marginTop: 40 },
+    splashBarFill: { width: '50%', height: '100%', backgroundColor: '#fff', borderRadius: 2 },
+    splashBlobTop: { position: 'absolute', width: 280, height: 280, borderRadius: 140, backgroundColor: 'rgba(255,255,255,0.06)', top: -60, right: -80 },
+    splashBlobBottom: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,255,255,0.04)', bottom: 60, left: -40 },
+
+    // Main screen
+    container: { flex: 1, backgroundColor: '#fff', overflow: 'hidden' as const },
+    safeArea: { flex: 1 },
+
+    // Top branding
+    topSection: {
         alignItems: 'center',
-        justifyContent: 'center',
+        paddingTop: 40,
+        paddingBottom: 20,
     },
-    splashContent: {
-        alignItems: 'center',
-        padding: 20,
+    logo: { width: 80, height: 80, marginBottom: 12 },
+    appName: {
+        fontSize: 30, fontWeight: '900', color: Theme.colors.text,
+        letterSpacing: -1,
     },
-    splashLogoContainer: {
-        width: 200,
-        height: 200,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 30,
-        borderRadius: 100,
-        backgroundColor: '#FFFFFF',
-        elevation: 10,
-        shadowColor: 'rgba(0,0,0,0.2)',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-    },
-    splashLogo: {
-        width: 140,
-        height: 140,
-    },
-    splashTitle: {
-        fontSize: 36,
-        fontWeight: '900',
-        color: '#FFFFFF',
-        letterSpacing: -0.5,
-    },
-    splashLoader: {
-        width: 120,
-        height: 4,
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        borderRadius: 2,
-        marginTop: 40,
-        overflow: 'hidden',
-    },
-    splashLoaderFill: {
-        width: '40%',
-        height: '100%',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 2,
-    },
-    splashVersion: {
-        position: 'absolute',
-        bottom: -100,
-        color: 'rgba(255,255,255,0.5)',
-        fontSize: 12,
-    },
-    splashBlobTop: {
-        position: 'absolute',
-        width: 300,
-        height: 300,
-        borderRadius: 150,
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        top: -60,
-        right: -80,
-    },
-    splashBlobBottom: {
-        position: 'absolute',
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        bottom: 40,
-        left: -50,
+    tagline: {
+        fontSize: 14, color: Theme.colors.textMuted, marginTop: 4,
+        textAlign: 'center', paddingHorizontal: 40,
     },
 
-    // Landing Page Styles
-    header: {
-        marginTop: 40,
-        marginBottom: 24,
-        paddingHorizontal: 20,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-        marginBottom: 8,
-    },
-    headerLogoLarge: {
-        width: 120,
-        height: 120,
-        resizeMode: 'contain',
-    },
-    headerTextContainer: {
+    // Role section
+    roleSection: {
         flex: 1,
         justifyContent: 'center',
+        paddingHorizontal: 24,
     },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: Theme.colors.forest,
-        textAlign: 'left',
+    roleLabel: {
+        fontSize: 16, fontWeight: '700', color: Theme.colors.textMuted,
+        textAlign: 'center', marginBottom: 20,
+        textTransform: 'uppercase', letterSpacing: 2,
     },
-    headerTitleHighlight: {
-        fontSize: 32,
-        fontWeight: '900',
-        color: Theme.colors.primary,
-        textAlign: 'left',
-        marginTop: -4,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: Theme.colors.moss,
-        textAlign: 'left',
-        paddingLeft: 8,
-    },
-    cardsContainer: {
+    roleRow: {
         flexDirection: 'row',
-        paddingHorizontal: 16,
         gap: 16,
-        marginBottom: 40,
     },
     roleCard: {
         flex: 1,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 16,
         alignItems: 'center',
+        paddingVertical: 28,
+        paddingHorizontal: 12,
+        borderRadius: Theme.roundness.lg,
+        backgroundColor: 'rgba(255,255,255,0.7)',
         borderWidth: 2,
-        borderColor: 'transparent',
-        shadowColor: Theme.colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 4,
+        borderColor: 'rgba(5, 150, 105, 0.08)',
         position: 'relative',
-        height: 200,
-        justifyContent: 'center',
     },
-    roleCardActive: {
+    roleCardSelected: {
+        backgroundColor: 'rgba(5, 150, 105, 0.06)',
         borderColor: Theme.colors.primary,
-        backgroundColor: '#f0fdf4',
+        ...Theme.shadows.soft,
     },
-    roleIconContainer: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        backgroundColor: '#f1f5f9',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
+    roleIconWrap: {
+        width: 64, height: 64, borderRadius: 20,
+        backgroundColor: 'rgba(5, 150, 105, 0.08)',
+        alignItems: 'center', justifyContent: 'center',
+        marginBottom: 14,
     },
-    roleIconActive: {
+    roleIconSelected: {
         backgroundColor: Theme.colors.primary,
     },
     roleTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: Theme.colors.text,
+        fontSize: 18, fontWeight: '800', color: Theme.colors.text,
         marginBottom: 4,
     },
-    roleTitleActive: {
+    roleTitleSelected: {
         color: Theme.colors.primary,
     },
     roleDesc: {
-        fontSize: 12,
-        color: Theme.colors.textMuted,
-        textAlign: 'center',
+        fontSize: 12, color: Theme.colors.textMuted, textAlign: 'center',
     },
-    roleDescActive: {
-        color: Theme.colors.moss,
-    },
-    checkIcon: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
+    checkBadge: {
+        position: 'absolute', top: 10, right: 10,
+        width: 24, height: 24, borderRadius: 12,
         backgroundColor: Theme.colors.primary,
-        borderRadius: 12,
+        alignItems: 'center', justifyContent: 'center',
     },
-    actionsContainer: {
+
+    // Bottom actions
+    bottomSection: {
         paddingHorizontal: 24,
-        gap: 16,
+        paddingBottom: 16,
+        gap: 14,
     },
-    btnPrimary: {
+    primaryBtn: {
+        height: 56, borderRadius: Theme.roundness.md,
         backgroundColor: Theme.colors.primary,
-        height: 56,
-        borderRadius: 16,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 12,
-        shadowColor: Theme.colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        gap: 10,
+        ...Theme.shadows.medium,
     },
-    btnText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
+    primaryBtnDisabled: {
+        backgroundColor: 'rgba(5, 150, 105, 0.3)',
     },
-    btnSecondary: {
-        height: 56,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: Theme.colors.primary,
-        backgroundColor: 'white',
+    primaryBtnText: {
+        fontSize: 17, fontWeight: '800', color: '#fff',
     },
-    btnTextSecondary: {
-        color: Theme.colors.primary,
-        fontSize: 16,
-        fontWeight: 'bold',
+    secondaryBtn: {
+        height: 48, alignItems: 'center', justifyContent: 'center',
     },
-    footer: {
-        marginTop: 40,
-        alignItems: 'center',
+    secondaryBtnText: {
+        fontSize: 14, color: Theme.colors.textMuted,
     },
     footerText: {
-        fontSize: 13,
-        color: Theme.colors.textMuted,
-        fontStyle: 'italic',
+        fontSize: 12, color: Theme.colors.textMuted,
+        textAlign: 'center', fontStyle: 'italic',
     },
 });

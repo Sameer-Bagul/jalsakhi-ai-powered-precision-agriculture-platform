@@ -97,7 +97,7 @@ export default function WaterStatus() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg },
+    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
     scrollContent: { padding: 16 },
     gaugeCard: { backgroundColor: '#f0f9ff', borderColor: '#bae6fd', borderWidth: 1 },
     gaugeTitle: { fontSize: 12, fontWeight: '700', color: '#0369a1', letterSpacing: 1, marginBottom: 16 },

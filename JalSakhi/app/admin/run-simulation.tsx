@@ -91,7 +91,7 @@ export default function RunSimulation() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg },
+    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Theme.colors.bg },
     loadingText: { marginTop: 16, fontSize: 18, fontWeight: 'bold', color: Theme.colors.text },
     loadingSub: { marginTop: 8, fontSize: 14, color: Theme.colors.textMuted },

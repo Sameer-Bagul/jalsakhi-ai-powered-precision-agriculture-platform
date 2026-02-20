@@ -1,126 +1,178 @@
 import { Logger } from '../utils/Logger';
-import api from '../utils/api';
+import api, { TOKEN_KEY, USER_ID_KEY } from '../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type UserRole = 'FARMER' | 'ADMIN';
+export type UserRole = 'farmer' | 'admin';
 
 export interface UserProfile {
     id: string;
     email: string;
-    phone: string;
-    role: UserRole;
     name?: string;
+    role: UserRole;
+    mobile?: string;
+    aadhar?: string;
+    gender?: string;
+    state?: string;
+    district?: string;
+    taluka?: string;
     village?: string;
-    farmDetails?: {
-        area: number;
-        location: string;
-    };
+    farmSize?: string;
+    isAccountVerified?: boolean;
 }
 
-export interface SignupData {
+export interface RegisterData {
     name: string;
     email: string;
-    phone: string;
-    role: 'FARMER' | 'ADMIN';
+    password: string;
+    role: UserRole;
+    mobile?: string;
+    aadhar?: string;
+    gender?: string;
+    state?: string;
+    district?: string;
+    taluka?: string;
     village?: string;
-    farmDetails?: {
-        area: number;
-        location: string;
-    };
-}
-
-export interface OTPVerificationData {
-    email: string;
-    otp: string;
+    farmSize?: string;
 }
 
 export interface LoginData {
     email: string;
-    password?: string;
+    password: string;
 }
 
 export const AuthService = {
-    // Send OTP to email for signup
-    sendSignupOTP: async (data: SignupData): Promise<any> => {
-        Logger.info('AuthService', `Sending OTP to ${data.email}`);
+    /**
+     * Register a new user. Server auto-sends verification OTP email.
+     */
+    register: async (data: RegisterData): Promise<{ success: boolean; message: string; token?: string; userId?: string }> => {
+        Logger.info('AuthService', `Registering ${data.email}`);
         try {
-            const response = await api.post('/auth/signup/send-otp', data);
-            return response.data;
+            const response = await api.post('/api/auth/register', data);
+            const result = response.data;
+            if (result.success && result.token) {
+                await AsyncStorage.setItem(TOKEN_KEY, result.token);
+                await AsyncStorage.setItem(USER_ID_KEY, result.userId);
+            }
+            return result;
         } catch (error: any) {
-            Logger.error('AuthService', 'Send OTP error', error);
-            throw new Error(error.response?.data?.message || 'Failed to send OTP');
+            Logger.error('AuthService', 'Register error', error);
+            const msg = error.response?.data?.message || 'Registration failed';
+            return { success: false, message: msg };
         }
     },
 
-    // Verify OTP and complete signup
-    verifySignupOTP: async (data: OTPVerificationData): Promise<any> => {
-        Logger.info('AuthService', `Verifying OTP for ${data.email}`);
+    /**
+     * Login with email and password.
+     */
+    login: async (data: LoginData): Promise<{ success: boolean; message: string; token?: string; userId?: string }> => {
+        Logger.info('AuthService', `Logging in ${data.email}`);
         try {
-            const response = await api.post('/auth/signup/verify-otp', data);
-            return response.data;
-        } catch (error: any) {
-            Logger.error('AuthService', 'Verify OTP error', error);
-            throw new Error(error.response?.data?.message || 'Failed to verify OTP');
-        }
-    },
-
-    // Resend OTP
-    resendOTP: async (email: string): Promise<any> => {
-        Logger.info('AuthService', `Resending OTP to ${email}`);
-        try {
-            const response = await api.post('/auth/resend-otp', { email });
-            return response.data;
-        } catch (error: any) {
-            Logger.error('AuthService', 'Resend OTP error', error);
-            throw new Error(error.response?.data?.message || 'Failed to resend OTP');
-        }
-    },
-
-    // Login with email
-    login: async (data: LoginData): Promise<any> => {
-        Logger.info('AuthService', `Login for ${data.email}`);
-        try {
-            const response = await api.post('/auth/login', data);
-            return response.data;
+            const response = await api.post('/api/auth/login', data);
+            const result = response.data;
+            if (result.success && result.token) {
+                await AsyncStorage.setItem(TOKEN_KEY, result.token);
+                await AsyncStorage.setItem(USER_ID_KEY, result.userId);
+            }
+            return result;
         } catch (error: any) {
             Logger.error('AuthService', 'Login error', error);
-            throw new Error(error.response?.data?.message || 'Failed to login');
+            const msg = error.response?.data?.message || 'Login failed';
+            return { success: false, message: msg };
         }
     },
 
-    sendOtp: async (phone: string): Promise<boolean> => {
-        Logger.info('AuthService', `Sending OTP to ${phone}`);
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(true);
-            }, 1500);
-        });
+    /**
+     * Send verification OTP to the logged-in user's email.
+     */
+    sendVerifyOtp: async (): Promise<{ success: boolean; message: string }> => {
+        Logger.info('AuthService', 'Sending verify OTP');
+        try {
+            const response = await api.post('/api/auth/send-verify-otp', {});
+            return response.data;
+        } catch (error: any) {
+            Logger.error('AuthService', 'Send verify OTP error', error);
+            return { success: false, message: error.response?.data?.message || 'Failed to send OTP' };
+        }
     },
 
-    verifyOtp: async (phone: string, otp: string, role?: UserRole, aadhar?: string): Promise<{ success: boolean; token?: string; user?: UserProfile }> => {
-        Logger.info('AuthService', `Verifying OTP ${otp} for ${phone} (Role: ${role}, Aadhar: ${aadhar})`);
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                if (otp === '123456') {
-                    resolve({
-                        success: true,
-                        token: 'mock-jwt-token',
-                        user: {
-                            id: 'user-123',
-                            phone,
-                            role: role || 'FARMER',
-                            name: 'Rajesh Kumar',
-                            aadharNumber: aadhar || '1234 5678 9012',
-                            state: 'Maharashtra',
-                            district: 'Pune',
-                            village: 'Indapur',
-                            farmSize: '5',
-                            gender: 'Male'
-                        }
-                    });
-                } else {
-                    resolve({ success: false });
-                }
-            }, 1000);
-        });
-    }
+    /**
+     * Verify account with the OTP.
+     */
+    verifyAccount: async (otp: string): Promise<{ success: boolean; message: string }> => {
+        Logger.info('AuthService', `Verifying account with OTP`);
+        try {
+            const response = await api.post('/api/auth/verify-account', { otp });
+            return response.data;
+        } catch (error: any) {
+            Logger.error('AuthService', 'Verify account error', error);
+            return { success: false, message: error.response?.data?.message || 'Verification failed' };
+        }
+    },
+
+    /**
+     * Send password reset OTP.
+     */
+    sendResetOtp: async (email: string): Promise<{ success: boolean; message: string }> => {
+        Logger.info('AuthService', `Sending reset OTP to ${email}`);
+        try {
+            const response = await api.post('/api/auth/send-reset-otp', { email });
+            return response.data;
+        } catch (error: any) {
+            Logger.error('AuthService', 'Send reset OTP error', error);
+            return { success: false, message: error.response?.data?.message || 'Failed to send reset OTP' };
+        }
+    },
+
+    /**
+     * Reset password with OTP and new password.
+     */
+    resetPassword: async (email: string, otp: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+        Logger.info('AuthService', `Resetting password for ${email}`);
+        try {
+            const response = await api.post('/api/auth/reset-password', { email, otp, newPassword });
+            return response.data;
+        } catch (error: any) {
+            Logger.error('AuthService', 'Reset password error', error);
+            return { success: false, message: error.response?.data?.message || 'Password reset failed' };
+        }
+    },
+
+    /**
+     * Check if the user is authenticated.
+     */
+    isAuthenticated: async (): Promise<{ success: boolean }> => {
+        try {
+            const response = await api.get('/api/auth/is-auth');
+            return response.data;
+        } catch (error: any) {
+            return { success: false };
+        }
+    },
+
+    /**
+     * Get user profile data.
+     */
+    getUserData: async (): Promise<{ success: boolean; userData?: UserProfile }> => {
+        try {
+            const response = await api.get('/api/user/data');
+            return response.data;
+        } catch (error: any) {
+            Logger.error('AuthService', 'Get user data error', error);
+            return { success: false };
+        }
+    },
+
+    /**
+     * Logout — clear stored token and call server logout.
+     */
+    logout: async (): Promise<void> => {
+        Logger.info('AuthService', 'Logging out');
+        try {
+            await api.post('/api/auth/logout');
+        } catch (e) {
+            // Ignore server errors on logout
+        }
+        await AsyncStorage.removeItem(TOKEN_KEY);
+        await AsyncStorage.removeItem(USER_ID_KEY);
+    },
 };

@@ -86,7 +86,7 @@ export default function Analytics() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg },
+    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
     scrollContent: { padding: 16 },
     summaryRow: { flexDirection: 'row', gap: 16 },
     scoreContainer: { alignItems: 'center', paddingVertical: 12 },

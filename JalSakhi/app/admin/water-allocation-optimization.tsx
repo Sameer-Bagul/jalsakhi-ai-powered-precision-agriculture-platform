@@ -97,7 +97,7 @@ export default function WaterAllocationOptimizationScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.background },
+    container: { flex: 1, backgroundColor: Theme.colors.background, overflow: 'hidden' as const },
     scrollContent: { padding: 20 },
     header: { alignItems: 'center', marginBottom: 24 },
     title: { fontSize: 24, fontWeight: 'bold', color: Theme.colors.forest, marginTop: 12 },
