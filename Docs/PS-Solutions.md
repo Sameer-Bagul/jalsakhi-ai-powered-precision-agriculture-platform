@@ -1,3 +1,6 @@
+PS : Create a platform that helps farmers plan irrigation and water usage efficiently at the village level to reduce water wastage.
+
+
 Problem Statement (PS):
 The goal is to create a platform that helps farmers plan irrigation and manage water usage efficiently at the village level to reduce water wastage, prevent over-irrigation, and ensure fair water distribution among farms.
 
@@ -47,6 +50,7 @@ Efficiently distribute limited water across farms at the village level.
 Inputs:
 Total available water in village reservoir
 List of farms
+
 Farm area (acre/hectare)
 Crop type per farm
 Crop water requirement (from Model 1)
