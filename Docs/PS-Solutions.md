@@ -58,3 +58,10 @@ Recommended water allocation per farm (liters or percentage share)
 Water deficit or excess report per farm
 Village-level water usage efficiency score
 
+
+
+NOTE : The Models will be connected the the Node server and the mobile app will fetch the predictions and recommendations via API calls. The app will provide a user-friendly interface for farmers to view their irrigation needs, soil moisture forecasts, and water allocation recommendations, while administrators can monitor overall water usage and manage resources effectively.
+
+Farmer View : can use the all feature of the all above models with respective UI and can add the details of the farm and the crop 
+
+village Admin : can view the overall water usage and can manage the water resources effectively and can also view the details of the farms and the crops in the village and can also view the predictions and recommendations for each farm. 

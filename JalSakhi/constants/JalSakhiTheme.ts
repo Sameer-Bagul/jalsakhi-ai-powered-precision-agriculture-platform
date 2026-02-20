@@ -16,6 +16,7 @@ export const JalSakhiColors = {
 
     // HTML Reference Colors
     primary: '#166534',
+    secondary: '#059669',
     primaryLight: '#15803d',
     primaryPale: '#dcfce7',
     primaryMid: '#86efac',
