@@ -50,7 +50,7 @@ export default function IrrigationDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.background },
+    container: { flex: 1, backgroundColor: Theme.colors.background, overflow: 'hidden' as const },
     content: { padding: Theme.spacing.md },
     recommendationCard: { backgroundColor: Theme.colors.emerald, borderRadius: Theme.roundness.lg, padding: Theme.spacing.lg, marginBottom: 24 },
     recLabel: { color: Theme.colors.leaf, fontSize: 14 },

@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
-import { FarmsService } from '../../services/farms';
-import { v4 as uuidv4 } from 'uuid';
+import { useApp } from '../../context/AppContext';
 import { Feather } from '@expo/vector-icons';
 
 export default function LogIrrigation() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const farmId = params.farmId as string | undefined;
+  const { addIrrigationLog } = useApp();
 
   const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState('');
@@ -24,7 +24,13 @@ export default function LogIrrigation() {
     }
     setLoading(true);
     try {
-      await FarmsService.addIrrigation({ id: uuidv4(), farmId: farmId || 'unknown', date: new Date().toISOString(), amount: parseFloat(amount), duration, notes });
+      await addIrrigationLog({
+        farmId: farmId || 'unknown',
+        date: new Date().toISOString(),
+        amount: parseFloat(amount),
+        duration,
+        notes,
+      });
       Alert.alert('Logged', 'Manual irrigation logged');
       router.replace({ pathname: '/farmer/my-farm-detail', params: { id: farmId } } as any);
     } catch (error) {
@@ -58,7 +64,7 @@ export default function LogIrrigation() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.bg },
+  container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
   content: { padding: 16 },
   label: { fontSize: 14, color: Theme.colors.text, marginTop: 12 },
   input: { backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: Theme.colors.border, marginTop: 8 },

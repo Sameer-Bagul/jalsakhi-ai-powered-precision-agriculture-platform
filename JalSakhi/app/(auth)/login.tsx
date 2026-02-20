@@ -1,49 +1,32 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, TextInput, ImageBackground } from 'react-native';
 import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AuthService } from '../../services/auth';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
     const role = (params.role as 'FARMER' | 'ADMIN') || 'FARMER';
+    const { login } = useAuth();
 
-    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [otpStep, setOtpStep] = useState(false);
-    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const [showPassword, setShowPassword] = useState(false);
 
-    const handleSendOTP = async () => {
-        if (phone.length < 10) {
-            Alert.alert('Invalid Phone', 'Please enter a valid 10-digit phone number.');
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Missing Fields', 'Please enter your email and password.');
             return;
         }
 
         setLoading(true);
         try {
-            await AuthService.sendOtp(phone);
-            setOtpStep(true);
-        } catch (error) {
-            Alert.alert('Error', 'Failed to send OTP.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleVerifyOTP = async () => {
-        const otpString = otp.join('');
-        if (otpString.length < 6) {
-            Alert.alert('Invalid OTP', 'Enter 6 digit OTP');
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const result = await AuthService.verifyOtp(phone, otpString, role);
+            const result = await login({ email, password });
             if (result.success) {
                 if (role === 'FARMER') {
                     router.replace('/farmer/dashboard');
@@ -51,192 +34,153 @@ export default function LoginScreen() {
                     router.replace('/admin/dashboard');
                 }
             } else {
-                Alert.alert('Error', 'Invalid OTP. Try 123456');
+                Alert.alert('Login Failed', result.message || 'Invalid credentials.');
             }
-        } catch (error) {
-            Alert.alert('Error', 'Verification failed.');
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'Login failed.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleOtpChange = (text: string, index: number) => {
-        const newOtp = [...otp];
-        newOtp[index] = text;
-        setOtp(newOtp);
-    };
-
     return (
-        <SafeAreaView style={styles.container}>
-            <Stack.Screen options={{ headerShown: false }} />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
-            >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Feather name="arrow-left" size={24} color={Theme.colors.forest} />
-                    </TouchableOpacity>
+        <ImageBackground
+            source={require('../../assets/images/background.jpeg')}
+            style={styles.bg}
+            imageStyle={{ opacity: 0.12 }}
+        >
+            <SafeAreaView style={{ flex: 1 }}>
+                <Stack.Screen options={{ headerShown: false }} />
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}
+                >
+                    <ScrollView
+                        contentContainerStyle={styles.scroll}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* Back */}
+                        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+                            <Feather name="arrow-left" size={22} color={Theme.colors.text} />
+                        </TouchableOpacity>
 
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Welcome Back</Text>
-                        <Text style={styles.subtitle}>
-                            Login to your <Text style={{ fontWeight: 'bold', color: Theme.colors.primary }}>
-                                {role === 'FARMER' ? 'Farmer' : 'Admin'}
-                            </Text> account
+                        {/* Heading */}
+                        <Text style={styles.greeting}>Welcome</Text>
+                        <Text style={styles.greeting2}>Back 👋</Text>
+                        <Text style={styles.sub}>
+                            Sign into your {role === 'FARMER' ? 'farmer' : 'admin'} account
                         </Text>
-                    </View>
 
-                    <View style={styles.form}>
-                        {!otpStep ? (
-                            <>
-                                <Text style={styles.label}>Mobile Number</Text>
-                                <View style={styles.inputContainer}>
-                                    <Text style={styles.prefix}>+91</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Enter mobile number"
-                                        keyboardType="phone-pad"
-                                        maxLength={10}
-                                        value={phone}
-                                        onChangeText={setPhone}
-                                    />
-                                </View>
-                                <CustomButton
-                                    title="Get OTP"
-                                    onPress={handleSendOTP}
-                                    loading={loading}
-                                    style={styles.button}
-                                />
-                            </>
-                        ) : (
-                            <>
-                                <Text style={styles.label}>Enter OTP Sent to {phone}</Text>
-                                <View style={styles.otpRow}>
-                                    {otp.map((digit, index) => (
-                                        <TextInput
-                                            key={index}
-                                            style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
-                                            keyboardType="number-pad"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChangeText={(text) => handleOtpChange(text, index)}
-                                        />
-                                    ))}
-                                </View>
-                                <CustomButton
-                                    title="Verify & Login"
-                                    onPress={handleVerifyOTP}
-                                    loading={loading}
-                                    style={styles.button}
-                                />
-                                <TouchableOpacity onPress={() => setOtpStep(false)} style={styles.linkBtn}>
-                                    <Text style={styles.linkText}>Change Mobile Number</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                        {/* Email */}
+                        <Text style={styles.label}>Email</Text>
+                        <View style={styles.inputRow}>
+                            <Feather name="mail" size={18} color={Theme.colors.primary} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="you@example.com"
+                                placeholderTextColor="rgba(0,0,0,0.25)"
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                value={email}
+                                onChangeText={setEmail}
+                            />
+                        </View>
+
+                        {/* Password */}
+                        <Text style={styles.label}>Password</Text>
+                        <View style={styles.inputRow}>
+                            <Feather name="lock" size={18} color={Theme.colors.primary} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter password"
+                                placeholderTextColor="rgba(0,0,0,0.25)"
+                                secureTextEntry={!showPassword}
+                                value={password}
+                                onChangeText={setPassword}
+                            />
+                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                                <Feather name={showPassword ? 'eye-off' : 'eye'} size={18} color={Theme.colors.textMuted} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Login Button */}
+                        <CustomButton
+                            title="Sign In"
+                            onPress={handleLogin}
+                            loading={loading}
+                            style={styles.btn}
+                        />
+
+                        {/* Link */}
+                        <TouchableOpacity
+                            onPress={() => router.push({ pathname: '/(auth)/farmer-signup', params: { role } } as any)}
+                            style={styles.linkBtn}
+                        >
+                            <Text style={styles.linkText}>
+                                Don't have an account? <Text style={{ fontWeight: '800', color: Theme.colors.primary }}>Sign Up</Text>
+                            </Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    bg: {
         flex: 1,
-        backgroundColor: Theme.colors.background,
+        backgroundColor: '#fff',
+        overflow: 'hidden' as const,
     },
-    scrollContent: {
+    scroll: {
         flexGrow: 1,
-        padding: 24,
+        paddingHorizontal: 28,
+        paddingTop: 20,
+        paddingBottom: 40,
     },
-    backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: 'white',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 32,
-        borderWidth: 1,
-        borderColor: Theme.colors.border,
+    backBtn: {
+        width: 42, height: 42, borderRadius: 14,
+        backgroundColor: 'rgba(255,255,255,0.75)',
+        alignItems: 'center', justifyContent: 'center',
+        marginBottom: 36,
+        ...Theme.shadows.soft,
     },
-    header: {
-        marginBottom: 32,
+    greeting: {
+        fontSize: 38, fontWeight: '900', color: Theme.colors.text,
+        letterSpacing: -1, lineHeight: 44,
     },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: Theme.colors.forest,
-        marginBottom: 8,
+    greeting2: {
+        fontSize: 38, fontWeight: '900', color: Theme.colors.primary,
+        letterSpacing: -1, lineHeight: 44, marginBottom: 8,
     },
-    subtitle: {
-        fontSize: 16,
-        color: Theme.colors.moss,
-    },
-    form: {
-        backgroundColor: 'white',
-        padding: 24,
-        borderRadius: 24,
-        elevation: 2,
+    sub: {
+        fontSize: 16, color: Theme.colors.textMuted,
+        marginBottom: 40, lineHeight: 22,
     },
     label: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 12,
-        textTransform: 'uppercase',
+        fontSize: 13, fontWeight: '700', color: Theme.colors.textMuted,
+        marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1,
     },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: Theme.colors.border,
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        height: 56,
-        marginBottom: 24,
-    },
-    prefix: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: Theme.colors.primary,
-        marginRight: 12,
+    inputRow: {
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        borderRadius: 16, paddingHorizontal: 16,
+        height: 56, marginBottom: 24,
+        borderBottomWidth: 2, borderBottomColor: 'rgba(5, 150, 105, 0.1)',
+        gap: 12,
     },
     input: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: '600',
+        flex: 1, fontSize: 16, fontWeight: '600', color: Theme.colors.text,
     },
-    button: {
-        marginTop: 8,
-    },
-    otpRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-    },
-    otpBox: {
-        width: 44,
-        height: 52,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: Theme.colors.border,
-        textAlign: 'center',
-        fontSize: 20,
-        fontWeight: '800',
-        color: Theme.colors.primary,
-    },
-    otpBoxFilled: {
-        borderColor: Theme.colors.primary,
-        backgroundColor: Theme.colors.primaryPale,
+    btn: {
+        marginTop: 12, height: 56, borderRadius: Theme.roundness.md,
     },
     linkBtn: {
-        marginTop: 16,
-        alignItems: 'center',
+        marginTop: 24, alignItems: 'center',
     },
     linkText: {
-        color: Theme.colors.primary,
-        fontWeight: '600',
+        fontSize: 14, color: Theme.colors.textMuted,
     },
 });

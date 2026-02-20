@@ -119,7 +119,7 @@ export default function AdminDashboard() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.background },
+    container: { flex: 1, backgroundColor: Theme.colors.background, overflow: 'hidden' as const },
     scrollContent: { padding: Theme.spacing.md },
     header: {
         flexDirection: 'row', justifyContent: 'space-between',

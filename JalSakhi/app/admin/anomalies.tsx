@@ -93,7 +93,7 @@ export default function Anomalies() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg },
+    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
     padding: { flex: 1, padding: 16 },
     chartCard: {
         backgroundColor: 'white',

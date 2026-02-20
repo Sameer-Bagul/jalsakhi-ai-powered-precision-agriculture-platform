@@ -8,6 +8,8 @@ import { useFonts } from 'expo-font';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { AuthProvider } from '../context/AuthContext';
+import { AppProvider } from '../context/AppContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,16 +32,20 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="farmer" options={{ headerShown: false }} />
-          <Stack.Screen name="admin" options={{ headerShown: false }} />
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <AuthProvider>
+      <AppProvider>
+        <SafeAreaProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false, gestureEnabled: false, animation: 'fade' }}>
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="farmer" />
+              <Stack.Screen name="admin" />
+              <Stack.Screen name="index" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </AppProvider>
+    </AuthProvider>
   );
 }

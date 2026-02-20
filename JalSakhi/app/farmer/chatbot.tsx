@@ -122,7 +122,7 @@ export default function ChatbotScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Theme.colors.bg },
+  safe: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
   container: { flex: 1 },
   list: { padding: 16, paddingBottom: 12 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginVertical: 6 },

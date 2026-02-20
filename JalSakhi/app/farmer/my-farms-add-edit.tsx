@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
-import { FarmsService, Farm } from '../../services/farms';
-import { v4 as uuidv4 } from 'uuid';
+import { useApp } from '../../context/AppContext';
 import { Feather } from '@expo/vector-icons';
 
 export default function MyFarmsAddEdit() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const editingId = params.id as string | undefined;
+  const { getFarm, createFarm, updateFarm } = useApp();
 
   const [name, setName] = useState('');
   const [crop, setCrop] = useState('');
@@ -20,7 +20,7 @@ export default function MyFarmsAddEdit() {
   useEffect(() => {
     if (editingId) {
       (async () => {
-        const f = await FarmsService.get(editingId);
+        const f = await getFarm(editingId);
         if (f) {
           setName(f.name);
           setCrop(f.crop);
@@ -39,11 +39,10 @@ export default function MyFarmsAddEdit() {
     setLoading(true);
     try {
       if (editingId) {
-        await FarmsService.update(editingId, { name, crop, size });
+        await updateFarm(editingId, { name, crop, size });
         Alert.alert('Saved', 'Farm updated.');
       } else {
-        const newFarm: Farm = { id: uuidv4(), name, crop, size, status: 'Unknown' };
-        await FarmsService.create(newFarm);
+        await createFarm({ name, crop, size, status: 'Unknown' });
         Alert.alert('Saved', 'Farm created.');
       }
       router.replace('/farmer/my-farms');
@@ -78,7 +77,7 @@ export default function MyFarmsAddEdit() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.bg },
+  container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
   content: { padding: 16 },
   label: { fontSize: 14, color: Theme.colors.text, marginBottom: 8, marginTop: 12 },
   input: { backgroundColor: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: Theme.colors.border },

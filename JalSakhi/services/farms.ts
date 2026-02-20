@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../utils/api';
 import { Logger } from '../utils/Logger';
 
 export interface Farm {
@@ -11,70 +11,144 @@ export interface Farm {
 }
 
 export interface IrrigationLog {
-  id: string;
+  id?: string;
   farmId: string;
-  date: string; // ISO
-  amount: number; // liters
+  date: string;
+  amount: number;
   duration?: string;
   notes?: string;
 }
 
-const FARMS_KEY = 'JALSAKHI_FARMS_V1';
-const IRRIGATION_KEY = 'JALSAKHI_IRRIGATION_V1';
-
 export const FarmsService = {
+  /**
+   * List all farms for the authenticated user.
+   */
   async list(): Promise<Farm[]> {
     try {
-      const raw = await AsyncStorage.getItem(FARMS_KEY);
-      if (!raw) return [];
-      return JSON.parse(raw) as Farm[];
+      const response = await api.get('/api/farms');
+      if (response.data.success) {
+        return response.data.farms.map((f: any) => ({
+          id: f._id,
+          name: f.name,
+          crop: f.crop,
+          size: f.size,
+          status: f.status,
+          image: f.image,
+        }));
+      }
+      return [];
     } catch (e) {
       Logger.error('FarmsService', 'list', e);
       return [];
     }
   },
 
+  /**
+   * Get a single farm by ID.
+   */
   async get(id: string): Promise<Farm | undefined> {
-    const all = await FarmsService.list();
-    return all.find((f) => f.id === id);
-  },
-
-  async create(farm: Farm): Promise<void> {
-    const all = await FarmsService.list();
-    all.unshift(farm);
-    await AsyncStorage.setItem(FARMS_KEY, JSON.stringify(all));
-  },
-
-  async update(id: string, patch: Partial<Farm>): Promise<void> {
-    const all = await FarmsService.list();
-    const idx = all.findIndex((f) => f.id === id);
-    if (idx === -1) return;
-    all[idx] = { ...all[idx], ...patch };
-    await AsyncStorage.setItem(FARMS_KEY, JSON.stringify(all));
-  },
-
-  async remove(id: string): Promise<void> {
-    const all = await FarmsService.list();
-    const filtered = all.filter((f) => f.id !== id);
-    await AsyncStorage.setItem(FARMS_KEY, JSON.stringify(filtered));
-  },
-
-  // Irrigation logs
-  async listIrrigation(farmId?: string): Promise<IrrigationLog[]> {
     try {
-      const raw = await AsyncStorage.getItem(IRRIGATION_KEY);
-      if (!raw) return [];
-      const logs = JSON.parse(raw) as IrrigationLog[];
-      return farmId ? logs.filter((l) => l.farmId === farmId) : logs;
+      const response = await api.get(`/api/farms/${id}`);
+      if (response.data.success) {
+        const f = response.data.farm;
+        return {
+          id: f._id,
+          name: f.name,
+          crop: f.crop,
+          size: f.size,
+          status: f.status,
+          image: f.image,
+        };
+      }
+      return undefined;
+    } catch (e) {
+      Logger.error('FarmsService', 'get', e);
+      return undefined;
+    }
+  },
+
+  /**
+   * Create a new farm.
+   */
+  async create(farm: Omit<Farm, 'id'>): Promise<Farm | null> {
+    try {
+      const response = await api.post('/api/farms', farm);
+      if (response.data.success) {
+        const f = response.data.farm;
+        return {
+          id: f._id,
+          name: f.name,
+          crop: f.crop,
+          size: f.size,
+          status: f.status,
+          image: f.image,
+        };
+      }
+      return null;
+    } catch (e) {
+      Logger.error('FarmsService', 'create', e);
+      return null;
+    }
+  },
+
+  /**
+   * Update a farm.
+   */
+  async update(id: string, patch: Partial<Farm>): Promise<void> {
+    try {
+      await api.put(`/api/farms/${id}`, patch);
+    } catch (e) {
+      Logger.error('FarmsService', 'update', e);
+    }
+  },
+
+  /**
+   * Delete a farm.
+   */
+  async remove(id: string): Promise<void> {
+    try {
+      await api.delete(`/api/farms/${id}`);
+    } catch (e) {
+      Logger.error('FarmsService', 'remove', e);
+    }
+  },
+
+  /**
+   * List irrigation logs for a farm.
+   */
+  async listIrrigation(farmId: string): Promise<IrrigationLog[]> {
+    try {
+      const response = await api.get(`/api/farms/${farmId}/irrigation`);
+      if (response.data.success) {
+        return response.data.logs.map((l: any) => ({
+          id: l._id,
+          farmId,
+          date: l.date,
+          amount: l.amount,
+          duration: l.duration,
+          notes: l.notes,
+        }));
+      }
+      return [];
     } catch (e) {
       Logger.error('FarmsService', 'listIrrigation', e);
       return [];
     }
   },
 
+  /**
+   * Add an irrigation log to a farm.
+   */
   async addIrrigation(log: IrrigationLog): Promise<void> {
-    const all = await FarmsService.listIrrigation();
-    all.unshift(log);
-    await AsyncStorage.setItem(IRRIGATION_KEY, JSON.stringify(all));
-  }
+    try {
+      await api.post(`/api/farms/${log.farmId}/irrigation`, {
+        date: log.date,
+        amount: log.amount,
+        duration: log.duration,
+        notes: log.notes,
+      });
+    } catch (e) {
+      Logger.error('FarmsService', 'addIrrigation', e);
+    }
+  },
 };

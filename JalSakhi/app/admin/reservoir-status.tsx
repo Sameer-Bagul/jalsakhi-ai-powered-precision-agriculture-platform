@@ -35,7 +35,7 @@ export default function ReservoirStatusScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.background },
+    container: { flex: 1, backgroundColor: Theme.colors.background, overflow: 'hidden' as const },
     content: { padding: 20 },
     tankCard: { backgroundColor: Theme.colors.card, padding: 40, borderRadius: 24, alignItems: 'center' },
     tankOuter: { width: 120, height: 180, backgroundColor: Theme.colors.dew, borderRadius: 12, borderWidth: 4, borderColor: Theme.colors.emerald, overflow: 'hidden', justifyContent: 'flex-end', marginBottom: 20 },

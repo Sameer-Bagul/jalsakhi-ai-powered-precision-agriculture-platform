@@ -79,7 +79,7 @@ export default function Notifications() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg },
+    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
     header: {
         flexDirection: 'row',
         alignItems: 'center',

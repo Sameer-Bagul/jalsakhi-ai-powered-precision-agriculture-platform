@@ -1,82 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
-import { FarmsService, Farm } from '../../services/farms';
+import { Farm } from '../../services/farms';
+import { useApp } from '../../context/AppContext';
 import { useIsFocused } from '@react-navigation/native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-
-const SAMPLE_FARMS: Farm[] = [
-    { id: '1', name: 'North Field', crop: 'Wheat', size: '3.5 Acres', status: 'Optimal', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop' },
-    { id: '2', name: 'River Bank', crop: 'Rice', size: '2.5 Acres', status: 'Needs Water', image: 'https://images.unsplash.com/photo-1586771107445-d3ca888129ff?q=80&w=1000&auto=format&fit=crop' },
-    { id: '3', name: 'Hill Side', crop: 'Cotton', size: '1.5 Acres', status: 'Optimal', image: 'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=1000&auto=format&fit=crop' },
-];
 
 export default function MyFarmsScreen() {
     const router = useRouter();
     const isFocused = useIsFocused();
-    const [farms, setFarms] = useState<Farm[]>([]);
+    const { farms, farmsLoading, loadFarms, deleteFarm } = useApp();
 
     useEffect(() => {
-        const load = async () => {
-            const list = await FarmsService.list();
-            if (!list || list.length === 0) {
-                // seed sample farms for first run
-                for (const f of SAMPLE_FARMS) {
-                    await FarmsService.create(f);
-                }
-                setFarms(SAMPLE_FARMS);
-            } else {
-                setFarms(list);
-            }
-        };
-        load();
+        loadFarms();
     }, []);
 
-    // reload when screen focuses (after add/edit/delete)
+    // Refresh when screen comes back into focus
     useEffect(() => {
-        if (!isFocused) return;
-        (async () => {
-            const list = await FarmsService.list();
-            setFarms(list);
-        })();
+        if (isFocused) loadFarms();
     }, [isFocused]);
+
+    const handleDelete = (id: string) => {
+        Alert.alert('Delete farm', 'Are you sure you want to delete this farm?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: () => deleteFarm(id) }
+        ]);
+    };
 
     const renderFarmItem = ({ item }: { item: Farm }) => (
         <View style={styles.farmCard}>
             <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push({ pathname: '/farmer/my-farm-detail', params: { id: item.id } } as any)}>
-            <Image source={{ uri: item.image }} style={styles.farmImage} />
-            <View style={styles.farmContent}>
-                <View style={styles.farmHeader}>
-                    <Text style={styles.farmName}>{item.name}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: item.status === 'Optimal' ? Theme.colors.dew : '#fef2f2' }]}>
-                        <Text style={[styles.statusText, { color: item.status === 'Optimal' ? Theme.colors.emerald : Theme.colors.error }]}>
-                            {item.status}
-                        </Text>
+                <Image source={{ uri: item.image }} style={styles.farmImage} />
+                <View style={styles.farmContent}>
+                    <View style={styles.farmHeader}>
+                        <Text style={styles.farmName}>{item.name}</Text>
+                        <View style={[styles.statusBadge, { backgroundColor: item.status === 'Optimal' ? Theme.colors.dew : '#fef2f2' }]}>
+                            <Text style={[styles.statusText, { color: item.status === 'Optimal' ? Theme.colors.emerald : Theme.colors.error }]}>
+                                {item.status}
+                            </Text>
+                        </View>
                     </View>
-                </View>
 
-                <View style={styles.farmDetails}>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="sprout" size={16} color={Theme.colors.moss} />
-                        <Text style={styles.detailText}>{item.crop}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Feather name="map" size={16} color={Theme.colors.moss} />
-                        <Text style={styles.detailText}>{item.size}</Text>
+                    <View style={styles.farmDetails}>
+                        <View style={styles.detailRow}>
+                            <MaterialCommunityIcons name="sprout" size={16} color={Theme.colors.moss} />
+                            <Text style={styles.detailText}>{item.crop}</Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                            <Feather name="map" size={16} color={Theme.colors.moss} />
+                            <Text style={styles.detailText}>{item.size}</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
             </TouchableOpacity>
             <View style={styles.cardActions}>
-                <TouchableOpacity style={styles.cardActionBtn} onPress={() => {
-                    // confirm delete
-                    Alert.alert('Delete farm', 'Are you sure you want to delete this farm?', [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Delete', style: 'destructive', onPress: async () => { await FarmsService.remove(item.id); const list = await FarmsService.list(); setFarms(list); } }
-                    ]);
-                }}>
+                <TouchableOpacity style={styles.cardActionBtn} onPress={() => handleDelete(item.id)}>
                     <Feather name="trash-2" size={18} color={Theme.colors.error} />
                 </TouchableOpacity>
             </View>
@@ -97,6 +77,14 @@ export default function MyFarmsScreen() {
                 contentContainerStyle={styles.list}
                 renderItem={renderFarmItem}
                 showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                    <View style={{ alignItems: 'center', paddingTop: 60 }}>
+                        <MaterialCommunityIcons name="sprout-outline" size={48} color={Theme.colors.textMuted} />
+                        <Text style={{ color: Theme.colors.textMuted, marginTop: 12 }}>
+                            {farmsLoading ? 'Loading farms...' : 'No farms yet. Tap + to add one!'}
+                        </Text>
+                    </View>
+                }
             />
 
             {/* Floating Add Button */}
@@ -114,6 +102,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Theme.colors.bg,
+        overflow: 'hidden' as const,
     },
     header: {
         flexDirection: 'row',
@@ -130,22 +119,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: Theme.colors.forest,
     },
-    addButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: Theme.colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: Theme.colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-    },
     list: {
         padding: 16,
         gap: 16,
+        paddingBottom: 80,
     },
     farmCard: {
         backgroundColor: '#FFFFFF',

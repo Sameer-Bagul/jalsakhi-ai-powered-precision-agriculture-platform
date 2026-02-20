@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput, KeyboardAvoidingView, Platform, ImageBackground } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomInput } from '../../components/shared/CustomInput';
 import { CustomButton } from '../../components/shared/CustomButton';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AuthService } from '../../services/auth';
+import { useAuth } from '../../context/AuthContext';
 
 export default function FarmerSignup() {
     const router = useRouter();
+    const { register, verifyAccount } = useAuth();
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState<'FORM' | 'OTP'>('FORM');
 
     const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [aadhar, setAadhar] = useState('');
     const [state, setState] = useState('');
     const [district, setDistrict] = useState('');
@@ -21,26 +24,27 @@ export default function FarmerSignup() {
     const [landSize, setLandSize] = useState('');
     const [gender, setGender] = useState<'Male' | 'Female' | 'Other'>('Male');
     const [mobile, setMobile] = useState('');
-
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
     const handleRegister = async () => {
-        if (!fullName || !mobile) {
-            Alert.alert('Missing Fields', 'Please fill at least Name and Mobile for testing.');
+        if (!fullName || !email || !password) {
+            Alert.alert('Missing Fields', 'Please fill Name, Email, and Password.');
             return;
         }
-
-        if (mobile.length !== 10) {
-            Alert.alert('Invalid Mobile', 'Mobile number must be 10 digits.');
-            return;
-        }
-
         setLoading(true);
         try {
-            await AuthService.sendOtp(mobile);
-            setStep('OTP');
-        } catch (error) {
-            Alert.alert('Error', 'Failed to send OTP.');
+            const result = await register({
+                name: fullName, email, password, role: 'farmer',
+                mobile, aadhar, gender, state, district, village, farmSize: landSize,
+            });
+            if (result.success) {
+                Alert.alert('OTP Sent', 'A verification code has been sent to your email.');
+                setStep('OTP');
+            } else {
+                Alert.alert('Error', result.message || 'Registration failed.');
+            }
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'Registration failed.');
         } finally {
             setLoading(false);
         }
@@ -52,22 +56,17 @@ export default function FarmerSignup() {
             Alert.alert('Invalid OTP', 'Please enter 6 digit OTP.');
             return;
         }
-
         setLoading(true);
         try {
-            const result = await AuthService.verifyOtp(mobile, otpString, 'FARMER', aadhar);
+            const result = await verifyAccount(otpString);
             if (result.success) {
-                Alert.alert('Success', 'Registration Successful!');
-                router.replace('/farmer/dashboard');
-            } else if (__DEV__) {
-                // Dev bypass for dummy UI: allow navigation when backend/mocks are not available
-                console.warn('OTP verification failed — dev bypass enabled. Proceeding to dashboard.');
+                Alert.alert('Success', 'Account verified! Welcome to JalSakhi.');
                 router.replace('/farmer/dashboard');
             } else {
-                Alert.alert('Error', 'Invalid OTP. Try 123456');
+                Alert.alert('Error', result.message || 'Invalid OTP.');
             }
-        } catch (error) {
-            Alert.alert('Error', 'Registration failed.');
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'Verification failed.');
         } finally {
             setLoading(false);
         }
@@ -80,252 +79,234 @@ export default function FarmerSignup() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Stack.Screen options={{ headerShown: false }} />
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ImageBackground
+            source={require('../../assets/images/background.jpeg')}
+            style={styles.bg}
+            imageStyle={{ opacity: 0.12 }}
+        >
+            <SafeAreaView style={{ flex: 1 }}>
+                <Stack.Screen options={{ headerShown: false }} />
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <ScrollView
+                        contentContainerStyle={styles.scroll}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* Back */}
+                        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                            <Feather name="arrow-left" size={22} color={Theme.colors.text} />
+                        </TouchableOpacity>
 
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                        <Feather name="arrow-left" size={24} color="white" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Farmer Registration</Text>
-                </View>
+                        {step === 'FORM' ? (
+                            <>
+                                {/* Heading */}
+                                <Text style={styles.heading}>Create</Text>
+                                <Text style={styles.heading2}>Account 🌱</Text>
+                                <Text style={styles.sub}>Join JalSakhi as a farmer</Text>
 
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                    {step === 'FORM' ? (
-                        <View style={styles.formCard}>
-                            <Text style={styles.sectionTitle}>Personal Details</Text>
+                                {/* Section: Account */}
+                                <Text style={styles.sectionLabel}>Account</Text>
+                                <CustomInput label="Full Name" placeholder="Rajesh Kumar" value={fullName} onChangeText={setFullName} />
+                                <CustomInput label="Email" placeholder="you@example.com" keyboardType="email-address" value={email} onChangeText={setEmail} />
+                                <CustomInput label="Password" placeholder="Create a password" secureTextEntry value={password} onChangeText={setPassword} />
 
-                            <CustomInput label="Full Name" placeholder="Rajesh Kumar" value={fullName} onChangeText={setFullName} />
+                                {/* Section: Personal */}
+                                <Text style={styles.sectionLabel}>Personal</Text>
+                                <CustomInput
+                                    label="Aadhar Number"
+                                    placeholder="1234 5678 9012"
+                                    keyboardType="number-pad"
+                                    maxLength={12}
+                                    value={aadhar}
+                                    onChangeText={setAadhar}
+                                    leftIcon={<MaterialIcons name="fingerprint" size={20} color={Theme.colors.textMuted} />}
+                                />
 
-                            <CustomInput
-                                label="Aadhar Number"
-                                placeholder="1234 5678 9012"
-                                keyboardType="number-pad"
-                                maxLength={12}
-                                value={aadhar}
-                                onChangeText={setAadhar}
-                                leftIcon={<MaterialIcons name="fingerprint" size={20} color={Theme.colors.textMuted} />}
-                            />
-
-                            <Text style={styles.label}>Gender</Text>
-                            <View style={styles.genderRow}>
-                                {['Male', 'Female', 'Other'].map((g) => (
-                                    <TouchableOpacity
-                                        key={g}
-                                        style={[styles.genderBtn, gender === g && styles.genderBtnActive]}
-                                        onPress={() => setGender(g as any)}
-                                    >
-                                        <Text style={[styles.genderText, gender === g && styles.genderTextActive]}>{g}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-
-                            <Text style={styles.sectionTitle}>Land & Location</Text>
-
-                            <View style={styles.row}>
-                                <View style={styles.halfInput}>
-                                    <CustomInput label="State" placeholder="Maharashtra" value={state} onChangeText={setState} />
+                                <Text style={styles.fieldLabel}>Gender</Text>
+                                <View style={styles.genderRow}>
+                                    {['Male', 'Female', 'Other'].map((g) => (
+                                        <TouchableOpacity
+                                            key={g}
+                                            style={[styles.genderPill, gender === g && styles.genderPillActive]}
+                                            onPress={() => setGender(g as any)}
+                                        >
+                                            <Text style={[styles.genderPillText, gender === g && styles.genderPillTextActive]}>{g}</Text>
+                                        </TouchableOpacity>
+                                    ))}
                                 </View>
-                                <View style={styles.halfInput}>
-                                    <CustomInput label="District" placeholder="Pune" value={district} onChangeText={setDistrict} />
+
+                                {/* Section: Location */}
+                                <Text style={styles.sectionLabel}>Location</Text>
+                                <View style={styles.row}>
+                                    <View style={{ flex: 1 }}>
+                                        <CustomInput label="State" placeholder="Maharashtra" value={state} onChangeText={setState} />
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <CustomInput label="District" placeholder="Pune" value={district} onChangeText={setDistrict} />
+                                    </View>
                                 </View>
-                            </View>
+                                <CustomInput label="Village" placeholder="Indapur" value={village} onChangeText={setVillage} />
+                                <CustomInput
+                                    label="Land Area (Acres)"
+                                    placeholder="5.2"
+                                    keyboardType="numeric"
+                                    value={landSize}
+                                    onChangeText={setLandSize}
+                                    leftIcon={<MaterialIcons name="landscape" size={20} color={Theme.colors.textMuted} />}
+                                />
 
-                            <CustomInput label="Village" placeholder="Indapur" value={village} onChangeText={setVillage} />
+                                {/* Section: Contact */}
+                                <Text style={styles.sectionLabel}>Contact</Text>
+                                <CustomInput
+                                    label="Mobile Number"
+                                    placeholder="9876543210"
+                                    keyboardType="phone-pad"
+                                    maxLength={10}
+                                    value={mobile}
+                                    onChangeText={setMobile}
+                                    leftIcon={<Text style={styles.prefix}>+91</Text>}
+                                />
 
-                            <CustomInput
-                                label="Land Area (Acres)"
-                                placeholder="5.2"
-                                keyboardType="numeric"
-                                value={landSize}
-                                onChangeText={setLandSize}
-                                leftIcon={<MaterialIcons name="landscape" size={20} color={Theme.colors.textMuted} />}
-                            />
+                                <CustomButton
+                                    title="Register & Verify"
+                                    onPress={handleRegister}
+                                    loading={loading}
+                                    style={styles.submitBtn}
+                                />
+                            </>
+                        ) : (
+                            /* OTP Step — also open layout, no container */
+                            <>
+                                <Text style={styles.heading}>Verify</Text>
+                                <Text style={styles.heading2}>Email ✉️</Text>
+                                <Text style={styles.sub}>Enter the 6-digit code sent to {email}</Text>
 
-                            <Text style={styles.sectionTitle}>Contact</Text>
+                                <View style={styles.otpRow}>
+                                    {otp.map((digit, index) => (
+                                        <TextInput
+                                            key={index}
+                                            style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
+                                            keyboardType="number-pad"
+                                            maxLength={1}
+                                            value={digit}
+                                            onChangeText={(text) => handleOtpChange(text, index)}
+                                            autoFocus={index === 0}
+                                        />
+                                    ))}
+                                </View>
 
-                            <CustomInput
-                                label="Mobile Number"
-                                placeholder="9876543210"
-                                keyboardType="phone-pad"
-                                maxLength={10}
-                                value={mobile}
-                                onChangeText={setMobile}
-                                leftIcon={<Text style={styles.prefix}>+91</Text>}
-                            />
+                                <CustomButton
+                                    title="Verify Account"
+                                    onPress={handleVerifyOtp}
+                                    loading={loading}
+                                    style={styles.submitBtn}
+                                />
 
-                            <CustomButton
-                                title="Verify & Register"
-                                onPress={handleRegister}
-                                loading={loading}
-                                style={styles.submitBtn}
-                            />
-                        </View>
-                    ) : (
-                        <View style={styles.otpContainer}>
-                            <Text style={styles.otpTitle}>Verify Mobile</Text>
-                            <Text style={styles.otpSub}>Enter OTP sent to +91 {mobile}</Text>
-
-                            <View style={styles.otpRow}>
-                                {otp.map((digit, index) => (
-                                    <TextInput
-                                        key={index}
-                                        style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
-                                        keyboardType="number-pad"
-                                        maxLength={1}
-                                        value={digit}
-                                        onChangeText={(text) => handleOtpChange(text, index)}
-                                        autoFocus={index === 0}
-                                    />
-                                ))}
-                            </View>
-
-                            <CustomButton
-                                title="Confirm Registration"
-                                onPress={handleVerifyOtp}
-                                loading={loading}
-                            />
-
-                            <TouchableOpacity onPress={() => setStep('FORM')} style={styles.changeMobile}>
-                                <Text style={styles.linkText}>Edit Details</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                                <TouchableOpacity onPress={() => setStep('FORM')} style={styles.linkBtn}>
+                                    <Text style={styles.linkText}>← Edit Details</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Theme.colors.bg,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 24,
-        paddingTop: 48,
-        backgroundColor: Theme.colors.primary,
+    bg: { flex: 1, backgroundColor: '#fff', overflow: 'hidden' as const },
+    scroll: {
+        paddingHorizontal: 28,
+        paddingTop: 20,
+        paddingBottom: 60,
     },
     backBtn: {
-        marginRight: 16,
+        width: 42, height: 42, borderRadius: 14,
+        backgroundColor: 'rgba(255,255,255,0.75)',
+        alignItems: 'center', justifyContent: 'center',
+        marginBottom: 28,
+        ...Theme.shadows.soft,
     },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: 'white',
+
+    // Headings
+    heading: {
+        fontSize: 38, fontWeight: '900', color: Theme.colors.text,
+        letterSpacing: -1, lineHeight: 44,
     },
-    scrollContent: {
-        padding: 24,
+    heading2: {
+        fontSize: 38, fontWeight: '900', color: Theme.colors.primary,
+        letterSpacing: -1, lineHeight: 44, marginBottom: 6,
     },
-    formCard: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 20,
-        elevation: 2,
+    sub: {
+        fontSize: 15, color: Theme.colors.textMuted,
+        marginBottom: 32, lineHeight: 22,
     },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: Theme.colors.text,
-        marginBottom: 16,
-        marginTop: 8,
+
+    // Section labels
+    sectionLabel: {
+        fontSize: 13, fontWeight: '800', color: Theme.colors.primary,
+        textTransform: 'uppercase', letterSpacing: 2,
+        marginTop: 28, marginBottom: 16,
+        paddingBottom: 8,
+        borderBottomWidth: 1, borderBottomColor: 'rgba(5,150,105,0.1)',
     },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: Theme.colors.text,
-        marginBottom: 8,
+    fieldLabel: {
+        fontSize: 13, fontWeight: '700', color: Theme.colors.textMuted,
+        marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1,
     },
+
+    // Gender pills
     genderRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 24,
+        flexDirection: 'row', gap: 10, marginBottom: 20,
     },
-    genderBtn: {
-        flex: 1,
-        paddingVertical: 10,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: Theme.colors.border,
+    genderPill: {
+        flex: 1, paddingVertical: 12,
+        borderRadius: 24,
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        borderWidth: 1.5, borderColor: 'rgba(5,150,105,0.1)',
         alignItems: 'center',
     },
-    genderBtnActive: {
+    genderPillActive: {
         backgroundColor: Theme.colors.primary,
         borderColor: Theme.colors.primary,
     },
-    genderText: {
-        fontSize: 14,
-        color: Theme.colors.textMuted,
-        fontWeight: '500',
+    genderPillText: {
+        fontSize: 14, fontWeight: '600', color: Theme.colors.textMuted,
     },
-    genderTextActive: {
-        color: 'white',
-        fontWeight: 'bold',
+    genderPillTextActive: {
+        color: '#fff', fontWeight: '800',
     },
-    row: {
-        flexDirection: 'row',
-        gap: 16,
-    },
-    halfInput: {
-        flex: 1,
-    },
+
+    // Layout helpers
+    row: { flexDirection: 'row', gap: 12 },
     prefix: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: Theme.colors.text,
-        marginRight: 8,
+        fontSize: 16, fontWeight: '800', color: Theme.colors.primary, marginRight: 6,
     },
     submitBtn: {
-        marginTop: 24,
+        marginTop: 28, height: 56, borderRadius: Theme.roundness.md,
     },
-    otpContainer: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 24,
-        alignItems: 'center',
-        elevation: 2,
-    },
-    otpTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: Theme.colors.text,
-        marginBottom: 8,
-    },
-    otpSub: {
-        fontSize: 14,
-        color: Theme.colors.textMuted,
-        marginBottom: 24,
-    },
+
+    // OTP
     otpRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 24,
+        flexDirection: 'row', justifyContent: 'center',
+        gap: 10, marginTop: 20, marginBottom: 36,
     },
     otpBox: {
-        width: 48,
-        height: 56,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: Theme.colors.border,
-        textAlign: 'center',
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: Theme.colors.text,
+        width: 48, height: 56, borderRadius: 14,
+        borderWidth: 2, borderColor: 'rgba(5,150,105,0.1)',
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        textAlign: 'center', fontSize: 22, fontWeight: '800',
+        color: Theme.colors.primary,
     },
     otpBoxFilled: {
         borderColor: Theme.colors.primary,
-        backgroundColor: '#ecfdf5',
+        backgroundColor: 'rgba(5,150,105,0.05)',
     },
-    changeMobile: {
-        marginTop: 16,
-        padding: 8,
-    },
+
+    // Links
+    linkBtn: { marginTop: 20, alignItems: 'center' },
     linkText: {
-        color: Theme.colors.primary,
-        fontWeight: '600',
+        color: Theme.colors.primary, fontWeight: '700', fontSize: 14,
     },
 });

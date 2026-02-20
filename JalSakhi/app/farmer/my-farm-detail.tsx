@@ -2,62 +2,50 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
-import { FarmsService, Farm, IrrigationLog } from '../../services/farms';
+import { Farm, IrrigationLog } from '../../services/farms';
+import { useApp } from '../../context/AppContext';
 import { Feather } from '@expo/vector-icons';
 
 export default function MyFarmDetail() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const id = params.id as string;
+  const { getFarm, deleteFarm, irrigationLogs, loadIrrigationLogs } = useApp();
 
   const [farm, setFarm] = useState<Farm | null>(null);
-  const [logs, setLogs] = useState<IrrigationLog[]>([]);
+
   useEffect(() => {
     (async () => {
-      try {
-        if (id) {
-          const f = await FarmsService.get(id);
-          if (f) {
-            setFarm(f);
-            const l = await FarmsService.listIrrigation(id);
-            setLogs(l);
-            return;
-          }
+      if (id) {
+        const f = await getFarm(id);
+        if (f) {
+          setFarm(f);
+          await loadIrrigationLogs(id);
         }
-
-        // fallback: pick first seeded farm or sample farm
-        const all = await FarmsService.list();
-        if (all && all.length > 0) {
-          setFarm(all[0]);
-          const l = await FarmsService.listIrrigation(all[0].id);
-          setLogs(l);
-        } else {
-          setFarm({ id: 'sample-1', name: 'Sample Farm', crop: 'Wheat', size: '2.0 Acres', status: 'Optimal', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop' } as Farm);
-          setLogs([]);
-        }
-      } catch (e) {
-        console.error('Error loading farm detail:', e);
-        setFarm({ id: 'sample-1', name: 'Sample Farm', crop: 'Wheat', size: '2.0 Acres', status: 'Optimal', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop' } as Farm);
       }
     })();
   }, [id]);
+
+  const logs = irrigationLogs[id] || [];
 
   const handleEdit = () => router.push({ pathname: '/farmer/my-farms-add-edit', params: { id } } as any);
 
   const handleDelete = async () => {
     Alert.alert('Confirm', 'Delete this farm?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
-        await FarmsService.remove(id);
-        router.replace('/farmer/my-farms');
-      } }
+      {
+        text: 'Delete', style: 'destructive', onPress: async () => {
+          await deleteFarm(id);
+          router.replace('/farmer/my-farms');
+        }
+      }
     ]);
   };
 
   const handleLog = () => router.push({ pathname: '/farmer/log-irrigation', params: { farmId: id } } as any);
 
   if (!farm) return (
-    <View style={styles.center}><Text style={{ color: Theme.colors.textSecondary }}>Farm not found.</Text></View>
+    <View style={styles.center}><Text style={{ color: Theme.colors.textSecondary }}>Loading farm...</Text></View>
   );
 
   return (
@@ -76,6 +64,8 @@ export default function MyFarmDetail() {
         <Text style={styles.infoValue}>{farm.crop}</Text>
         <Text style={styles.infoLabel}>Size</Text>
         <Text style={styles.infoValue}>{farm.size}</Text>
+        <Text style={styles.infoLabel}>Status</Text>
+        <Text style={styles.infoValue}>{farm.status}</Text>
       </View>
 
       <TouchableOpacity style={styles.logBtn} onPress={handleLog}><Feather name="plus" size={16} color="#fff" /><Text style={styles.logText}>Log Manual Irrigation</Text></TouchableOpacity>
@@ -93,7 +83,7 @@ export default function MyFarmDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: Theme.colors.bg },
+  container: { flex: 1, padding: 16, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   name: { fontSize: 20, fontWeight: '700', color: Theme.colors.text },

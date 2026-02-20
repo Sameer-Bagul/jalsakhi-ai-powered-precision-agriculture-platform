@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { WeatherWidget } from '../../components/WeatherWidget';
@@ -20,242 +20,251 @@ export default function FarmerDashboard() {
     const dateString = today.toLocaleDateString('en-US', dateOptions);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ImageBackground
+            source={require('../../assets/images/background.jpeg')}
+            style={styles.container}
+            imageStyle={{ opacity: 0.15 }} // Subtle background
+        >
+            <SafeAreaView style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                {/* Header Section */}
-                <View style={styles.header}>
-                    <View style={styles.headerContent}>
-                        <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
-                        <View style={styles.headerText}>
-                            <Text style={styles.greeting}>Welcome,</Text>
-                            <Text style={styles.username}>Rajesh Kumar</Text>
-                            <Text style={styles.date}>{dateString}</Text>
-                        </View>
-                    </View>
-                    <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/notifications')}>
-                        <Feather name="bell" size={24} color="white" />
-                        <View style={styles.badgeDot} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Hero Section: Weather & Calendar */}
-                <View style={styles.heroRow}>
-                    {/* Weather - Left */}
-                    <View style={styles.weatherContainer}>
-                        <WeatherWidget style={styles.weatherWidgetFixed} compact={true} />
-                    </View>
-
-                    {/* Crop Calendar - Center/Right */}
-                    <View style={styles.calendarContainer}>
-                        <LinearGradient colors={['#fff', '#f0f9ff']} style={styles.calendarCard}>
-                            <View style={styles.calendarHeader}>
-                                <Feather name="calendar" size={16} color={Theme.colors.primary} />
-                                <Text style={styles.calendarTitle}>Crop Calendar</Text>
+                    {/* Header Section - Floating Minimalist Bar */}
+                    <View style={styles.header}>
+                        <View style={styles.headerContent}>
+                            <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
+                            <View style={styles.headerText}>
+                                <Text style={styles.greeting}>Welcome back,</Text>
+                                <Text style={styles.username}>Rajesh Kumar</Text>
                             </View>
+                        </View>
+                        <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/notifications')}>
+                            <Feather name="bell" size={22} color={Theme.colors.primary} />
+                            <View style={styles.badgeDot} />
+                        </TouchableOpacity>
+                    </View>
 
-                            <View style={styles.seasonRow}>
-                                <View style={styles.seasonItem}>
-                                    <Text style={styles.seasonLabel}>Winter</Text>
-                                    <View style={[styles.monthPill, styles.activePill]}>
-                                        <Text style={styles.monthTextActive}>Feb</Text>
+                    {/* Date sub-header */}
+                    <View style={styles.dateContainer}>
+                        <Text style={styles.dateText}>{dateString}</Text>
+                    </View>
+
+                    {/* Hero Section: Weather & Calendar */}
+                    <View style={styles.heroRow}>
+                        {/* Weather - Left */}
+                        <View style={styles.weatherContainer}>
+                            <WeatherWidget style={styles.weatherWidgetFixed} compact={true} />
+                        </View>
+
+                        {/* Crop Calendar - Center/Right */}
+                        <View style={styles.calendarContainer}>
+                            <LinearGradient colors={['#fff', '#f0f9ff']} style={styles.calendarCard}>
+                                <View style={styles.calendarHeader}>
+                                    <Feather name="calendar" size={16} color={Theme.colors.primary} />
+                                    <Text style={styles.calendarTitle}>Crop Calendar</Text>
+                                </View>
+
+                                <View style={styles.seasonRow}>
+                                    <View style={styles.seasonItem}>
+                                        <Text style={styles.seasonLabel}>Winter</Text>
+                                        <View style={[styles.monthPill, styles.activePill]}>
+                                            <Text style={styles.monthTextActive}>Feb</Text>
+                                        </View>
+                                    </View>
+                                    <Feather name="chevron-right" size={16} color={Theme.colors.textMuted} />
+                                    <View style={styles.seasonItem}>
+                                        <Text style={styles.seasonLabel}>Summer</Text>
+                                        <Text style={styles.monthText}>starts Mar</Text>
                                     </View>
                                 </View>
-                                <Feather name="chevron-right" size={16} color={Theme.colors.textMuted} />
-                                <View style={styles.seasonItem}>
-                                    <Text style={styles.seasonLabel}>Summer</Text>
-                                    <Text style={styles.monthText}>starts Mar</Text>
-                                </View>
-                            </View>
 
-                            <View style={styles.divider} />
+                                <View style={styles.divider} />
 
-                            <Text style={styles.calendarFooter}>
-                                Ideal for <Text style={{ fontWeight: 'bold', color: Theme.colors.forest }}>Wheat, Gram</Text>
-                            </Text>
-                        </LinearGradient>
-                    </View>
-                </View>
-
-                {/* Detailed Crop Suggestions */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Seasonal Suggestions</Text>
-                    <Text style={styles.sectionSub}>Recommended crops for current weather & water levels</Text>
-
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
-
-                        <TouchableOpacity style={styles.cropCardLarge}>
-                            <View style={styles.cropHeader}>
-                                <View style={[styles.cropIconCb, { backgroundColor: '#dcfce7' }]}>
-                                    <MaterialCommunityIcons name="corn" size={24} color="#16a34a" />
-                                </View>
-                                <View>
-                                    <Text style={styles.cropNameLarge}>Maize</Text>
-                                    <Text style={styles.cropSeason}>Summer Crop</Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.waterInfo}>
-                                <Feather name="droplet" size={14} color="#3b82f6" />
-                                <Text style={styles.waterText}>Requires ~4500 L/acre</Text>
-                            </View>
-
-                            <View style={styles.suitabilityBadge}>
-                                <Text style={styles.suitabilityText}>High Suitability</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.cropCardLarge}>
-                            <View style={styles.cropHeader}>
-                                <View style={[styles.cropIconCb, { backgroundColor: '#fef9c3' }]}>
-                                    <MaterialCommunityIcons name="seed" size={24} color="#ca8a04" />
-                                </View>
-                                <View>
-                                    <Text style={styles.cropNameLarge}>Bajra</Text>
-                                    <Text style={styles.cropSeason}>All Season</Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.waterInfo}>
-                                <Feather name="droplet" size={14} color="#3b82f6" />
-                                <Text style={styles.waterText}>Requires ~3000 L/acre</Text>
-                            </View>
-
-                            <View style={styles.suitabilityBadge}>
-                                <Text style={styles.suitabilityText}>Drought Safe</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.cropCardLarge}>
-                            <View style={styles.cropHeader}>
-                                <View style={[styles.cropIconCb, { backgroundColor: '#fee2e2' }]}>
-                                    <MaterialCommunityIcons name="flower-tulip" size={24} color="#dc2626" />
-                                </View>
-                                <View>
-                                    <Text style={styles.cropNameLarge}>Onion</Text>
-                                    <Text style={styles.cropSeason}>Late Winter</Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.waterInfo}>
-                                <Feather name="droplet" size={14} color="#3b82f6" />
-                                <Text style={styles.waterText}>Requires ~5000 L/acre</Text>
-                            </View>
-
-                            <View style={[styles.suitabilityBadge, { backgroundColor: '#ffedd5' }]}>
-                                <Text style={[styles.suitabilityText, { color: '#ea580c' }]}>Moderate Match</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                    </ScrollView>
-                </View>
-
-                {/* ML Models Integration */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Smart Farm Tools</Text>
-                    <View style={styles.toolsGridBento}>
-                        <BentoTile
-                            title="Crop Water Prediction"
-                            subtitle="Input data → Results"
-                            icon={<MaterialCommunityIcons name="water-pump" size={22} color="white" />}
-                            onPress={() => router.push('/farmer/crop-water-input')}
-                            size="large"
-                        />
-
-                        <BentoTile
-                            title="Soil Moisture Forecast"
-                            subtitle="Forecast → Advice"
-                            icon={<MaterialCommunityIcons name="chart-bell-curve-cumulative" size={22} color="white" />}
-                            onPress={() => router.push('/farmer/soil-moisture-forecast')}
-                            size="large"
-                        />
-
-                        <BentoTile
-                            title="Water Allocation"
-                            subtitle="Village optimizer"
-                            icon={<MaterialCommunityIcons name="water-outline" size={22} color="white" />}
-                            onPress={() => router.push('/farmer/water-allocation-view')}
-                            size="large"
-                        />
-
-                        <BentoTile
-                            title="Chat with FarmAI"
-                            subtitle="Ask about crops & irrigation"
-                            icon={<Feather name="message-circle" size={22} color={Theme.colors.primary} />}
-                            onPress={() => router.push('/farmer/chatbot')}
-                            size="medium"
-                        />
-
-                    </View>
-                </View>
-
-                {/* Water Management: Usage & Credits */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Water Management</Text>
-
-                    {/* Water Credits Card */}
-                    <View style={styles.creditCard}>
-                        <View>
-                            <Text style={styles.creditLabel}>Total Water Credits</Text>
-                            <Text style={styles.creditValue}>1,250</Text>
-                            <Text style={styles.creditSub}>Excellent! You saved 20% more water.</Text>
+                                <Text style={styles.calendarFooter}>
+                                    Ideal for <Text style={{ fontWeight: 'bold', color: Theme.colors.forest }}>Wheat, Gram</Text>
+                                </Text>
+                            </LinearGradient>
                         </View>
-                        <Image source={require('../../assets/images/logo.png')} style={{ width: 60, height: 60, opacity: 0.8 }} resizeMode="contain" />
                     </View>
 
-                    {/* Usage Graph */}
-                    <Text style={[styles.sectionTitle, { fontSize: 16, marginTop: 16 }]}>Weekly Usage (Liters)</Text>
-                    <LineChart
-                        data={{
-                            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                            datasets: [{ data: [450, 320, 200, 400, 380, 500, 250] }]
-                        }}
-                        width={screenWidth - 40}
-                        height={220}
-                        yAxisLabel=""
-                        yAxisSuffix="L"
-                        chartConfig={{
-                            backgroundColor: "#ffffff",
-                            backgroundGradientFrom: "#ffffff",
-                            backgroundGradientTo: "#ffffff",
-                            decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(22, 163, 74, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                            style: { borderRadius: 16 },
-                            propsForDots: { r: "6", strokeWidth: "2", stroke: "#16a34a" }
-                        }}
-                        bezier
-                        style={{ borderRadius: 16, marginVertical: 8, elevation: 2 }}
-                    />
-                </View>
+                    {/* Detailed Crop Suggestions */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Seasonal Suggestions</Text>
+                        <Text style={styles.sectionSub}>Recommended crops for current weather & water levels</Text>
 
-            </ScrollView>
-        </SafeAreaView>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
+
+                            <TouchableOpacity style={styles.cropCardLarge}>
+                                <View style={styles.cropHeader}>
+                                    <View style={[styles.cropIconCb, { backgroundColor: '#dcfce7' }]}>
+                                        <MaterialCommunityIcons name="corn" size={24} color="#16a34a" />
+                                    </View>
+                                    <View>
+                                        <Text style={styles.cropNameLarge}>Maize</Text>
+                                        <Text style={styles.cropSeason}>Summer Crop</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.waterInfo}>
+                                    <Feather name="droplet" size={14} color="#3b82f6" />
+                                    <Text style={styles.waterText}>Requires ~4500 L/acre</Text>
+                                </View>
+
+                                <View style={styles.suitabilityBadge}>
+                                    <Text style={styles.suitabilityText}>High Suitability</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.cropCardLarge}>
+                                <View style={styles.cropHeader}>
+                                    <View style={[styles.cropIconCb, { backgroundColor: '#fef9c3' }]}>
+                                        <MaterialCommunityIcons name="seed" size={24} color="#ca8a04" />
+                                    </View>
+                                    <View>
+                                        <Text style={styles.cropNameLarge}>Bajra</Text>
+                                        <Text style={styles.cropSeason}>All Season</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.waterInfo}>
+                                    <Feather name="droplet" size={14} color="#3b82f6" />
+                                    <Text style={styles.waterText}>Requires ~3000 L/acre</Text>
+                                </View>
+
+                                <View style={styles.suitabilityBadge}>
+                                    <Text style={styles.suitabilityText}>Drought Safe</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.cropCardLarge}>
+                                <View style={styles.cropHeader}>
+                                    <View style={[styles.cropIconCb, { backgroundColor: '#fee2e2' }]}>
+                                        <MaterialCommunityIcons name="flower-tulip" size={24} color="#dc2626" />
+                                    </View>
+                                    <View>
+                                        <Text style={styles.cropNameLarge}>Onion</Text>
+                                        <Text style={styles.cropSeason}>Late Winter</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.waterInfo}>
+                                    <Feather name="droplet" size={14} color="#3b82f6" />
+                                    <Text style={styles.waterText}>Requires ~5000 L/acre</Text>
+                                </View>
+
+                                <View style={[styles.suitabilityBadge, { backgroundColor: '#ffedd5' }]}>
+                                    <Text style={[styles.suitabilityText, { color: '#ea580c' }]}>Moderate Match</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                        </ScrollView>
+                    </View>
+
+                    {/* ML Models Integration */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Smart Farm Tools</Text>
+                        <View style={styles.toolsGridBento}>
+                            <BentoTile
+                                title="Crop Water Prediction"
+                                subtitle="Input data → Results"
+                                icon={<MaterialCommunityIcons name="water-pump" size={22} color="white" />}
+                                onPress={() => router.push('/farmer/crop-water-input')}
+                                size="large"
+                            />
+
+                            <BentoTile
+                                title="Soil Moisture Forecast"
+                                subtitle="Forecast → Advice"
+                                icon={<MaterialCommunityIcons name="chart-bell-curve-cumulative" size={22} color="white" />}
+                                onPress={() => router.push('/farmer/soil-moisture-forecast')}
+                                size="large"
+                            />
+
+                            <BentoTile
+                                title="Water Allocation"
+                                subtitle="Village optimizer"
+                                icon={<MaterialCommunityIcons name="water-outline" size={22} color="white" />}
+                                onPress={() => router.push('/farmer/water-allocation-view')}
+                                size="large"
+                            />
+
+                            <BentoTile
+                                title="Chat with FarmAI"
+                                subtitle="Ask about crops & irrigation"
+                                icon={<Feather name="message-circle" size={22} color={Theme.colors.primary} />}
+                                onPress={() => router.push('/farmer/chatbot')}
+                                size="medium"
+                            />
+
+                        </View>
+                    </View>
+
+                    {/* Water Management: Usage & Credits */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Water Management</Text>
+
+                        {/* Water Credits Card */}
+                        <View style={styles.creditCard}>
+                            <View>
+                                <Text style={styles.creditLabel}>Total Water Credits</Text>
+                                <Text style={styles.creditValue}>1,250</Text>
+                                <Text style={styles.creditSub}>Excellent! You saved 20% more water.</Text>
+                            </View>
+                            <Image source={require('../../assets/images/logo.png')} style={{ width: 60, height: 60, opacity: 0.8 }} resizeMode="contain" />
+                        </View>
+
+                        {/* Usage Graph */}
+                        <Text style={[styles.sectionTitle, { fontSize: 16, marginTop: 16 }]}>Weekly Usage (Liters)</Text>
+                        <LineChart
+                            data={{
+                                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                                datasets: [{ data: [450, 320, 200, 400, 380, 500, 250] }]
+                            }}
+                            width={screenWidth - 40}
+                            height={220}
+                            yAxisLabel=""
+                            yAxisSuffix="L"
+                            chartConfig={{
+                                backgroundColor: "#ffffff",
+                                backgroundGradientFrom: "#ffffff",
+                                backgroundGradientTo: "#ffffff",
+                                decimalPlaces: 0,
+                                color: (opacity = 1) => `rgba(22, 163, 74, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                style: { borderRadius: 16 },
+                                propsForDots: { r: "6", strokeWidth: "2", stroke: "#16a34a" }
+                            }}
+                            bezier
+                            style={{ borderRadius: 16, marginVertical: 8, elevation: 2 }}
+                        />
+                    </View>
+
+                </ScrollView>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Theme.colors.bg,
+        backgroundColor: Theme.colors.background,
     },
     scrollContent: {
         paddingBottom: 40,
+        paddingTop: 10,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: Theme.colors.primary,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-        marginBottom: 20,
+        padding: 16,
+        marginHorizontal: 20,
+        marginTop: 10,
+        backgroundColor: Theme.colors.glass,
+        borderRadius: Theme.roundness.lg,
+        ...Theme.shadows.soft,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.5)',
     },
     headerContent: {
         flexDirection: 'row',
@@ -264,49 +273,52 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     headerLogo: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         backgroundColor: 'white',
     },
     headerText: {
         flex: 1,
     },
     greeting: {
-        fontSize: 14,
-        color: 'rgba(255, 255, 255, 0.9)',
-        fontWeight: '600',
+        fontSize: 12,
+        color: Theme.colors.textMuted,
+        fontWeight: '500',
     },
     username: {
-        fontSize: 18,
-        color: 'white',
-        fontWeight: 'bold',
-        marginBottom: 2,
+        fontSize: 16,
+        color: Theme.colors.text,
+        fontWeight: '700',
     },
-    date: {
-        fontSize: 12,
-        color: 'rgba(255, 255, 255, 0.8)',
-        fontWeight: '600',
+    dateContainer: {
+        paddingHorizontal: 24,
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    dateText: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: Theme.colors.text,
+        letterSpacing: -0.5,
     },
     notifBtn: {
-        width: 44,
-        height: 44,
+        width: 40,
+        height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 12,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
     },
     badgeDot: {
         position: 'absolute',
         top: 10,
-        right: 12,
+        right: 10,
         width: 8,
         height: 8,
         borderRadius: 4,
         backgroundColor: Theme.colors.error,
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: 'white',
     },
     section: {

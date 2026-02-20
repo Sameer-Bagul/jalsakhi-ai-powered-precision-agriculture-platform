@@ -74,30 +74,24 @@ export const BentoTile: React.FC<BentoTileProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Theme.colors.card,
+        backgroundColor: Theme.colors.glass,
         borderRadius: Theme.roundness.lg,
         padding: Theme.spacing.md,
         marginBottom: Theme.spacing.md,
-        // iOS Shadow
-        shadowColor: Theme.colors.forest,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        // Android Shadow
-        elevation: 3,
+        ...Theme.shadows.soft,
         justifyContent: 'space-between',
         borderWidth: 1,
-        borderColor: 'rgba(45, 106, 79, 0.05)',
+        borderColor: 'rgba(255, 255, 255, 0.5)',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: Theme.spacing.md,
+        marginBottom: Theme.spacing.sm,
     },
     iconContainer: {
-        width: 40,
-        height: 40,
-        backgroundColor: Theme.colors.dew,
+        width: 36,
+        height: 36,
+        backgroundColor: 'rgba(5, 150, 105, 0.1)',
         borderRadius: Theme.roundness.md,
         marginRight: Theme.spacing.sm,
         alignItems: 'center',
@@ -107,7 +101,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     title: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '700',
         color: Theme.colors.text,
         fontFamily: 'System',
