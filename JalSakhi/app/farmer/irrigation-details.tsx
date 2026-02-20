@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
 
 export default function IrrigationDetailsScreen() {
+    const router = useRouter();
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ title: 'Irrigation Details', headerShown: true }} />
@@ -41,7 +43,7 @@ export default function IrrigationDetailsScreen() {
                     ))}
                 </View>
 
-                <CustomButton title="Log Manual Irrigation" onPress={() => { }} type="outline" />
+                <CustomButton title="Log Manual Irrigation" onPress={() => router.push('/farmer/log-irrigation')} type="outline" />
             </ScrollView>
         </SafeAreaView>
     );

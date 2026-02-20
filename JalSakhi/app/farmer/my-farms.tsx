@@ -1,11 +1,13 @@
-import React from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
+import { FarmsService, Farm } from '../../services/farms';
+import { useIsFocused } from '@react-navigation/native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
-const FARMS = [
+const SAMPLE_FARMS: Farm[] = [
     { id: '1', name: 'North Field', crop: 'Wheat', size: '3.5 Acres', status: 'Optimal', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop' },
     { id: '2', name: 'River Bank', crop: 'Rice', size: '2.5 Acres', status: 'Needs Water', image: 'https://images.unsplash.com/photo-1586771107445-d3ca888129ff?q=80&w=1000&auto=format&fit=crop' },
     { id: '3', name: 'Hill Side', crop: 'Cotton', size: '1.5 Acres', status: 'Optimal', image: 'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=1000&auto=format&fit=crop' },
@@ -13,9 +15,37 @@ const FARMS = [
 
 export default function MyFarmsScreen() {
     const router = useRouter();
+    const isFocused = useIsFocused();
+    const [farms, setFarms] = useState<Farm[]>([]);
 
-    const renderFarmItem = ({ item }: { item: typeof FARMS[0] }) => (
-        <TouchableOpacity style={styles.farmCard} onPress={() => { }}>
+    useEffect(() => {
+        const load = async () => {
+            const list = await FarmsService.list();
+            if (!list || list.length === 0) {
+                // seed sample farms for first run
+                for (const f of SAMPLE_FARMS) {
+                    await FarmsService.create(f);
+                }
+                setFarms(SAMPLE_FARMS);
+            } else {
+                setFarms(list);
+            }
+        };
+        load();
+    }, []);
+
+    // reload when screen focuses (after add/edit/delete)
+    useEffect(() => {
+        if (!isFocused) return;
+        (async () => {
+            const list = await FarmsService.list();
+            setFarms(list);
+        })();
+    }, [isFocused]);
+
+    const renderFarmItem = ({ item }: { item: Farm }) => (
+        <View style={styles.farmCard}>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push({ pathname: '/farmer/my-farm-detail', params: { id: item.id } } as any)}>
             <Image source={{ uri: item.image }} style={styles.farmImage} />
             <View style={styles.farmContent}>
                 <View style={styles.farmHeader}>
@@ -38,7 +68,19 @@ export default function MyFarmsScreen() {
                     </View>
                 </View>
             </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
+            <View style={styles.cardActions}>
+                <TouchableOpacity style={styles.cardActionBtn} onPress={() => {
+                    // confirm delete
+                    Alert.alert('Delete farm', 'Are you sure you want to delete this farm?', [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Delete', style: 'destructive', onPress: async () => { await FarmsService.remove(item.id); const list = await FarmsService.list(); setFarms(list); } }
+                    ]);
+                }}>
+                    <Feather name="trash-2" size={18} color={Theme.colors.error} />
+                </TouchableOpacity>
+            </View>
+        </View>
     );
 
     return (
@@ -47,18 +89,23 @@ export default function MyFarmsScreen() {
 
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>My Farms</Text>
-                <TouchableOpacity style={styles.addButton}>
-                    <Feather name="plus" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
             </View>
 
             <FlatList
-                data={FARMS}
+                data={farms}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.list}
                 renderItem={renderFarmItem}
                 showsVerticalScrollIndicator={false}
             />
+
+            {/* Floating Add Button */}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => router.push('/farmer/my-farms-add-edit')}
+            >
+                <Feather name="plus" size={20} color="#fff" />
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }
@@ -144,6 +191,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 16,
     },
+    cardActions: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    cardActionBtn: {
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        padding: 8,
+        borderRadius: 8,
+    },
     detailRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -153,5 +212,21 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Theme.colors.textMuted,
         fontWeight: '500',
+    },
+    fab: {
+        position: 'absolute',
+        right: 20,
+        bottom: 28,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: Theme.colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: Theme.colors.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.16,
+        shadowRadius: 12,
+        elevation: 6,
     },
 });
