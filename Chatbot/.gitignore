@@ -84,3 +84,12 @@ htmlcov/
 *.npz
 __pycache__/
 .wandb/
+
+# ML Models
+*.joblib
+ML models/
+
+# Python
+venv/
+__pycache__/
+*.pyc

@@ -21,6 +21,13 @@ def parse_temperature_midpoint(temp_str: str) -> float:
     return (int(low) + int(high)) / 2.0
 
 
+def _ensure_column_transformer_compat():
+    """Allow loading ColumnTransformer pickled with sklearn 1.6.x on 1.7+ (missing _RemainderColsList)."""
+    import sklearn.compose._column_transformer as _ct
+    if not hasattr(_ct, "_RemainderColsList"):
+        _ct._RemainderColsList = type("_RemainderColsList", (list,), {})
+
+
 def load_artifacts():
     global model_pipeline, config
     import json
@@ -28,6 +35,7 @@ def load_artifacts():
         raise FileNotFoundError(
             f"Model not found at {MODEL_PATH}. Run train.py first."
         )
+    _ensure_column_transformer_compat()
     model_pipeline = joblib.load(MODEL_PATH)
     with open(CONFIG_PATH) as f:
         config = json.load(f)

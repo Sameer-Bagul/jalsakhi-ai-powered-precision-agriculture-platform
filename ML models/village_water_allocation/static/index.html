@@ -203,7 +203,7 @@
           total_available_water_liters: parseFloat(document.getElementById('total').value),
           farms: collectFarms(),
         };
-        const res = await fetch('/optimize?_=' + Date.now(), {
+        const res = await fetch('optimize?_=' + Date.now(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
           body: JSON.stringify(payload),
