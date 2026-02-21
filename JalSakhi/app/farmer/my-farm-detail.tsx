@@ -71,7 +71,7 @@ export default function MyFarmDetail() {
       <TouchableOpacity style={styles.logBtn} onPress={handleLog}><Feather name="plus" size={16} color="#fff" /><Text style={styles.logText}>Log Manual Irrigation</Text></TouchableOpacity>
 
       <Text style={styles.sectionTitle}>Irrigation History</Text>
-      <FlatList data={logs} keyExtractor={(i) => i.id} renderItem={({ item }) => (
+      <FlatList data={logs} keyExtractor={(i, idx) => i.id ?? String(idx)} renderItem={({ item }) => (
         <View style={styles.logItem}>
           <Text style={styles.logDate}>{new Date(item.date).toLocaleString()}</Text>
           <Text style={styles.logAmount}>{item.amount} L</Text>
