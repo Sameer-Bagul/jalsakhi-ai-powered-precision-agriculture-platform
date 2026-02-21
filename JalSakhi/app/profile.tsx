@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Switch, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Switch, Alert, StatusBar, Dimensions } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Theme } from '../constants/JalSakhiTheme';
 import { useAuth } from '../context/AuthContext';
 import { Logger } from '../utils/Logger';
-import { MaterialIcons, Feather } from '@expo/vector-icons';
+import { MaterialIcons, Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { changeLanguage } from '../i18n';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const screenWidth = Dimensions.get('window').width;
 
 export default function ProfileScreen() {
     const router = useRouter();
@@ -29,302 +34,275 @@ export default function ProfileScreen() {
         ]);
     };
 
-    const currentLanguage = i18n.language === 'mr' ? 'मराठी' : i18n.language === 'hi' ? 'हिन्दी' : 'English';
+    const handleLanguageChange = () => {
+        Alert.alert(
+            t('profile.language'),
+            t('profile.selectLanguage'),
+            [
+                {
+                    text: 'English',
+                    onPress: async () => {
+                        await changeLanguage('en');
+                        i18n.changeLanguage('en');
+                    }
+                },
+                {
+                    text: 'हिन्दी',
+                    onPress: async () => {
+                        await changeLanguage('hi');
+                        i18n.changeLanguage('hi');
+                    }
+                },
+                {
+                    text: 'मराठी',
+                    onPress: async () => {
+                        await changeLanguage('mr');
+                        i18n.changeLanguage('mr');
+                    }
+                },
+                { text: t('common.cancel'), style: 'cancel' }
+            ]
+        );
+    };
+
+    const currentLanguage = i18n.language.startsWith('mr') ? 'मराठी' : i18n.language.startsWith('hi') ? 'हिन्दी' : 'English';
+
+    const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
+        <View style={[styles.glassCard, style]}>
+            <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
+                {title && (
+                    <View style={styles.cardHeader}>
+                        <View style={styles.cardIconBox}>
+                            <MaterialCommunityIcons name={icon} size={18} color={Theme.colors.primary} />
+                        </View>
+                        <Text style={styles.cardTitle}>{title}</Text>
+                    </View>
+                )}
+                {children}
+            </BlurView>
+        </View>
+    );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.safe}>
+            <StatusBar barStyle="dark-content" />
             <Stack.Screen options={{ headerShown: false }} />
 
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <Feather name="arrow-left" size={24} color="white" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('profile.myProfile')}</Text>
-                <TouchableOpacity>
-                    <Feather name="edit" size={20} color="white" />
-                </TouchableOpacity>
+            {/* Decorative Layer */}
+            <View style={styles.decorativeLayer} pointerEvents="none">
+                <View style={[styles.designLine, { top: '25%', right: -80, transform: [{ rotate: '-30deg' }] }]} />
+                <View style={[styles.designLine, { bottom: '15%', left: -40, width: 250, transform: [{ rotate: '45deg' }] }]} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-
-                {/* Profile Card */}
-                <View style={styles.profileCard}>
-                    <View style={styles.avatarContainer}>
-                        <Image
-                            source={require('../assets/images/logo.png')} // using logo as avatar placeholder
-                            style={styles.avatar}
-                        />
-                        <View style={styles.roleBadge}>
-                            <Text style={styles.roleText}>{authUser?.role?.toUpperCase() || 'USER'}</Text>
-                        </View>
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <BlurView intensity={60} tint="light" style={styles.backBlur}>
+                            <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+                        </BlurView>
+                    </TouchableOpacity>
+                    <View style={styles.headerTitles}>
+                        <Text style={styles.headerTitle}>{t('profile.myProfile')}</Text>
+                        <Text style={styles.headerSubtitle}>User Account & Preferences</Text>
                     </View>
-
-                    <Text style={styles.userName}>{authUser?.name || 'User'}</Text>
-                    <Text style={styles.userLocation}>{authUser?.village && authUser?.district ? `${authUser.village}, ${authUser.district}` : (authUser?.village || authUser?.district || '')}</Text>
-
-                    <View style={styles.infoRow}>
-                        <View style={styles.infoItem}>
-                            <Feather name="phone" size={16} color={Theme.colors.textMuted} />
-                            <Text style={styles.infoText}>+91 {authUser?.mobile || 'N/A'}</Text>
-                        </View>
-                        <View style={styles.divider} />
-                        <View style={styles.infoItem}>
-                            <MaterialIcons name="fingerprint" size={16} color={Theme.colors.textMuted} />
-                            <Text style={styles.infoText}>{t('signup.aadhar')}: {authUser?.aadhar || 'N/A'}</Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Settings Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('profile.appSettings')}</Text>
-
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.iconBox, { backgroundColor: '#e0f2fe' }]}>
-                                <Feather name="bell" size={20} color="#0284c7" />
-                            </View>
-                            <Text style={styles.settingText}>{t('profile.notifications')}</Text>
-                        </View>
-                        <Switch
-                            value={notificationsEnabled}
-                            onValueChange={setNotificationsEnabled}
-                            trackColor={{ false: '#d1d5db', true: Theme.colors.primary }}
-                        />
-                    </View>
-
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.iconBox, { backgroundColor: '#f3e8ff' }]}>
-                                <Feather name="moon" size={20} color="#9333ea" />
-                            </View>
-                            <Text style={styles.settingText}>{t('profile.darkMode')}</Text>
-                        </View>
-                        <Switch
-                            value={darkMode}
-                            onValueChange={setDarkMode}
-                            trackColor={{ false: '#d1d5db', true: Theme.colors.primary }}
-                        />
-                    </View>
-
-                    <TouchableOpacity style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.iconBox, { backgroundColor: '#ffedd5' }]}>
-                                <Feather name="globe" size={20} color="#ea580c" />
-                            </View>
-                            <Text style={styles.settingText}>{t('profile.language')}</Text>
-                        </View>
-                        <View style={styles.settingRight}>
-                            <Text style={styles.valueText}>{currentLanguage}</Text>
-                            <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
-                        </View>
+                    <TouchableOpacity style={styles.editBtn}>
+                        <Feather name="edit-3" size={20} color={Theme.colors.text} />
                     </TouchableOpacity>
                 </View>
 
-                {/* Support Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('profile.support')}</Text>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    <TouchableOpacity style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.iconBox, { backgroundColor: '#ecfccb' }]}>
-                                <Feather name="help-circle" size={20} color="#65a30d" />
+                    {/* User Hero Card */}
+                    <GlassCard intensity={40} style={styles.heroCard}>
+                        <View style={styles.heroTop}>
+                            <View style={styles.avatarWrapper}>
+                                <Image
+                                    source={require('../assets/images/logo.png')}
+                                    style={styles.avatar}
+                                />
+                                <LinearGradient colors={['#10b981', '#059669']} style={styles.roleBadge}>
+                                    <Text style={styles.roleText}>{authUser?.role?.toUpperCase() || 'USER'}</Text>
+                                </LinearGradient>
                             </View>
-                            <Text style={styles.settingText}>{t('profile.helpFaq')}</Text>
+                            <View style={styles.heroInfo}>
+                                <Text style={styles.userName}>{authUser?.name || 'User'}</Text>
+                                <Text style={styles.userLocation}>{authUser?.village && authUser?.district ? `${authUser.village}, ${authUser.district}` : (authUser?.village || authUser?.district || 'Green Valley')}</Text>
+                            </View>
                         </View>
-                        <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
+
+                        <View style={styles.statsRow}>
+                            <View style={styles.statItem}>
+                                <Feather name="phone" size={14} color={Theme.colors.primary} />
+                                <Text style={styles.statText}>+91 {authUser?.mobile || 'N/A'}</Text>
+                            </View>
+                            <View style={styles.statDivider} />
+                            <View style={styles.statItem}>
+                                <MaterialIcons name="fingerprint" size={15} color={Theme.colors.primary} />
+                                <Text style={styles.statText}>{authUser?.aadhar ? `**** ${authUser.aadhar.slice(-4)}` : 'N/A'}</Text>
+                            </View>
+                        </View>
+                    </GlassCard>
+
+                    {/* App Settings Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionHeader}>{t('profile.appSettings')}</Text>
+
+                        <GlassCard style={styles.settingsGroup}>
+                            <View style={styles.settingItem}>
+                                <View style={[styles.settingIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
+                                    <Feather name="bell" size={18} color="#3b82f6" />
+                                </View>
+                                <Text style={styles.settingLabel}>{t('profile.notifications')}</Text>
+                                <Switch
+                                    value={notificationsEnabled}
+                                    onValueChange={setNotificationsEnabled}
+                                    trackColor={{ false: '#e2e8f0', true: '#10b981' }}
+                                    thumbColor="white"
+                                />
+                            </View>
+
+                            <View style={styles.settingDivider} />
+
+                            <View style={styles.settingItem}>
+                                <View style={[styles.settingIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                                    <Feather name="moon" size={18} color="#a855f7" />
+                                </View>
+                                <Text style={styles.settingLabel}>{t('profile.darkMode')}</Text>
+                                <Switch
+                                    value={darkMode}
+                                    onValueChange={setDarkMode}
+                                    trackColor={{ false: '#e2e8f0', true: '#10b981' }}
+                                    thumbColor="white"
+                                />
+                            </View>
+
+                            <View style={styles.settingDivider} />
+
+                            <TouchableOpacity style={styles.settingItem} onPress={handleLanguageChange}>
+                                <View style={[styles.settingIconBox, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
+                                    <Feather name="globe" size={18} color="#f59e0b" />
+                                </View>
+                                <Text style={[styles.settingLabel, { flex: 1 }]}>{t('profile.language')}</Text>
+                                <View style={styles.settingRight}>
+                                    <Text style={styles.settingValue}>{currentLanguage}</Text>
+                                    <Feather name="chevron-right" size={18} color={Theme.colors.textMuted} />
+                                </View>
+                            </TouchableOpacity>
+                        </GlassCard>
+                    </View>
+
+                    {/* Support Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionHeader}>{t('profile.support')}</Text>
+
+                        <GlassCard style={styles.settingsGroup}>
+                            <TouchableOpacity style={styles.settingItem}>
+                                <View style={[styles.settingIconBox, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+                                    <Feather name="help-circle" size={18} color="#10b981" />
+                                </View>
+                                <Text style={[styles.settingLabel, { flex: 1 }]}>{t('profile.helpFaq')}</Text>
+                                <Feather name="chevron-right" size={18} color={Theme.colors.textMuted} />
+                            </TouchableOpacity>
+
+                            <View style={styles.settingDivider} />
+
+                            <TouchableOpacity style={styles.settingItem}>
+                                <View style={[styles.settingIconBox, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+                                    <Feather name="alert-circle" size={18} color="#ef4444" />
+                                </View>
+                                <Text style={[styles.settingLabel, { flex: 1 }]}>{t('profile.reportIssue')}</Text>
+                                <Feather name="chevron-right" size={18} color={Theme.colors.textMuted} />
+                            </TouchableOpacity>
+                        </GlassCard>
+                    </View>
+
+                    <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+                        <LinearGradient colors={['#fee2e2', '#fecaca']} style={styles.logoutGradient}>
+                            <Feather name="log-out" size={20} color="#dc2626" />
+                            <Text style={styles.logoutText}>{t('profile.logout')}</Text>
+                        </LinearGradient>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.settingRow}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.iconBox, { backgroundColor: '#fee2e2' }]}>
-                                <Feather name="alert-circle" size={20} color="#dc2626" />
-                            </View>
-                            <Text style={styles.settingText}>{t('profile.reportIssue')}</Text>
-                        </View>
-                        <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
-                    </TouchableOpacity>
-                </View>
+                    <Text style={styles.versionText}>{t('profile.version')} 1.0.0 • JalSakhi Premium</Text>
 
-                <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-                    <Feather name="log-out" size={20} color="#dc2626" />
-                    <Text style={styles.logoutText}>{t('profile.logout')}</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.versionText}>{t('profile.version')} 1.0.0</Text>
-
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Theme.colors.bg,
+    safe: { flex: 1, backgroundColor: '#F8FAFC' },
+    decorativeLayer: {
+        ...StyleSheet.absoluteFillObject,
+        overflow: 'hidden',
+    },
+    designLine: {
+        position: 'absolute',
+        width: 350,
+        height: 1,
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
     },
     header: {
-        backgroundColor: Theme.colors.primary,
-        padding: 20,
-        paddingVertical: 24,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 20,
+        gap: 16,
     },
-    backBtn: {
-        padding: 4,
+    backBlur: {
+        width: 44, height: 44, borderRadius: 14,
+        justifyContent: 'center', alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
     },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: 'white',
-    },
-    scrollContent: {
-        padding: 20,
-    },
-    profileCard: {
+    headerTitles: { flex: 1 },
+    headerTitle: { fontSize: 24, fontWeight: '900', color: Theme.colors.text, letterSpacing: -0.5 },
+    headerSubtitle: { fontSize: 13, color: Theme.colors.textMuted },
+    editBtn: { padding: 10 },
+    scrollContent: { padding: 20, paddingBottom: 40 },
+    glassCard: {
+        borderRadius: 24,
+        overflow: 'hidden',
         backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 24,
-        alignItems: 'center',
-        shadowColor: Theme.colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 4,
-        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.7)',
+        elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
     },
-    avatarContainer: {
-        position: 'relative',
-        marginBottom: 16,
-    },
-    avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        borderWidth: 4,
-        borderColor: Theme.colors.leaf,
-    },
-    roleBadge: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        backgroundColor: Theme.colors.primary,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: 'white',
-    },
-    roleText: {
-        color: 'white',
-        fontSize: 10,
-        fontWeight: 'bold',
-    },
-    userName: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: Theme.colors.text,
-        marginBottom: 4,
-    },
-    userLocation: {
-        fontSize: 14,
-        color: Theme.colors.textMuted,
-        marginBottom: 16,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: Theme.colors.bg,
-        padding: 12,
-        borderRadius: 12,
-        width: '100%',
-        justifyContent: 'space-around',
-    },
-    infoItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    infoText: {
-        fontSize: 13,
-        color: Theme.colors.text,
-        fontWeight: '600',
-    },
-    divider: {
-        width: 1,
-        height: 20,
-        backgroundColor: Theme.colors.border,
-    },
-    section: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 20,
-        elevation: 2,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: Theme.colors.forest,
-        marginBottom: 16,
-        marginLeft: 8,
-    },
-    settingRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        paddingHorizontal: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    settingLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    iconBox: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    settingText: {
-        fontSize: 15,
-        color: Theme.colors.text,
-        fontWeight: '500',
-    },
-    settingRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    valueText: {
-        fontSize: 14,
-        color: Theme.colors.textMuted,
-    },
-    logoutBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fee2e2',
-        padding: 16,
-        borderRadius: 16,
-        gap: 8,
-        marginBottom: 24,
-    },
-    logoutText: {
-        color: '#dc2626',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    versionText: {
-        textAlign: 'center',
-        color: Theme.colors.textMuted,
-        fontSize: 12,
-        marginBottom: 20,
-    },
+    cardBlur: { padding: 20, backgroundColor: 'rgba(255,255,255,0.35)' },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+    cardIconBox: { width: 30, height: 30, borderRadius: 10, backgroundColor: 'rgba(16, 185, 129, 0.08)', justifyContent: 'center', alignItems: 'center' },
+    cardTitle: { fontSize: 13, fontWeight: '800', color: Theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.6 },
+    heroCard: { marginBottom: 24 },
+    heroTop: { flexDirection: 'row', alignItems: 'center', gap: 20, marginBottom: 20 },
+    avatarWrapper: { position: 'relative' },
+    avatar: { width: 80, height: 80, borderRadius: 30, borderWidth: 3, borderColor: 'white' },
+    roleBadge: { position: 'absolute', bottom: -4, right: -4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, borderWidth: 2, borderColor: 'white' },
+    roleText: { color: 'white', fontSize: 10, fontWeight: '900' },
+    heroInfo: { flex: 1 },
+    userName: { fontSize: 22, fontWeight: '900', color: Theme.colors.text, letterSpacing: -0.5 },
+    userLocation: { fontSize: 14, color: Theme.colors.textMuted, fontWeight: '600', marginTop: 2 },
+    statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 16, padding: 12 },
+    statItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    statText: { fontSize: 13, fontWeight: '700', color: Theme.colors.text },
+    statDivider: { width: 1, height: 16, backgroundColor: 'rgba(0,0,0,0.05)' },
+    section: { marginBottom: 24 },
+    sectionHeader: { fontSize: 16, fontWeight: '800', color: Theme.colors.text, marginBottom: 12, marginLeft: 4 },
+    settingsGroup: { padding: 0 },
+    settingItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, gap: 14 },
+    settingIconBox: { width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    settingLabel: { fontSize: 15, fontWeight: '700', color: Theme.colors.text },
+    settingDivider: { height: 1, backgroundColor: 'rgba(0,0,0,0.03)', marginHorizontal: 16 },
+    settingRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    settingValue: { fontSize: 14, fontWeight: '700', color: Theme.colors.textMuted },
+    logoutBtn: { borderRadius: 20, overflow: 'hidden', marginTop: 10 },
+    logoutGradient: { paddingVertical: 16, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 },
+    logoutText: { color: '#dc2626', fontWeight: '900', fontSize: 16 },
+    versionText: { textAlign: 'center', color: Theme.colors.textMuted, fontSize: 12, marginTop: 24, fontWeight: '600' },
+    backBtn: {},
 });

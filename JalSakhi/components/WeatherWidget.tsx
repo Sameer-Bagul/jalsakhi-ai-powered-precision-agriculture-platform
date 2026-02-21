@@ -7,9 +7,10 @@ import { WeatherService, WeatherData } from '../services/weather';
 interface WeatherWidgetProps {
     style?: any;
     compact?: boolean;
+    light?: boolean;
 }
 
-export const WeatherWidget = ({ style, compact = false }: WeatherWidgetProps) => {
+export const WeatherWidget = ({ style, compact = false, light = false }: WeatherWidgetProps) => {
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -19,10 +20,8 @@ export const WeatherWidget = ({ style, compact = false }: WeatherWidgetProps) =>
 
     const loadWeather = async () => {
         setLoading(true);
-        // 1. Get Location
         const coords = await WeatherService.getLocation();
         if (coords) {
-            // 2. Fetch Weather
             const data = await WeatherService.getCurrentWeather(coords.lat, coords.lon);
             if (data) {
                 setWeather(data);
@@ -31,13 +30,72 @@ export const WeatherWidget = ({ style, compact = false }: WeatherWidgetProps) =>
         setLoading(false);
     };
 
-    // Fallback/Default data if API fails or loading
     const displayWeather = weather || {
         temp: 28,
         condition: 'Partly Cloudy',
-        city: 'Rampur Village', // Default fallback
+        city: 'Rampur Village',
         icon: '02d'
     };
+
+    const Content = () => (
+        <>
+            <View style={[styles.header, compact && styles.headerCompact]}>
+                <View style={compact ? styles.infoCompact : undefined}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: compact ? 0 : 4 }}>
+                        <Ionicons name="location-sharp" size={12} color="rgba(255,255,255,0.8)" />
+                        <Text style={styles.location}>
+                            {compact && displayWeather.city.length > 10
+                                ? displayWeather.city.substring(0, 10) + '...'
+                                : displayWeather.city}
+                        </Text>
+                    </View>
+                    <Text style={[styles.temp, compact && styles.tempCompact]}>
+                        {displayWeather.temp}°C
+                    </Text>
+                    <Text style={[styles.condition, compact && styles.conditionCompact]}>
+                        {displayWeather.condition}
+                    </Text>
+                </View>
+                <Feather
+                    name={getIconName(displayWeather.condition)}
+                    size={compact ? 40 : 48}
+                    color="rgba(255,255,255,0.9)"
+                />
+            </View>
+
+            {!compact && (
+                <View style={styles.forecastRow}>
+                    <View style={styles.forecastItem}>
+                        <Text style={styles.day}>Today</Text>
+                        <Ionicons name="sunny" size={16} color="#fbbf24" />
+                        <Text style={styles.forecastTemp}>{displayWeather.temp}°</Text>
+                    </View>
+                    <View style={styles.forecastItem}>
+                        <Text style={styles.day}>Tom</Text>
+                        <Ionicons name="partly-sunny" size={16} color="white" />
+                        <Text style={styles.forecastTemp}>{displayWeather.temp - 1}°</Text>
+                    </View>
+                    <View style={styles.forecastItem}>
+                        <Text style={styles.day}>Wed</Text>
+                        <Ionicons name="cloud" size={16} color="white" />
+                        <Text style={styles.forecastTemp}>{displayWeather.temp - 2}°</Text>
+                    </View>
+                </View>
+            )}
+        </>
+    );
+
+    if (light) {
+        return (
+            <View style={[styles.containerLight, compact && styles.containerCompact, style]}>
+                {loading && !weather ? (
+                    <ActivityIndicator color="white" />
+                ) : (
+                    <Content />
+                )}
+            </View>
+        );
+    }
 
     return (
         <LinearGradient
@@ -52,53 +110,7 @@ export const WeatherWidget = ({ style, compact = false }: WeatherWidgetProps) =>
                     <Text style={{ color: 'white', marginTop: 8, fontSize: 12 }}>Loading Weather...</Text>
                 </View>
             ) : (
-                <>
-                    <View style={[styles.header, compact && styles.headerCompact]}>
-                        <View style={compact ? styles.infoCompact : undefined}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: compact ? 0 : 4 }}>
-                                <Ionicons name="location-sharp" size={12} color="rgba(255,255,255,0.8)" />
-                                <Text style={styles.location}>
-                                    {compact && displayWeather.city.length > 10
-                                        ? displayWeather.city.substring(0, 10) + '...'
-                                        : displayWeather.city}
-                                </Text>
-                            </View>
-                            <Text style={[styles.temp, compact && styles.tempCompact]}>
-                                {displayWeather.temp}°C
-                            </Text>
-                            <Text style={[styles.condition, compact && styles.conditionCompact]}>
-                                {displayWeather.condition}
-                            </Text>
-                        </View>
-                        {/* Map OpenWeatherMap conditions to icons roughly */}
-                        <Feather
-                            name={getIconName(displayWeather.condition)}
-                            size={compact ? 40 : 48}
-                            color="rgba(255,255,255,0.9)"
-                        />
-                    </View>
-
-                    {!compact && (
-                        <View style={styles.forecastRow}>
-                            {/* Forecast is static for now as API requires paid plan for daily forecast often */}
-                            <View style={styles.forecastItem}>
-                                <Text style={styles.day}>Today</Text>
-                                <Ionicons name="sunny" size={16} color="#fbbf24" />
-                                <Text style={styles.forecastTemp}>{displayWeather.temp}°</Text>
-                            </View>
-                            <View style={styles.forecastItem}>
-                                <Text style={styles.day}>Tom</Text>
-                                <Ionicons name="partly-sunny" size={16} color="white" />
-                                <Text style={styles.forecastTemp}>{displayWeather.temp - 1}°</Text>
-                            </View>
-                            <View style={styles.forecastItem}>
-                                <Text style={styles.day}>Wed</Text>
-                                <Ionicons name="cloud" size={16} color="white" />
-                                <Text style={styles.forecastTemp}>{displayWeather.temp - 2}°</Text>
-                            </View>
-                        </View>
-                    )}
-                </>
+                <Content />
             )}
         </LinearGradient>
     );
@@ -121,6 +133,11 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 20,
         marginBottom: 16,
+    },
+    containerLight: {
+        borderRadius: 20,
+        padding: 20,
+        backgroundColor: 'transparent',
     },
     containerCompact: {
         padding: 16,

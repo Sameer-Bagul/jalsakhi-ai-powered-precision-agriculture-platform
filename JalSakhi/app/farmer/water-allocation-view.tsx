@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
-// Model 3 Output: Farmer View - See their allocated water from village admin
+const screenWidth = Dimensions.get('window').width;
+
 export default function WaterAllocationView() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -18,506 +20,439 @@ export default function WaterAllocationView() {
 
   const fetchAllocation = async () => {
     setLoading(true);
-    // Sample data structure used as a safe fallback
     const sampleData = {
-        farmerId: 'F001',
-        farmerName: 'Ramesh Kumar',
-        village: 'Khadki',
-        totalLand: 2.5,
-        currentAllocation: {
-          amount: 1250, // liters
-          validFrom: '2025-01-15',
-          validUntil: '2025-01-21',
-          status: 'active',
-        },
-        schedule: [
-          { date: 'Jan 15', slot: 'Morning 6-8 AM', amount: 200, status: 'completed' },
-          { date: 'Jan 16', slot: 'Morning 6-8 AM', amount: 200, status: 'pending' },
-          { date: 'Jan 18', slot: 'Evening 5-7 PM', amount: 250, status: 'pending' },
-          { date: 'Jan 20', slot: 'Morning 6-8 AM', amount: 300, status: 'pending' },
-          { date: 'Jan 21', slot: 'Evening 5-7 PM', amount: 300, status: 'pending' },
-        ],
-        reservoirStatus: {
-          capacity: 50000, // liters
-          currentLevel: 38500,
-          percentage: 77,
-        },
-        priority: 'medium',
-        crops: ['Rice', 'Wheat'],
-        lastUpdated: new Date().toISOString(),
+      farmerId: 'F001',
+      farmerName: 'Ramesh Kumar',
+      village: 'Khadki',
+      totalLand: 2.5,
+      currentAllocation: {
+        amount: 1250,
+        validFrom: '2025-01-15',
+        validUntil: '2025-01-21',
+        status: 'active',
+      },
+      schedule: [
+        { date: 'Jan 15', slot: 'Morning 6-8 AM', amount: 200, status: 'completed' },
+        { date: 'Jan 16', slot: 'Morning 6-8 AM', amount: 200, status: 'pending' },
+        { date: 'Jan 18', slot: 'Evening 5-7 PM', amount: 250, status: 'pending' },
+        { date: 'Jan 20', slot: 'Morning 6-8 AM', amount: 300, status: 'pending' },
+        { date: 'Jan 21', slot: 'Evening 5-7 PM', amount: 300, status: 'pending' },
+      ],
+      reservoirStatus: {
+        capacity: 50000,
+        currentLevel: 38500,
+        percentage: 77,
+      },
+      priority: 'medium',
+      crops: ['Rice', 'Wheat'],
+      lastUpdated: new Date().toISOString(),
     };
 
     try {
-      // try fetching but abort if the request hangs (timeout)
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000);
-      // TODO: Replace with actual API endpoint
-      const response = await fetch('http://YOUR_SERVER_IP:5000/api/farmer/water-allocation', { signal: controller.signal } as any);
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const response = await fetch('http://YOUR_SERVER_IP:3000/api/farmer/water-allocation', { signal: controller.signal } as any);
       clearTimeout(timeout);
 
       if (response && response.ok) {
         const data = await response.json();
         setAllocation(data || sampleData);
       } else {
-        // fallback to sample if response not ok
         setAllocation(sampleData);
       }
     } catch (error) {
-      console.error('Error fetching allocation (fallback to sample):', error);
       setAllocation(sampleData);
     } finally {
       setLoading(false);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return '#ef4444';
-      case 'medium': return '#f59e0b';
-      case 'low': return '#10b981';
-      default: return '#6b7280';
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'High Priority';
-      case 'medium': return 'Medium Priority';
-      case 'low': return 'Low Priority';
-      default: return 'Not Set';
-    }
-  };
+  const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
+    <View style={[styles.glassCard, style]}>
+      <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
+        {title && (
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconBox}>
+              <MaterialCommunityIcons name={icon} size={18} color={Theme.colors.primary} />
+            </View>
+            <Text style={styles.cardTitle}>{title}</Text>
+          </View>
+        )}
+        {children}
+      </BlurView>
+    </View>
+  );
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Theme.colors.primary} />
-          <Text style={styles.loadingText}>Loading allocation...</Text>
-        </View>
-      </SafeAreaView>
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color={Theme.colors.primary} />
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <LinearGradient
-          colors={[Theme.colors.primary, Theme.colors.secondary]}
-          style={styles.header}
-        >
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* Decorative Layer */}
+      <View style={styles.decorativeLayer} pointerEvents="none">
+        <View style={[styles.designLine, { top: '20%', left: -60, transform: [{ rotate: '30deg' }] }]} />
+        <View style={[styles.designLine, { bottom: '15%', right: -40, width: 250, transform: [{ rotate: '-45deg' }] }]} />
+      </View>
+
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Feather name="arrow-left" size={24} color="#fff" />
+            <BlurView intensity={60} tint="light" style={styles.backBlur}>
+              <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+            </BlurView>
           </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Water Allocation</Text>
-            <Text style={styles.headerSubtitle}>Your weekly water quota</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>Water Allocation</Text>
+            <Text style={styles.subtitle}>Current weekly distribution</Text>
           </View>
           <TouchableOpacity onPress={fetchAllocation} style={styles.refreshBtn}>
-            <Feather name="refresh-cw" size={20} color="#fff" />
+            <Ionicons name="reload" size={20} color={Theme.colors.textMuted} />
           </TouchableOpacity>
-        </LinearGradient>
+        </View>
 
-        <View style={styles.content}>
-          {/* Current Allocation Card */}
-          <View style={styles.allocationCard}>
-            <View style={styles.allocationHeader}>
-              <View>
-                <Text style={styles.allocationLabel}>Current Weekly Allocation</Text>
-                <Text style={styles.allocationValue}>{allocation?.currentAllocation?.amount ?? 0} L</Text>
-              </View>
-              <View style={styles.allocationIcon}>
-                <Feather name="droplet" size={32} color={Theme.colors.primary} />
-              </View>
-            </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Bento Grid */}
+          <View style={styles.bentoGrid}>
 
-            <View style={styles.allocationDetails}>
-              <View style={styles.detailRow}>
-                <Feather name="calendar" size={16} color={Theme.colors.textSecondary} />
-                <Text style={styles.detailText}>
-                  Valid: {allocation?.currentAllocation?.validFrom ? new Date(allocation.currentAllocation.validFrom).toLocaleDateString() : '-'} - {allocation?.currentAllocation?.validUntil ? new Date(allocation.currentAllocation.validUntil).toLocaleDateString() : '-'}
-                </Text>
-              </View>
-
-              <View style={styles.detailRow}>
-                <Feather name="map-pin" size={16} color={Theme.colors.textSecondary} />
-                <Text style={styles.detailText}>
-                  Land: {allocation?.totalLand ?? '-'} acres • Crops: {Array.isArray(allocation?.crops) ? allocation.crops.join(', ') : '-'}
-                </Text>
-              </View>
-
-              <View style={styles.detailRow}>
-                <Feather name="flag" size={16} color={getPriorityColor(allocation.priority)} />
-                <Text style={[styles.detailText, { color: getPriorityColor(allocation?.priority ?? '') }]}> 
-                  {getPriorityLabel(allocation?.priority ?? '')}
-                </Text>
-              </View>
-            </View>
-
-            <View style={[
-              styles.statusBadge,
-              {
-                backgroundColor: allocation.currentAllocation.status === 'active' ? '#dcfce7' : '#fee2e2'
-              }
-            ]}>
-              <Text style={[
-                styles.statusText,
-                {
-                  color: allocation.currentAllocation.status === 'active' ? '#16a34a' : '#dc2626'
-                }
-              ]}>
-                {allocation.currentAllocation.status === 'active' ? '✓ Active' : '✗ Inactive'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Reservoir Status */}
-          <View style={styles.reservoirCard}>
-            <Text style={styles.sectionTitle}>💧 Village Reservoir Status</Text>
-            
-            <View style={styles.reservoirBar}>
-              <View style={[styles.reservoirFill, { width: `${allocation.reservoirStatus.percentage}%` }]} />
-            </View>
-
-            <View style={styles.reservoirStats}>
-              <View style={styles.reservoirStat}>
-                <Text style={styles.reservoirStatValue}>
-                  {allocation.reservoirStatus.currentLevel.toLocaleString()} L
-                </Text>
-                <Text style={styles.reservoirStatLabel}>Current Level</Text>
-              </View>
-              <View style={styles.reservoirStat}>
-                <Text style={styles.reservoirStatValue}>
-                  {allocation.reservoirStatus.capacity.toLocaleString()} L
-                </Text>
-                <Text style={styles.reservoirStatLabel}>Total Capacity</Text>
-              </View>
-              <View style={styles.reservoirStat}>
-                <Text style={[styles.reservoirStatValue, { color: Theme.colors.primary }]}>
-                  {allocation.reservoirStatus.percentage}%
-                </Text>
-                <Text style={styles.reservoirStatLabel}>Fill Level</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Irrigation Schedule */}
-          <View style={styles.scheduleCard}>
-            <Text style={styles.sectionTitle}>📅 Your Irrigation Schedule</Text>
-            <Text style={styles.sectionSubtitle}>Optimized by village admin</Text>
-
-            {(allocation?.schedule || []).map((item: any, index: number) => (
-              <View key={index} style={styles.scheduleItem}>
-                <View style={[
-                  styles.scheduleStatus,
-                  {
-                    backgroundColor: item.status === 'completed' ? '#dcfce7' : '#fff7ed'
-                  }
-                ]}>
-                  <Feather
-                    name={item.status === 'completed' ? 'check-circle' : 'clock'}
-                    size={20}
-                    color={item.status === 'completed' ? '#16a34a' : '#f59e0b'}
-                  />
+            {/* Main Level Tile */}
+            <GlassCard style={styles.fullWidth} intensity={40}>
+              <View style={styles.mainAllocationRow}>
+                <View>
+                  <Text style={styles.miniLabel}>Weekly Quota</Text>
+                  <Text style={styles.mainValue}>{allocation.currentAllocation.amount} L</Text>
                 </View>
-
-                <View style={styles.scheduleContent}>
-                  <Text style={styles.scheduleDate}>{item.date}</Text>
-                  <Text style={styles.scheduleSlot}>{item.slot}</Text>
-                </View>
-
-                <View style={styles.scheduleAmount}>
-                  <Text style={styles.scheduleAmountValue}>{item.amount} L</Text>
-                  <Text style={styles.scheduleAmountLabel}>
-                    {item.status === 'completed' ? 'Used' : 'Allocated'}
+                <LinearGradient colors={['#3b82f6', '#2563eb']} style={styles.dropletIcon}>
+                  <Feather name="droplet" size={24} color="white" />
+                </LinearGradient>
+              </View>
+              <View style={styles.statusBadgeRow}>
+                <View style={[styles.badge, { backgroundColor: allocation.currentAllocation.status === 'active' ? '#dcfce7' : '#fee2e2' }]}>
+                  <Text style={[styles.badgeText, { color: allocation.currentAllocation.status === 'active' ? '#166534' : '#991b1b' }]}>
+                    {allocation.currentAllocation.status.toUpperCase()}
                   </Text>
                 </View>
+                <Text style={styles.dateRange}>
+                  {allocation.currentAllocation.validFrom} - {allocation.currentAllocation.validUntil}
+                </Text>
               </View>
-            ))}
+            </GlassCard>
+
+            {/* Side-by-Side Status */}
+            <View style={styles.row}>
+              <GlassCard title="Priority" icon="flag-variant" style={styles.halfWidth}>
+                <Text style={[styles.priorityText, { color: allocation.priority === 'high' ? '#ef4444' : '#f59e0b' }]}>
+                  {allocation.priority.toUpperCase()}
+                </Text>
+              </GlassCard>
+              <GlassCard title="Land size" icon="texture-box" style={styles.halfWidth}>
+                <Text style={styles.landText}>{allocation.totalLand} Acres</Text>
+              </GlassCard>
+            </View>
+
+            {/* Reservoir Progress */}
+            <GlassCard title="Village Reservoir" icon="water-percent" style={styles.fullWidth}>
+              <View style={styles.reservoirContainer}>
+                <View style={styles.reservoirMeta}>
+                  <Text style={styles.resPercent}>{allocation.reservoirStatus.percentage}%</Text>
+                  <Text style={styles.resVolume}>{allocation.reservoirStatus.currentLevel.toLocaleString()} / {allocation.reservoirStatus.capacity.toLocaleString()} L</Text>
+                </View>
+                <View style={styles.progressBg}>
+                  <LinearGradient
+                    colors={['#60a5fa', '#3b82f6']}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                    style={[styles.progressFill, { width: `${allocation.reservoirStatus.percentage}%` }]}
+                  />
+                </View>
+                <Text style={styles.resSubText}>Village backup level is {allocation.reservoirStatus.percentage > 70 ? 'Healthy' : 'Moderate'}</Text>
+              </View>
+            </GlassCard>
+
+            {/* Schedule Section */}
+            <View style={{ marginTop: 8 }}>
+              <Text style={styles.sectionHeader}>Irrigation Schedule</Text>
+              {allocation.schedule.map((item: any, idx: number) => (
+                <GlassCard key={idx} style={[styles.scheduleItem, { marginBottom: 12 }]} intensity={idx % 2 === 0 ? 25 : 15}>
+                  <View style={styles.scheduleRow}>
+                    <View style={[styles.scheduleStatus, { backgroundColor: item.status === 'completed' ? '#dcfce7' : '#F1F5F9' }]}>
+                      <Feather
+                        name={item.status === 'completed' ? 'check' : 'clock'}
+                        size={18}
+                        color={item.status === 'completed' ? '#16a34a' : '#64748b'}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.scheduleDate}>{item.date}</Text>
+                      <Text style={styles.scheduleSlot}>{item.slot}</Text>
+                    </View>
+                    <View style={styles.amountBox}>
+                      <Text style={styles.itemAmount}>{item.amount}L</Text>
+                      <Text style={styles.itemStatus}>{item.status}</Text>
+                    </View>
+                  </View>
+                </GlassCard>
+              ))}
+            </View>
+
           </View>
-
-          {/* Action Buttons */}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => router.push('/farmer/usage-history')}
-            >
-              <Feather name="bar-chart-2" size={18} color={Theme.colors.primary} />
-              <Text style={styles.secondaryButtonText}>Usage History</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => router.push('/farmer')}
-            >
-              <Feather name="home" size={18} color="#fff" />
-              <Text style={styles.primaryButtonText}>Home</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.lastUpdated}>
-            Last updated: {new Date(allocation.lastUpdated).toLocaleString()}
-          </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8FAFC',
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  decorativeLayer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  designLine: {
+    position: 'absolute',
+    width: 300,
+    height: 1,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+    gap: 16,
+  },
+  backBlur: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: Theme.colors.text,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: Theme.colors.textMuted,
+  },
+  refreshBtn: {
+    padding: 10,
   },
   scrollView: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: Theme.colors.textSecondary,
+  bentoGrid: {
+    gap: 16,
   },
-  header: {
-    padding: 20,
-    paddingTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+  fullWidth: {
+    width: '100%',
   },
-  backBtn: {
-    marginRight: 16,
-  },
-  refreshBtn: {
-    padding: 8,
-  },
-  headerContent: {
+  halfWidth: {
     flex: 1,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
-    marginTop: 4,
-  },
-  content: {
-    padding: 16,
-  },
-  allocationCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    elevation: 4,
+  glassCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.7)',
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
   },
-  allocationHeader: {
+  cardBlur: {
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  cardIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: Theme.colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  miniLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Theme.colors.textMuted,
+    marginBottom: 4,
+  },
+  mainAllocationRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  allocationLabel: {
-    fontSize: 14,
-    color: Theme.colors.textSecondary,
-    marginBottom: 4,
-  },
-  allocationValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
+  mainValue: {
+    fontSize: 36,
+    fontWeight: '900',
     color: Theme.colors.primary,
   },
-  allocationIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: `${Theme.colors.primary}15`,
-    alignItems: 'center',
+  dropletIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  allocationDetails: {
-    gap: 8,
-    marginBottom: 16,
-  },
-  detailRow: {
+  statusBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
   },
-  detailText: {
-    fontSize: 14,
-    color: Theme.colors.text,
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
-  statusBadge: {
-    padding: 8,
-    borderRadius: 8,
-    alignItems: 'center',
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '900',
   },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  reservoirCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Theme.colors.text,
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
+  dateRange: {
     fontSize: 13,
-    color: Theme.colors.textSecondary,
-    marginBottom: 16,
+    fontWeight: '600',
+    color: Theme.colors.textMuted,
   },
-  reservoirBar: {
-    height: 12,
-    backgroundColor: '#e5e5e5',
-    borderRadius: 6,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  reservoirFill: {
-    height: '100%',
-    backgroundColor: Theme.colors.primary,
-  },
-  reservoirStats: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 16,
   },
-  reservoirStat: {
-    alignItems: 'center',
+  priorityText: {
+    fontSize: 22,
+    fontWeight: '900',
   },
-  reservoirStatValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  landText: {
+    fontSize: 22,
+    fontWeight: '900',
     color: Theme.colors.text,
   },
-  reservoirStatLabel: {
-    fontSize: 11,
-    color: Theme.colors.textSecondary,
+  reservoirContainer: {
     marginTop: 4,
   },
-  scheduleCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
+  reservoirMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 10,
+  },
+  resPercent: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: Theme.colors.text,
+  },
+  resVolume: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Theme.colors.textMuted,
+  },
+  progressBg: {
+    height: 10,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  resSubText: {
+    fontSize: 12,
+    color: Theme.colors.textMuted,
+    marginTop: 10,
+    fontStyle: 'italic',
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Theme.colors.text,
     marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    marginLeft: 4,
   },
   scheduleItem: {
+    padding: 0,
+  },
+  scheduleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    gap: 16,
   },
   scheduleStatus: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  scheduleContent: {
-    flex: 1,
+    alignItems: 'center',
   },
   scheduleDate: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: Theme.colors.text,
   },
   scheduleSlot: {
     fontSize: 12,
-    color: Theme.colors.textSecondary,
+    color: Theme.colors.textMuted,
     marginTop: 2,
   },
-  scheduleAmount: {
+  amountBox: {
     alignItems: 'flex-end',
   },
-  scheduleAmountValue: {
+  itemAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: Theme.colors.primary,
   },
-  scheduleAmountLabel: {
-    fontSize: 11,
-    color: Theme.colors.textSecondary,
+  itemStatus: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: Theme.colors.textMuted,
+    textTransform: 'uppercase',
     marginTop: 2,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  secondaryButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Theme.colors.primary,
-    backgroundColor: '#fff',
-  },
-  secondaryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Theme.colors.primary,
-  },
-  primaryButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: Theme.colors.primary,
-    elevation: 4,
-    shadowColor: Theme.colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  primaryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  lastUpdated: {
-    fontSize: 12,
-    color: Theme.colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 16,
-    marginBottom: 24,
-  },
+  }
 });
