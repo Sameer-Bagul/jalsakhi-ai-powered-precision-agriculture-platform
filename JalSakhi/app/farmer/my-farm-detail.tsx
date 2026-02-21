@@ -5,11 +5,13 @@ import { Theme } from '../../constants/JalSakhiTheme';
 import { Farm, IrrigationLog } from '../../services/farms';
 import { useApp } from '../../context/AppContext';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function MyFarmDetail() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const id = params.id as string;
+  const { t } = useTranslation();
   const { getFarm, deleteFarm, irrigationLogs, loadIrrigationLogs } = useApp();
 
   const [farm, setFarm] = useState<Farm | null>(null);
@@ -31,10 +33,10 @@ export default function MyFarmDetail() {
   const handleEdit = () => router.push({ pathname: '/farmer/my-farms-add-edit', params: { id } } as any);
 
   const handleDelete = async () => {
-    Alert.alert('Confirm', 'Delete this farm?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('common.confirm'), t('farms.confirmDelete'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete', style: 'destructive', onPress: async () => {
+        text: t('common.delete'), style: 'destructive', onPress: async () => {
           await deleteFarm(id);
           router.replace('/farmer/my-farms');
         }
@@ -45,7 +47,7 @@ export default function MyFarmDetail() {
   const handleLog = () => router.push({ pathname: '/farmer/log-irrigation', params: { farmId: id } } as any);
 
   if (!farm) return (
-    <View style={styles.center}><Text style={{ color: Theme.colors.textSecondary }}>Loading farm...</Text></View>
+    <View style={styles.center}><Text style={{ color: Theme.colors.textSecondary }}>{t('common.loading')}</Text></View>
   );
 
   return (
@@ -60,23 +62,23 @@ export default function MyFarmDetail() {
       </View>
 
       <View style={styles.infoCard}>
-        <Text style={styles.infoLabel}>Crop</Text>
+        <Text style={styles.infoLabel}>{t('farms.crop')}</Text>
         <Text style={styles.infoValue}>{farm.crop}</Text>
-        <Text style={styles.infoLabel}>Size</Text>
+        <Text style={styles.infoLabel}>{t('farms.size')}</Text>
         <Text style={styles.infoValue}>{farm.size}</Text>
-        <Text style={styles.infoLabel}>Status</Text>
-        <Text style={styles.infoValue}>{farm.status}</Text>
+        <Text style={styles.infoLabel}>{t('farms.status')}</Text>
+        <Text style={styles.infoValue}>{farm.status ? t(`farms.${farm.status.toLowerCase()}`, { defaultValue: farm.status }) : t('farms.unknown')}</Text>
       </View>
 
-      <TouchableOpacity style={styles.logBtn} onPress={handleLog}><Feather name="plus" size={16} color="#fff" /><Text style={styles.logText}>Log Manual Irrigation</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.logBtn} onPress={handleLog}><Feather name="plus" size={16} color="#fff" /><Text style={styles.logText}>{t('irrigation.logManual')}</Text></TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Irrigation History</Text>
+      <Text style={styles.sectionTitle}>{t('irrigation.history')}</Text>
       <FlatList data={logs} keyExtractor={(i, idx) => i.id ?? String(idx)} renderItem={({ item }) => (
         <View style={styles.logItem}>
           <Text style={styles.logDate}>{new Date(item.date).toLocaleString()}</Text>
           <Text style={styles.logAmount}>{item.amount} L</Text>
         </View>
-      )} ListEmptyComponent={<Text style={{ color: Theme.colors.textSecondary }}>No logs yet.</Text>} />
+      )} ListEmptyComponent={<Text style={{ color: Theme.colors.textSecondary }}>{t('irrigation.noLogs')}</Text>} />
 
     </View>
   );

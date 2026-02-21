@@ -1,31 +1,33 @@
 import React from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ReservoirStatusScreen() {
+    const { t } = useTranslation();
     return (
         <SafeAreaView style={styles.container}>
-            <Stack.Screen options={{ title: 'Reservoir Status' }} />
+            <Stack.Screen options={{ title: t('admin.reservoir.title') }} />
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.tankCard}>
                     <View style={styles.tankOuter}>
                         <View style={[styles.tankInner, { height: '75%' }]} />
                     </View>
-                    <Text style={styles.percent}>75% Full</Text>
-                    <Text style={styles.volume}>450,000 / 600,000 Liters</Text>
+                    <Text style={styles.percent}>{t('admin.reservoir.full', { percent: 75 })}</Text>
+                    <Text style={styles.volume}>{t('admin.reservoir.volume', { current: '450,000', total: '600,000' })}</Text>
                 </View>
 
                 <View style={styles.detailsBox}>
-                    <Text style={styles.sectionTitle}>Weekly Inflow/Outflow</Text>
+                    <Text style={styles.sectionTitle}>{t('admin.reservoir.weeklyInflowOutflow')}</Text>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Daily Average Inflow</Text>
+                        <Text style={styles.detailLabel}>{t('admin.reservoir.dailyAverageInflow')}</Text>
                         <Text style={[styles.detailValue, { color: Theme.colors.emerald }]}>+12,400 L</Text>
                     </View>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Daily Average Outflow</Text>
+                        <Text style={styles.detailLabel}>{t('admin.reservoir.dailyAverageOutflow')}</Text>
                         <Text style={[styles.detailValue, { color: Theme.colors.error }]}>-52,000 L</Text>
                     </View>
                 </View>

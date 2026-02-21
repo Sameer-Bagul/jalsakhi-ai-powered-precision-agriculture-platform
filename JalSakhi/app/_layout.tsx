@@ -10,6 +10,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { AuthProvider } from '../context/AuthContext';
 import { AppProvider } from '../context/AppContext';
+import '../i18n'; // Initialize i18n
+import { loadSavedLanguage } from '../i18n';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,6 +25,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded || error) {
+      loadSavedLanguage();
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);

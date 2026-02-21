@@ -1,42 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Switch, Alert } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../constants/JalSakhiTheme';
+import { useAuth } from '../context/AuthContext';
 import { Logger } from '../utils/Logger';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AuthService, UserProfile } from '../services/auth';
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const [user, setUser] = useState<UserProfile | null>(null);
+    const { t, i18n } = useTranslation();
+    const { user: authUser, logout: authLogout } = useAuth();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [darkMode, setDarkMode] = useState(false);
 
-    useEffect(() => {
-        // Mock fetching user profile
-        // In a real app, you'd fetch this from a context or storage
-        setUser({
-            id: 'user-123',
-            phone: '9876543210',
-            role: 'FARMER',
-            name: 'Rajesh Kumar',
-            aadharNumber: '1234 5678 9012',
-            village: 'Indapur',
-            district: 'Pune'
-        });
-    }, []);
-
     const handleLogout = () => {
-        Alert.alert('Logout', 'Are you sure you want to logout?', [
-            { text: 'Cancel', style: 'cancel' },
+        Alert.alert(t('profile.logout'), t('profile.logoutConfirm'), [
+            { text: t('common.cancel'), style: 'cancel' },
             {
-                text: 'Logout',
+                text: t('profile.logout'),
                 style: 'destructive',
-                onPress: () => router.replace('/') // Go back to Landing Page
+                onPress: async () => {
+                    await authLogout();
+                    router.replace('/');
+                }
             }
         ]);
     };
+
+    const currentLanguage = i18n.language === 'mr' ? 'मराठी' : i18n.language === 'hi' ? 'हिन्दी' : 'English';
 
     return (
         <SafeAreaView style={styles.container}>
@@ -47,7 +40,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <Feather name="arrow-left" size={24} color="white" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>My Profile</Text>
+                <Text style={styles.headerTitle}>{t('profile.myProfile')}</Text>
                 <TouchableOpacity>
                     <Feather name="edit" size={20} color="white" />
                 </TouchableOpacity>
@@ -63,36 +56,36 @@ export default function ProfileScreen() {
                             style={styles.avatar}
                         />
                         <View style={styles.roleBadge}>
-                            <Text style={styles.roleText}>{user?.role}</Text>
+                            <Text style={styles.roleText}>{authUser?.role?.toUpperCase() || 'USER'}</Text>
                         </View>
                     </View>
 
-                    <Text style={styles.userName}>{user?.name || 'User'}</Text>
-                    <Text style={styles.userLocation}>{user?.village}, {user?.district}</Text>
+                    <Text style={styles.userName}>{authUser?.name || 'User'}</Text>
+                    <Text style={styles.userLocation}>{authUser?.village && authUser?.district ? `${authUser.village}, ${authUser.district}` : (authUser?.village || authUser?.district || '')}</Text>
 
                     <View style={styles.infoRow}>
                         <View style={styles.infoItem}>
                             <Feather name="phone" size={16} color={Theme.colors.textMuted} />
-                            <Text style={styles.infoText}>+91 {user?.phone}</Text>
+                            <Text style={styles.infoText}>+91 {authUser?.mobile || 'N/A'}</Text>
                         </View>
                         <View style={styles.divider} />
                         <View style={styles.infoItem}>
                             <MaterialIcons name="fingerprint" size={16} color={Theme.colors.textMuted} />
-                            <Text style={styles.infoText}>Aadhar: {user?.aadharNumber}</Text>
+                            <Text style={styles.infoText}>{t('signup.aadhar')}: {authUser?.aadhar || 'N/A'}</Text>
                         </View>
                     </View>
                 </View>
 
                 {/* Settings Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>App Settings</Text>
+                    <Text style={styles.sectionTitle}>{t('profile.appSettings')}</Text>
 
                     <View style={styles.settingRow}>
                         <View style={styles.settingLeft}>
                             <View style={[styles.iconBox, { backgroundColor: '#e0f2fe' }]}>
                                 <Feather name="bell" size={20} color="#0284c7" />
                             </View>
-                            <Text style={styles.settingText}>Notifications</Text>
+                            <Text style={styles.settingText}>{t('profile.notifications')}</Text>
                         </View>
                         <Switch
                             value={notificationsEnabled}
@@ -106,7 +99,7 @@ export default function ProfileScreen() {
                             <View style={[styles.iconBox, { backgroundColor: '#f3e8ff' }]}>
                                 <Feather name="moon" size={20} color="#9333ea" />
                             </View>
-                            <Text style={styles.settingText}>Dark Mode</Text>
+                            <Text style={styles.settingText}>{t('profile.darkMode')}</Text>
                         </View>
                         <Switch
                             value={darkMode}
@@ -120,10 +113,10 @@ export default function ProfileScreen() {
                             <View style={[styles.iconBox, { backgroundColor: '#ffedd5' }]}>
                                 <Feather name="globe" size={20} color="#ea580c" />
                             </View>
-                            <Text style={styles.settingText}>Language</Text>
+                            <Text style={styles.settingText}>{t('profile.language')}</Text>
                         </View>
                         <View style={styles.settingRight}>
-                            <Text style={styles.valueText}>English</Text>
+                            <Text style={styles.valueText}>{currentLanguage}</Text>
                             <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
                         </View>
                     </TouchableOpacity>
@@ -131,14 +124,14 @@ export default function ProfileScreen() {
 
                 {/* Support Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Support</Text>
+                    <Text style={styles.sectionTitle}>{t('profile.support')}</Text>
 
                     <TouchableOpacity style={styles.settingRow}>
                         <View style={styles.settingLeft}>
                             <View style={[styles.iconBox, { backgroundColor: '#ecfccb' }]}>
                                 <Feather name="help-circle" size={20} color="#65a30d" />
                             </View>
-                            <Text style={styles.settingText}>Help & FAQ</Text>
+                            <Text style={styles.settingText}>{t('profile.helpFaq')}</Text>
                         </View>
                         <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
                     </TouchableOpacity>
@@ -148,7 +141,7 @@ export default function ProfileScreen() {
                             <View style={[styles.iconBox, { backgroundColor: '#fee2e2' }]}>
                                 <Feather name="alert-circle" size={20} color="#dc2626" />
                             </View>
-                            <Text style={styles.settingText}>Report an Issue</Text>
+                            <Text style={styles.settingText}>{t('profile.reportIssue')}</Text>
                         </View>
                         <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
                     </TouchableOpacity>
@@ -156,10 +149,10 @@ export default function ProfileScreen() {
 
                 <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
                     <Feather name="log-out" size={20} color="#dc2626" />
-                    <Text style={styles.logoutText}>Logout</Text>
+                    <Text style={styles.logoutText}>{t('profile.logout')}</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>Version 1.0.0</Text>
+                <Text style={styles.versionText}>{t('profile.version')} 1.0.0</Text>
 
             </ScrollView>
         </SafeAreaView>
@@ -211,7 +204,7 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 4,
-        borderColor: Theme.colors.primaryPale,
+        borderColor: Theme.colors.leaf,
     },
     roleBadge: {
         position: 'absolute',
