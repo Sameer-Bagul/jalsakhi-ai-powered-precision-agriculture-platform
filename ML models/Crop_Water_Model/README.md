@@ -1,6 +1,6 @@
 # Crop Water Requirement Model and API
 
-Predicts crop water requirement (mm/day) from crop type, soil type, region, temperature range, and weather condition. Uses a Random Forest model trained on [DATASET - Sheet1.csv](DATASET%20-%20Sheet1.csv) and exposed via FastAPI.
+Predicts crop water requirement from crop type, soil type, **15 India agro-climatic zones**, temperature range, and weather condition. Outputs in **mm/day** and **L/acre/day**. Uses a Random Forest model trained on the expanded dataset and exposed via FastAPI.
 
 ## Setup
 
@@ -8,9 +8,17 @@ Predicts crop water requirement (mm/day) from crop type, soil type, region, temp
 pip install -r requirements.txt
 ```
 
-## Train the model
+## Data and training
 
-Run once (or when you change the dataset) to produce `model.joblib` and `config.json`:
+The model uses **15 agro-climatic zones of India** (e.g. Western Himalayan Region, Trans-Gangetic Plain Region, Western Dry Region). The training data is built from the original 4-region dataset:
+
+1. **Expand dataset** (run once to create `DATASET_15_agro_zones.csv`):
+
+```bash
+python expand_dataset_agro_zones.py
+```
+
+2. **Train the model** to produce `model.joblib` and `config.json`:
 
 ```bash
 python train.py
@@ -24,7 +32,7 @@ Use the **same Python environment** for training and running the API so the save
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-Or with the same interpreter used for training:
+Or:
 
 ```bash
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
@@ -44,7 +52,7 @@ Request body (JSON):
 |-------------------|--------------------------------|------------|
 | `crop_type`       | Crop name                      | `"MAIZE"`  |
 | `soil_type`       | DRY, WET, HUMID                | `"DRY"`    |
-| `region`          | DESERT, SEMI ARID, SEMI HUMID, HUMID | `"SEMI ARID"` |
+| `region`          | One of 15 India agro-climatic zones | `"Western Himalayan Region"` |
 | `temperature`     | Range as string                | `"20-30"`  |
 | `weather_condition` | NORMAL, SUNNY, WINDY, RAINY  | `"SUNNY"`  |
 
@@ -53,33 +61,37 @@ Example:
 ```bash
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{"crop_type":"MAIZE","soil_type":"DRY","region":"SEMI ARID","temperature":"20-30","weather_condition":"SUNNY"}'
+  -d '{"crop_type":"MAIZE","soil_type":"DRY","region":"Trans-Gangetic Plain Region","temperature":"20-30","weather_condition":"SUNNY"}'
 ```
 
-Response:
+Response (mm/day and L/acre/day):
 
 ```json
-{"water_requirement": 7.9062, "unit": "mm/day"}
+{
+  "water_requirement": 7.9062,
+  "unit": "mm/day",
+  "water_requirement_litre_per_acre": 31988.52,
+  "unit_litre_per_acre": "L/acre/day"
+}
 ```
 
-**GET /config** returns allowed values for each field (for dropdowns in your project).
+**GET /config** returns allowed values for each field (including all 15 regions).
 
 ## Test UI (Gradio)
 
-A simple Gradio UI loads the model and lets you try predictions in the browser:
-
 ```bash
-pip install gradio
 python app_gradio.py
 ```
 
-Open the URL shown in the terminal (e.g. http://127.0.0.1:7860). Pick crop, soil, region, temperature, weather and click **Predict**.
+Open the URL shown (e.g. http://127.0.0.1:7860). Pick crop, soil, **agro-climatic zone**, temperature, weather and click **Predict**. Results show both **mm/day** and **L/acre/day**.
 
 ## Project layout
 
+- `expand_dataset_agro_zones.py` – Build 15-zone dataset from original 4-region data
 - `train.py` – Load data, preprocess, train Random Forest, save pipeline and config
 - `main.py` – FastAPI app: `/predict`, `/health`, `/config`
 - `app_gradio.py` – Gradio UI for testing predictions
 - `model.joblib` – Trained pipeline (created by `train.py`)
-- `config.json` – Allowed categories (created by `train.py`)
-- `DATASET - Sheet1.csv` – Training data
+- `config.json` – Allowed categories including 15 regions (created by `train.py`)
+- `DATASET - Sheet1.csv` – Original training data (4 regions)
+- `DATASET_15_agro_zones.csv` – Expanded training data (15 agro-climatic zones)

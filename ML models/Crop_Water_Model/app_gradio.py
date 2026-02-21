@@ -12,6 +12,28 @@ import pandas as pd
 MODEL_PATH = Path(__file__).resolve().parent / "model.joblib"
 CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
 
+# 1 mm depth over 1 acre ≈ 4046.86 L
+MM_PER_DAY_TO_LITRE_PER_ACRE = 4046.86
+
+# 15 Agro-Climatic Zones of India (always use this for region dropdown)
+AGRO_CLIMATIC_ZONES = [
+    "Western Himalayan Region",
+    "Eastern Himalayan Region",
+    "Lower Gangetic Plain Region",
+    "Middle Gangetic Plain Region",
+    "Upper Gangetic Plain Region",
+    "Trans-Gangetic Plain Region",
+    "Eastern Plateau & Hills Region",
+    "Central Plateau & Hills Region",
+    "Western Plateau & Hills Region",
+    "Southern Plateau & Hills Region",
+    "East Coast Plains & Hills Region",
+    "West Coast Plains & Ghats Region",
+    "Gujarat Plains & Hills Region",
+    "Western Dry Region",
+    "Island Region",
+]
+
 
 def load_artifacts():
     with open(CONFIG_PATH) as f:
@@ -26,18 +48,27 @@ def parse_temp(s: str) -> float:
 
 
 def predict(crop_type, soil_type, region, temperature, weather_condition):
+    temp_mid = parse_temp(temperature)
+    # Map 15 agro-climatic zones -> 4 climates for model input
+    zone_to_climate = config.get("zone_to_climate") or {}
+    region_climate = zone_to_climate.get((region or "").strip(), (region or "").strip())
     row = pd.DataFrame(
         [{
             "CROP TYPE": crop_type,
             "SOIL TYPE": soil_type,
-            "REGION": region,
+            "REGION": region_climate,
             "WEATHER CONDITION": weather_condition,
-            "temp_mid": parse_temp(temperature),
+            "temp_mid": temp_mid,
+            "temp_mid_sq": temp_mid * temp_mid,
         }],
-        columns=["CROP TYPE", "SOIL TYPE", "REGION", "WEATHER CONDITION", "temp_mid"],
+        columns=["CROP TYPE", "SOIL TYPE", "REGION", "WEATHER CONDITION", "temp_mid", "temp_mid_sq"],
     )
     pred = model_pipeline.predict(row)[0]
-    return round(float(pred), 4)
+    pred_mm = round(float(pred), 4)
+    crop_min = config.get("crop_min_mm") or {}
+    pred_mm = max(pred_mm, crop_min.get((crop_type or "").strip().upper(), 0))
+    litre_per_acre = round(pred_mm * MM_PER_DAY_TO_LITRE_PER_ACRE, 2)
+    return pred_mm, litre_per_acre
 
 
 if not MODEL_PATH.exists():
@@ -59,9 +90,9 @@ with gr.Blocks(title="Crop Water Requirement") as app:
         )
     with gr.Row():
         region = gr.Dropdown(
-            choices=config["region"],
-            value=config["region"][0],
-            label="Region",
+            choices=AGRO_CLIMATIC_ZONES,
+            value=AGRO_CLIMATIC_ZONES[0],
+            label="Agro-climatic zone (India)",
         )
         temp = gr.Dropdown(
             choices=config["temperature"],
@@ -74,12 +105,15 @@ with gr.Blocks(title="Crop Water Requirement") as app:
         label="Weather condition",
     )
     btn = gr.Button("Predict")
-    out = gr.Number(label="Water requirement (mm/day)", interactive=False)
+    gr.Markdown("**Output**")
+    with gr.Row():
+        out_mm = gr.Number(label="mm/day", interactive=False)
+        out_litre = gr.Number(label="litre/acre per day", interactive=False)
 
     btn.click(
         fn=predict,
         inputs=[crop, soil, region, temp, weather],
-        outputs=out,
+        outputs=[out_mm, out_litre],
     )
 
 app.launch()
