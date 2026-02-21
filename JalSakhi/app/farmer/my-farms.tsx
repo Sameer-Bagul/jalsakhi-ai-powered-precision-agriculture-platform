@@ -7,10 +7,12 @@ import { Farm } from '../../services/farms';
 import { useApp } from '../../context/AppContext';
 import { useIsFocused } from '@react-navigation/native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function MyFarmsScreen() {
     const router = useRouter();
     const isFocused = useIsFocused();
+    const { t } = useTranslation();
     const { farms, farmsLoading, loadFarms, deleteFarm } = useApp();
 
     useEffect(() => {
@@ -23,9 +25,9 @@ export default function MyFarmsScreen() {
     }, [isFocused]);
 
     const handleDelete = (id: string) => {
-        Alert.alert('Delete farm', 'Are you sure you want to delete this farm?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => deleteFarm(id) }
+        Alert.alert(t('farms.deleteFarm'), t('farms.confirmDelete'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('common.delete'), style: 'destructive', onPress: () => deleteFarm(id) }
         ]);
     };
 
@@ -38,7 +40,7 @@ export default function MyFarmsScreen() {
                         <Text style={styles.farmName}>{item.name}</Text>
                         <View style={[styles.statusBadge, { backgroundColor: item.status === 'Optimal' ? Theme.colors.dew : '#fef2f2' }]}>
                             <Text style={[styles.statusText, { color: item.status === 'Optimal' ? Theme.colors.emerald : Theme.colors.error }]}>
-                                {item.status}
+                                {item.status ? t(`farms.${item.status.toLowerCase()}`, { defaultValue: item.status }) : t('farms.unknown')}
                             </Text>
                         </View>
                     </View>
@@ -68,7 +70,7 @@ export default function MyFarmsScreen() {
             <Stack.Screen options={{ headerShown: false }} />
 
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>My Farms</Text>
+                <Text style={styles.headerTitle}>{t('farms.myFarms')}</Text>
             </View>
 
             <FlatList
@@ -81,7 +83,7 @@ export default function MyFarmsScreen() {
                     <View style={{ alignItems: 'center', paddingTop: 60 }}>
                         <MaterialCommunityIcons name="sprout-outline" size={48} color={Theme.colors.textMuted} />
                         <Text style={{ color: Theme.colors.textMuted, marginTop: 12 }}>
-                            {farmsLoading ? 'Loading farms...' : 'No farms yet. Tap + to add one!'}
+                            {farmsLoading ? t('farms.loadingFarms') : t('farms.noFarms')}
                         </Text>
                     </View>
                 }

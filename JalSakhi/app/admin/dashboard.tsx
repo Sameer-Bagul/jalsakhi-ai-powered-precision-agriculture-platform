@@ -8,11 +8,15 @@ import { PieChart } from 'react-native-chart-kit';
 import { Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function AdminDashboard() {
     const router = useRouter();
+    const { t } = useTranslation();
+    const { user } = useAuth();
     return (
         <SafeAreaView style={styles.container}>
 
@@ -26,8 +30,8 @@ export default function AdminDashboard() {
                                 <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
                             </View>
                             <View>
-                                <Text style={styles.welcomeText}>Welcome, <Text style={styles.adminName}>Ms. Priya</Text></Text>
-                                <Text style={styles.dashboardTitle}>Admin Dashboard</Text>
+                                <Text style={styles.welcomeText}>{t('dashboard.welcomeBack')} <Text style={styles.adminName}>{user?.name || 'Admin'}</Text></Text>
+                                <Text style={styles.dashboardTitle}>{t('admin.dashboard')}</Text>
                             </View>
                         </View>
                         <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/notifications')}>
@@ -54,7 +58,7 @@ export default function AdminDashboard() {
                             <MaterialCommunityIcons name="water-percent" size={24} color="#0ea5e9" />
                         </View>
                         <Text style={styles.statVal}>2.8M L</Text>
-                        <Text style={styles.statLabel}>Water Available</Text>
+                        <Text style={styles.statLabel}>{t('admin.waterAvailable')}</Text>
                         <Text style={styles.statSub}>+12% vs last week</Text>
                     </View>
 
@@ -64,7 +68,7 @@ export default function AdminDashboard() {
                             <Feather name="users" size={24} color="#16a34a" />
                         </View>
                         <Text style={styles.statVal}>284</Text>
-                        <Text style={styles.statLabel}>Active Farmers</Text>
+                        <Text style={styles.statLabel}>{t('admin.activeFarmers')}</Text>
                         <Text style={styles.statSub}>24 New Requests</Text>
                     </View>
 
@@ -74,7 +78,7 @@ export default function AdminDashboard() {
                             <MaterialCommunityIcons name="hand-coin-outline" size={24} color="#ca8a04" />
                         </View>
                         <Text style={styles.statVal}>850k</Text>
-                        <Text style={styles.statLabel}>Credits Dist.</Text>
+                        <Text style={styles.statLabel}>{t('admin.creditsDistributed')}</Text>
                         <Text style={styles.statSub}>High Savings</Text>
                     </View>
                 </View>
@@ -83,18 +87,18 @@ export default function AdminDashboard() {
                 <View style={styles.bentoGrid}>
 
                     {/* Alerts Section */}
-                    <BentoCard colSpan={2} title="CRITICAL ALERTS">
+                    <BentoCard colSpan={2} title={t('admin.criticalAlerts')}>
                         <TouchableOpacity onPress={() => router.push('/admin/anomalies')}>
                             <View style={styles.alertItem}>
                                 <View style={styles.alertIconBox}>
                                     <Feather name="alert-triangle" size={20} color={Theme.colors.error} />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.alertTitle}>Water Shortage Detected</Text>
+                                    <Text style={styles.alertTitle}>{t('admin.waterShortageDetected')}</Text>
                                     <Text style={styles.alertDesc}>Sector 4 is at 15% capacity. Immediate allocation needed.</Text>
                                 </View>
                                 <View style={styles.actionBadge}>
-                                    <Text style={styles.actionText}>RESOLVE</Text>
+                                    <Text style={styles.actionText}>{t('admin.resolve')}</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -107,7 +111,7 @@ export default function AdminDashboard() {
                                     <Feather name="user-check" size={20} color="#ea580c" />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.alertTitle}>Farmer Approvals Pending</Text>
+                                    <Text style={styles.alertTitle}>{t('admin.farmerApprovalsPending')}</Text>
                                     <Text style={styles.alertDesc}>7 new farmers waiting for approval in Rampur.</Text>
                                 </View>
                                 <Feather name="chevron-right" size={20} color={Theme.colors.textMuted} />
@@ -124,7 +128,7 @@ export default function AdminDashboard() {
                             <View>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                                     <MaterialCommunityIcons name="molecule" size={24} color={Theme.colors.primary} />
-                                    <Text style={[styles.cardTitle, { color: Theme.colors.primary }]}>AI Optimization Model</Text>
+                                    <Text style={[styles.cardTitle, { color: Theme.colors.primary }]}>{t('admin.aiModel')}</Text>
                                 </View>
                                 <Text style={styles.mlDesc}>Run "Village-Level Water Allocation" to fix Sector 4 shortage.</Text>
                             </View>

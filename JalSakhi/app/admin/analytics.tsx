@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { LineChart, BarChart } from 'react-native-chart-kit';
@@ -10,15 +11,16 @@ import { BentoCard } from '../../components/BentoCard';
 const screenWidth = Dimensions.get('window').width;
 
 export default function Analytics() {
+    const { t } = useTranslation();
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Analytics & Reports" actionLabel="Export PDF" onActionPress={() => { }} />
+            <AdminHeader title={t('admin.analytics.title')} actionLabel={t('admin.analytics.exportPdf')} onActionPress={() => { }} />
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
                 {/* Usage Trends */}
-                <BentoCard colSpan={2} title="MONTHLY WATER USAGE (M Liters)">
+                <BentoCard colSpan={2} title={t('admin.analytics.usageTrends')}>
                     <LineChart
                         data={{
                             labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -43,10 +45,10 @@ export default function Analytics() {
                 </BentoCard>
 
                 {/* Crop Distribution */}
-                <BentoCard colSpan={2} title="CROP DISTRIBUTION (Acres)">
+                <BentoCard colSpan={2} title={t('admin.analytics.cropDistribution')}>
                     <BarChart
                         data={{
-                            labels: ["Wheat", "Rice", "Cotton", "Sugar", "Pulse"],
+                            labels: [t('crops.wheat'), t('crops.rice'), t('crops.cotton'), t('crops.sugar'), t('crops.pulse')],
                             datasets: [{ data: [120, 85, 60, 45, 30] }]
                         }}
                         width={screenWidth - 64}
@@ -66,16 +68,16 @@ export default function Analytics() {
                 </BentoCard>
 
                 <View style={styles.summaryRow}>
-                    <BentoCard title="Efficiency Score">
+                    <BentoCard title={t('admin.analytics.efficiencyScore')}>
                         <View style={styles.scoreContainer}>
                             <Text style={styles.scoreVal}>87/100</Text>
-                            <Text style={styles.scoreChange}>+5% vs last month</Text>
+                            <Text style={styles.scoreChange}>{t('admin.analytics.vsLastMonth', { change: '+5%' })}</Text>
                         </View>
                     </BentoCard>
-                    <BentoCard title="Total Wastage">
+                    <BentoCard title={t('admin.analytics.totalWastage')}>
                         <View style={styles.scoreContainer}>
                             <Text style={[styles.scoreVal, { color: Theme.colors.error }]}>4.2%</Text>
-                            <Text style={styles.scoreChange}>-2% vs last month</Text>
+                            <Text style={styles.scoreChange}>{t('admin.analytics.vsLastMonth', { change: '-2%' })}</Text>
                         </View>
                     </BentoCard>
                 </View>

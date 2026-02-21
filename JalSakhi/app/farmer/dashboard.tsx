@@ -8,16 +8,20 @@ import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BentoTile } from '../../components/bento/BentoTile';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function FarmerDashboard() {
     const router = useRouter();
+    const { t, i18n } = useTranslation();
+    const { user } = useAuth();
 
     // Mock Data
     const today = new Date();
     const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'short' };
-    const dateString = today.toLocaleDateString('en-US', dateOptions);
+    const dateString = today.toLocaleDateString(i18n.language === 'mr' ? 'mr-IN' : i18n.language === 'hi' ? 'hi-IN' : 'en-US', dateOptions);
 
     return (
         <ImageBackground
@@ -33,8 +37,8 @@ export default function FarmerDashboard() {
                         <View style={styles.headerContent}>
                             <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
                             <View style={styles.headerText}>
-                                <Text style={styles.greeting}>Welcome back,</Text>
-                                <Text style={styles.username}>Rajesh Kumar</Text>
+                                <Text style={styles.greeting}>{t('dashboard.welcomeBack')}</Text>
+                                <Text style={styles.username}>{user?.name || 'User'}</Text>
                             </View>
                         </View>
                         <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/notifications')}>
@@ -60,27 +64,27 @@ export default function FarmerDashboard() {
                             <LinearGradient colors={['#fff', '#f0f9ff']} style={styles.calendarCard}>
                                 <View style={styles.calendarHeader}>
                                     <Feather name="calendar" size={16} color={Theme.colors.primary} />
-                                    <Text style={styles.calendarTitle}>Crop Calendar</Text>
+                                    <Text style={styles.calendarTitle}>{t('dashboard.cropCalendar')}</Text>
                                 </View>
 
                                 <View style={styles.seasonRow}>
                                     <View style={styles.seasonItem}>
-                                        <Text style={styles.seasonLabel}>Winter</Text>
+                                        <Text style={styles.seasonLabel}>{t('dashboard.winter')}</Text>
                                         <View style={[styles.monthPill, styles.activePill]}>
                                             <Text style={styles.monthTextActive}>Feb</Text>
                                         </View>
                                     </View>
                                     <Feather name="chevron-right" size={16} color={Theme.colors.textMuted} />
                                     <View style={styles.seasonItem}>
-                                        <Text style={styles.seasonLabel}>Summer</Text>
-                                        <Text style={styles.monthText}>starts Mar</Text>
+                                        <Text style={styles.seasonLabel}>{t('dashboard.summer')}</Text>
+                                        <Text style={styles.monthText}>{t('dashboard.starts', { month: 'Mar' })}</Text>
                                     </View>
                                 </View>
 
                                 <View style={styles.divider} />
 
                                 <Text style={styles.calendarFooter}>
-                                    Ideal for <Text style={{ fontWeight: 'bold', color: Theme.colors.forest }}>Wheat, Gram</Text>
+                                    {t('dashboard.idealFor')} <Text style={{ fontWeight: 'bold', color: Theme.colors.forest }}>Wheat, Gram</Text>
                                 </Text>
                             </LinearGradient>
                         </View>
@@ -88,8 +92,8 @@ export default function FarmerDashboard() {
 
                     {/* Detailed Crop Suggestions */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Seasonal Suggestions</Text>
-                        <Text style={styles.sectionSub}>Recommended crops for current weather & water levels</Text>
+                        <Text style={styles.sectionTitle}>{t('dashboard.seasonalSuggestions')}</Text>
+                        <Text style={styles.sectionSub}>{t('dashboard.recommendedCrops')}</Text>
 
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
 
@@ -161,35 +165,35 @@ export default function FarmerDashboard() {
 
                     {/* ML Models Integration */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Smart Farm Tools</Text>
+                        <Text style={styles.sectionTitle}>{t('dashboard.farmOperations')}</Text>
                         <View style={styles.toolsGridBento}>
                             <BentoTile
-                                title="Crop Water Prediction"
-                                subtitle="Input data → Results"
+                                title={t('dashboard.cropPrediction')}
+                                subtitle={t('dashboard.predictDesc')}
                                 icon={<MaterialCommunityIcons name="water-pump" size={22} color="white" />}
                                 onPress={() => router.push('/farmer/crop-water-input')}
                                 size="large"
                             />
 
                             <BentoTile
-                                title="Soil Moisture Forecast"
-                                subtitle="Forecast → Advice"
+                                title={t('dashboard.moistureForecast')}
+                                subtitle={t('dashboard.moistureDesc')}
                                 icon={<MaterialCommunityIcons name="chart-bell-curve-cumulative" size={22} color="white" />}
                                 onPress={() => router.push('/farmer/soil-moisture-forecast')}
                                 size="large"
                             />
 
                             <BentoTile
-                                title="Water Allocation"
-                                subtitle="Village optimizer"
+                                title={t('dashboard.waterAllocation')}
+                                subtitle={t('dashboard.recommendedCrops')}
                                 icon={<MaterialCommunityIcons name="water-outline" size={22} color="white" />}
                                 onPress={() => router.push('/farmer/water-allocation-view')}
                                 size="large"
                             />
 
                             <BentoTile
-                                title="Chat with FarmAI"
-                                subtitle="Ask about crops & irrigation"
+                                title={t('dashboard.chat')}
+                                subtitle={t('dashboard.predictDesc')}
                                 icon={<Feather name="message-circle" size={22} color={Theme.colors.primary} />}
                                 onPress={() => router.push('/farmer/chatbot')}
                                 size="medium"
@@ -200,23 +204,31 @@ export default function FarmerDashboard() {
 
                     {/* Water Management: Usage & Credits */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Water Management</Text>
+                        <Text style={styles.sectionTitle}>{t('dashboard.waterAllocation')}</Text>
 
                         {/* Water Credits Card */}
                         <View style={styles.creditCard}>
                             <View>
-                                <Text style={styles.creditLabel}>Total Water Credits</Text>
+                                <Text style={styles.creditLabel}>{t('dashboard.totalCredits')}</Text>
                                 <Text style={styles.creditValue}>1,250</Text>
-                                <Text style={styles.creditSub}>Excellent! You saved 20% more water.</Text>
+                                <Text style={styles.creditSub}>{t('dashboard.savingsMsg')}</Text>
                             </View>
                             <Image source={require('../../assets/images/logo.png')} style={{ width: 60, height: 60, opacity: 0.8 }} resizeMode="contain" />
                         </View>
 
                         {/* Usage Graph */}
-                        <Text style={[styles.sectionTitle, { fontSize: 16, marginTop: 16 }]}>Weekly Usage (Liters)</Text>
+                        <Text style={[styles.sectionTitle, { fontSize: 16, marginTop: 16 }]}>{t('dashboard.weeklyUsage')}</Text>
                         <LineChart
                             data={{
-                                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                                labels: [
+                                    t('dashboard.days.mon'),
+                                    t('dashboard.days.tue'),
+                                    t('dashboard.days.wed'),
+                                    t('dashboard.days.thu'),
+                                    t('dashboard.days.fri'),
+                                    t('dashboard.days.sat'),
+                                    t('dashboard.days.sun')
+                                ],
                                 datasets: [{ data: [450, 320, 200, 400, 380, 500, 250] }]
                             }}
                             width={screenWidth - 40}

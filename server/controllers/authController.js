@@ -58,7 +58,12 @@ export const register = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: email,
       subject: 'Verify your account',
-      html: EMAIL_VERIFY_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email)
+      html: EMAIL_VERIFY_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email),
+      attachments: [{
+        filename: 'logo.png',
+        path: './assets/images/logo.png',
+        cid: 'logo'
+      }]
     };
 
     await transporter.sendMail(mailOptions);
@@ -134,7 +139,12 @@ export const sendVerifyOtp = async (req, res) => {
       to: user.email,
       subject: 'Verify your account',
       // text: `Your OTP to verify your account is ${otp}`,
-      html: EMAIL_VERIFY_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email)
+      html: EMAIL_VERIFY_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email),
+      attachments: [{
+        filename: 'logo.png',
+        path: './assets/images/logo.png',
+        cid: 'logo'
+      }]
     };
 
     await transporter.sendMail(mailOption); // Send the email to the user
@@ -210,7 +220,12 @@ export const sendResetOtp = async (req, res) => {
       to: user.email,
       subject: 'Reset OTP for your account',
       // text: `Your OTP for resetin your password is: ${otp}`,
-      html: PASSWORD_RESET_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email)
+      html: PASSWORD_RESET_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email),
+      attachments: [{
+        filename: 'logo.png',
+        path: './assets/images/logo.png',
+        cid: 'logo'
+      }]
     };
 
     await transporter.sendMail(mailOption); // Send the email to the user

@@ -5,11 +5,13 @@ import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { useApp } from '../../context/AppContext';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function MyFarmsAddEdit() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const editingId = params.id as string | undefined;
+  const { t } = useTranslation();
   const { getFarm, createFarm, updateFarm } = useApp();
 
   const [name, setName] = useState('');
@@ -32,7 +34,7 @@ export default function MyFarmsAddEdit() {
 
   const handleSave = async () => {
     if (!name || !crop || !size) {
-      Alert.alert('Missing fields', 'Please provide name, crop and size.');
+      Alert.alert(t('farms.missingFields'));
       return;
     }
 
@@ -40,15 +42,15 @@ export default function MyFarmsAddEdit() {
     try {
       if (editingId) {
         await updateFarm(editingId, { name, crop, size });
-        Alert.alert('Saved', 'Farm updated.');
+        Alert.alert(t('common.success'), t('farms.farmUpdated'));
       } else {
         await createFarm({ name, crop, size, status: 'Unknown' });
-        Alert.alert('Saved', 'Farm created.');
+        Alert.alert(t('common.success'), t('farms.farmCreated'));
       }
       router.replace('/farmer/my-farms');
     } catch (error) {
       console.error('Save farm error', error);
-      Alert.alert('Error', 'Failed to save farm.');
+      Alert.alert(t('common.error'), t('farms.failedSave'));
     } finally {
       setLoading(false);
     }
@@ -56,20 +58,20 @@ export default function MyFarmsAddEdit() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: editingId ? 'Edit Farm' : 'Add Farm' }} />
+      <Stack.Screen options={{ title: editingId ? t('farms.editFarm') : t('farms.addFarm') }} />
       <View style={styles.content}>
-        <Text style={styles.label}>Farm Name</Text>
+        <Text style={styles.label}>{t('farms.farmName')}</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g., North Field" />
 
-        <Text style={styles.label}>Primary Crop</Text>
+        <Text style={styles.label}>{t('farms.primaryCrop')}</Text>
         <TextInput style={styles.input} value={crop} onChangeText={setCrop} placeholder="e.g., Wheat" />
 
-        <Text style={styles.label}>Area (Acres)</Text>
+        <Text style={styles.label}>{t('farms.areaAcres')}</Text>
         <TextInput style={styles.input} value={size} onChangeText={setSize} placeholder="e.g., 3.5" keyboardType="numeric" />
 
         <TouchableOpacity style={[styles.button, loading && { opacity: 0.6 }]} onPress={handleSave} disabled={loading}>
           <Feather name="save" size={18} color="#fff" />
-          <Text style={styles.buttonText}>{loading ? 'Saving...' : 'Save Farm'}</Text>
+          <Text style={styles.buttonText}>{loading ? t('farms.saving') : t('farms.saveFarm')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
