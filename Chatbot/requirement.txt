@@ -3,7 +3,5 @@ langchain
 langchain-core
 langchain-groq
 python-dotenv
-joblib
-pandas
-scikit-learn
-numpy
+httpx
+pydantic
