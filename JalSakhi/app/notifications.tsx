@@ -1,139 +1,209 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, StatusBar, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Theme } from '../constants/JalSakhiTheme';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const NOTIFICATIONS = [
-    { id: '1', title: 'Water Allocation Approved', message: 'Your request for 500L has been approved.', time: '2 mins ago', type: 'success', read: false },
-    { id: '2', title: 'Critical Low Level', message: 'Main Reservoir is below 20% capacity.', time: '1 hour ago', type: 'critical', read: false },
-    { id: '3', title: 'Weather Alert', message: 'Heavy rain expected tomorrow. Delay irrigation.', time: '5 hours ago', type: 'info', read: true },
-    { id: '4', title: 'Weekly Report Ready', message: 'Your farming insights for last week are available.', time: '1 day ago', type: 'info', read: true },
-];
+const screenWidth = Dimensions.get('window').width;
 
 export default function Notifications() {
     const router = useRouter();
     const { t } = useTranslation();
 
-    const NOTIFICATIONS = [
+    const NOTIFICATIONS_DATA = [
         { id: '1', title: t('notifications.waterAllocationApproved'), message: t('notifications.allocationApprovedMsg', { amount: 500 }), time: '2 mins ago', type: 'success', read: false },
         { id: '2', title: t('notifications.criticalLowLevel'), message: t('notifications.reservoirLowMsg'), time: '1 hour ago', type: 'critical', read: false },
         { id: '3', title: t('notifications.weatherAlert'), message: t('notifications.rainExpectedMsg'), time: '5 hours ago', type: 'info', read: true },
         { id: '4', title: t('notifications.weeklyReportReady'), message: t('notifications.reportReadyMsg'), time: '1 day ago', type: 'info', read: true },
     ];
 
-    const [list, setList] = useState(NOTIFICATIONS);
+    const [list, setList] = useState(NOTIFICATIONS_DATA);
 
     const markAllRead = () => {
         setList(list.map(n => ({ ...n, read: true })));
     };
 
+    const GlassCard = ({ children, style, intensity = 20 }: any) => (
+        <View style={[styles.glassCard, style]}>
+            <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
+                {children}
+            </BlurView>
+        </View>
+    );
+
     const renderItem = ({ item }: { item: any }) => (
-        <TouchableOpacity style={[styles.card, !item.read && styles.unreadCard]}>
-            <View style={[styles.iconBox,
-            item.type === 'success' && { backgroundColor: '#dcfce7' },
-            item.type === 'critical' && { backgroundColor: '#fee2e2' },
-            item.type === 'info' && { backgroundColor: '#e0f2fe' },
-            ]}>
-                <Feather
-                    name={item.type === 'success' ? 'check-circle' : item.type === 'critical' ? 'alert-triangle' : 'info'}
-                    size={20}
-                    color={
-                        item.type === 'success' ? Theme.colors.success :
-                            item.type === 'critical' ? Theme.colors.error : Theme.colors.primary
-                    }
-                />
-            </View>
-            <View style={styles.textContainer}>
-                <View style={styles.headerRow}>
-                    <Text style={[styles.title, !item.read && styles.unreadTitle]}>{item.title}</Text>
-                    <Text style={styles.time}>{item.time}</Text>
+        <TouchableOpacity activeOpacity={0.8} style={styles.itemWrapper}>
+            <GlassCard intensity={item.read ? 15 : 40} style={!item.read && styles.unreadOutline}>
+                <View style={styles.cardRow}>
+                    <View style={[styles.iconBox,
+                    item.type === 'success' && { backgroundColor: 'rgba(16, 185, 129, 0.1)' },
+                    item.type === 'critical' && { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
+                    item.type === 'info' && { backgroundColor: 'rgba(59, 130, 246, 0.1)' },
+                    ]}>
+                        <MaterialCommunityIcons
+                            name={item.type === 'success' ? 'check-circle-outline' : item.type === 'critical' ? 'alert-outline' : 'information-outline'}
+                            size={22}
+                            color={
+                                item.type === 'success' ? '#10b981' :
+                                    item.type === 'critical' ? '#ef4444' : '#3b82f6'
+                            }
+                        />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <View style={styles.headerRow}>
+                            <Text style={[styles.title, !item.read && styles.unreadTitle]}>{item.title}</Text>
+                            <Text style={styles.time}>{item.time}</Text>
+                        </View>
+                        <Text style={styles.message} numberOfLines={2}>{item.message}</Text>
+                    </View>
+                    {!item.read && <View style={styles.dot} />}
                 </View>
-                <Text style={styles.message} numberOfLines={2}>{item.message}</Text>
-            </View>
-            {!item.read && <View style={styles.dot} />}
+            </GlassCard>
         </TouchableOpacity>
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.safe}>
+            <StatusBar barStyle="dark-content" />
             <Stack.Screen options={{ headerShown: false }} />
 
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <Feather name="arrow-left" size={24} color={Theme.colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
-                <TouchableOpacity onPress={markAllRead}>
-                    <Text style={styles.actionText}>{t('notifications.readAll')}</Text>
-                </TouchableOpacity>
+            {/* Decorative Layer */}
+            <View style={styles.decorativeLayer} pointerEvents="none">
+                <View style={[styles.designLine, { top: '15%', left: -60, transform: [{ rotate: '45deg' }] }]} />
+                <View style={[styles.designLine, { bottom: '25%', right: -80, width: 300, transform: [{ rotate: '-30deg' }] }]} />
             </View>
 
-            <FlatList
-                data={list}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={styles.list}
-                showsVerticalScrollIndicator={false}
-                ListEmptyComponent={
-                    <View style={styles.empty}>
-                        <Feather name="bell-off" size={48} color={Theme.colors.textMuted} />
-                        <Text style={styles.emptyText}>{t('notifications.noNotifications')}</Text>
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <BlurView intensity={60} tint="light" style={styles.backBlur}>
+                            <MaterialCommunityIcons name="chevron-left" size={28} color={Theme.colors.text} />
+                        </BlurView>
+                    </TouchableOpacity>
+                    <View style={styles.headerTitles}>
+                        <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
+                        <Text style={styles.headerSubtitle}>Latest alerts & updates</Text>
                     </View>
-                }
-            />
-        </SafeAreaView>
+                    <TouchableOpacity onPress={markAllRead} style={styles.readAllBtn}>
+                        <Text style={styles.actionText}>{t('notifications.readAll')}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <FlatList
+                    data={list}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={
+                        <View style={styles.empty}>
+                            <BlurView intensity={20} tint="light" style={styles.emptyBlur}>
+                                <MaterialCommunityIcons name="bell-off-outline" size={48} color={Theme.colors.textMuted} />
+                                <Text style={styles.emptyText}>{t('notifications.noNotifications')}</Text>
+                            </BlurView>
+                        </View>
+                    }
+                />
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Theme.colors.bg, overflow: 'hidden' as const },
+    safe: { flex: 1, backgroundColor: '#F8FAFC' },
+    decorativeLayer: {
+        ...StyleSheet.absoluteFillObject,
+        overflow: 'hidden',
+    },
+    designLine: {
+        position: 'absolute',
+        width: 350,
+        height: 1,
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 16,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: Theme.colors.border,
-        justifyContent: 'space-between',
-    },
-    backBtn: { padding: 4 },
-    headerTitle: { fontSize: 18, fontWeight: 'bold', color: Theme.colors.text },
-    actionText: { fontSize: 14, fontWeight: '600', color: Theme.colors.primary },
-    list: { padding: 16, gap: 12 },
-    card: {
-        flexDirection: 'row',
-        backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 16,
+        paddingTop: 10,
+        paddingBottom: 20,
         gap: 16,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'transparent',
     },
-    unreadCard: {
-        backgroundColor: '#f8fafc', // Slight off-white/blue tint
-        borderColor: '#e2e8f0',
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
+    backBlur: {
+        width: 44,
+        height: 44,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.05)',
+    },
+    headerTitles: {
+        flex: 1,
+    },
+    headerTitle: { fontSize: 24, fontWeight: '900', color: Theme.colors.text, letterSpacing: -0.5 },
+    headerSubtitle: { fontSize: 13, color: Theme.colors.textMuted },
+    readAllBtn: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 12,
+    },
+    actionText: { fontSize: 13, fontWeight: '800', color: Theme.colors.primary },
+    list: { padding: 20, gap: 16 },
+    itemWrapper: {
+        width: '100%',
+    },
+    glassCard: {
+        borderRadius: 24,
+        overflow: 'hidden',
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.7)',
         elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+    },
+    unreadOutline: {
+        borderColor: 'rgba(59, 130, 246, 0.2)',
+        borderWidth: 1.5,
+    },
+    cardBlur: {
+        padding: 16,
+        backgroundColor: 'rgba(255,255,255,0.4)',
+    },
+    cardRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
     },
     iconBox: {
-        width: 40, height: 40, borderRadius: 12,
+        width: 44, height: 44, borderRadius: 14,
         justifyContent: 'center', alignItems: 'center',
     },
     textContainer: { flex: 1 },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-    title: { fontSize: 15, fontWeight: '600', color: Theme.colors.text },
-    unreadTitle: { fontWeight: 'bold', color: '#0f172a' },
-    time: { fontSize: 11, color: Theme.colors.textMuted },
-    message: { fontSize: 13, color: Theme.colors.textMuted, lineHeight: 18 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Theme.colors.primary, position: 'absolute', right: 16, top: 16 },
-    empty: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100, gap: 16 },
-    emptyText: { fontSize: 16, color: Theme.colors.textMuted },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+    title: { fontSize: 15, fontWeight: '700', color: Theme.colors.text },
+    unreadTitle: { fontWeight: '900', color: '#0f172a' },
+    time: { fontSize: 11, color: Theme.colors.textMuted, fontWeight: '600' },
+    message: { fontSize: 13, color: Theme.colors.textMuted, lineHeight: 18, fontWeight: '500' },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Theme.colors.primary },
+    empty: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100 },
+    emptyBlur: {
+        padding: 40,
+        borderRadius: 32,
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.05)',
+        width: screenWidth - 80,
+    },
+    emptyText: { fontSize: 16, color: Theme.colors.textMuted, fontWeight: '700', marginTop: 16 },
+    backBtn: {},
 });

@@ -1,23 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, StatusBar } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
 const { width } = Dimensions.get('window');
 
 export default function CropWaterResults() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  
-  // Parse the prediction and input data
+
   const prediction = params.prediction ? JSON.parse(params.prediction as string) : null;
   const inputData = params.inputData ? JSON.parse(params.inputData as string) : null;
 
-  // Sample data structure (replace with actual API response)
-  const waterRequirement = prediction?.waterRequirement || 45.5; // mm/day
+  const waterRequirement = prediction?.waterRequirement || 45.5;
   const irrigationRecommendation = prediction?.recommendation || 'Irrigate in next 24 hours';
   const schedule = prediction?.schedule || [
     { day: 'Today', amount: 25, time: 'Morning 6-8 AM' },
@@ -26,345 +25,398 @@ export default function CropWaterResults() {
   ];
   const confidence = prediction?.confidence || 92;
 
+  const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
+    <View style={[styles.glassCard, style]}>
+      <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
+        {title && (
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconBox}>
+              <MaterialCommunityIcons name={icon} size={18} color={Theme.colors.primary} />
+            </View>
+            <Text style={styles.cardTitle}>{title}</Text>
+          </View>
+        )}
+        {children}
+      </BlurView>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <LinearGradient
-          colors={[Theme.colors.primary, Theme.colors.secondary]}
-          style={styles.header}
-        >
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* Decorative Layer */}
+      <View style={styles.decorativeLayer} pointerEvents="none">
+        <View style={[styles.designLine, { top: '15%', right: -60, transform: [{ rotate: '-45deg' }] }]} />
+        <View style={[styles.designLine, { bottom: '25%', left: -80, width: 300, transform: [{ rotate: '30deg' }] }]} />
+      </View>
+
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Feather name="arrow-left" size={24} color="#fff" />
+            <BlurView intensity={60} tint="light" style={styles.backBlur}>
+              <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+            </BlurView>
           </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Water Requirement</Text>
-            <Text style={styles.headerSubtitle}>Crop: {inputData?.cropType || 'N/A'}</Text>
-          </View>
-        </LinearGradient>
-
-        <View style={styles.content}>
-          {/* Main Result Card */}
-          <View style={styles.resultCard}>
-            <View style={styles.resultIconContainer}>
-              <Feather name="droplet" size={48} color={Theme.colors.primary} />
-            </View>
-            <Text style={styles.resultValue}>{waterRequirement} mm/day</Text>
-            <Text style={styles.resultLabel}>Daily Water Requirement</Text>
-            
-            <View style={styles.confidenceBadge}>
-              <Feather name="check-circle" size={16} color={Theme.colors.success} />
-              <Text style={styles.confidenceText}>{confidence}% Confidence</Text>
-            </View>
-          </View>
-
-          {/* Recommendation Card */}
-          <View style={styles.recommendationCard}>
-            <View style={styles.cardHeader}>
-              <Feather name="alert-circle" size={20} color={Theme.colors.primary} />
-              <Text style={styles.cardTitle}>Recommendation</Text>
-            </View>
-            <Text style={styles.recommendationText}>{irrigationRecommendation}</Text>
-          </View>
-
-          {/* Irrigation Schedule */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📅 Irrigation Schedule</Text>
-            <Text style={styles.sectionSubtitle}>Next 7 days based on forecast</Text>
-            
-            {schedule.map((item: any, index: number) => (
-              <View key={index} style={styles.scheduleItem}>
-                <View style={styles.scheduleLeft}>
-                  <Text style={styles.scheduleDay}>{item.day}</Text>
-                  <Text style={styles.scheduleTime}>{item.time}</Text>
-                </View>
-                <View style={styles.scheduleRight}>
-                  <Text style={styles.scheduleAmount}>{item.amount} mm</Text>
-                  <View style={styles.waterBar}>
-                    <View style={[styles.waterFill, { width: `${(item.amount / 50) * 100}%` }]} />
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-
-          {/* Input Summary */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📊 Input Summary</Text>
-            
-            <View style={styles.infoGrid}>
-              <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Growth Stage</Text>
-                <Text style={styles.infoValue}>{inputData?.growthStage || 'N/A'}</Text>
-              </View>
-              <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Soil Type</Text>
-                <Text style={styles.infoValue}>{inputData?.soilType || 'N/A'}</Text>
-              </View>
-              <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Temperature</Text>
-                <Text style={styles.infoValue}>{inputData?.temperature || 'N/A'}°C</Text>
-              </View>
-              <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Humidity</Text>
-                <Text style={styles.infoValue}>{inputData?.humidity || 'N/A'}%</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => router.back()}
-            >
-              <Feather name="refresh-cw" size={18} color={Theme.colors.primary} />
-              <Text style={styles.secondaryButtonText}>New Prediction</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => router.push('/farmer')}
-            >
-              <Feather name="home" size={18} color="#fff" />
-              <Text style={styles.primaryButtonText}>Back to Home</Text>
-            </TouchableOpacity>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>Prediction Results</Text>
+            <Text style={styles.subtitle}>Optimized for {inputData?.cropType || 'N/A'}</Text>
           </View>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.bentoGrid}>
+
+            {/* Main Requirement Tile */}
+            <GlassCard style={styles.fullWidth} intensity={40}>
+              <View style={styles.mainResultRow}>
+                <View>
+                  <Text style={styles.miniLabel}>Water Needed</Text>
+                  <Text style={styles.mainValue}>{waterRequirement}<Text style={styles.mainUnit}> mm/day</Text></Text>
+                </View>
+                <View style={styles.confidenceCircle}>
+                  <BlurView intensity={80} tint="light" style={styles.confBlur}>
+                    <Text style={styles.confValue}>{confidence}%</Text>
+                    <Text style={styles.confLabel}>CONF.</Text>
+                  </BlurView>
+                </View>
+              </View>
+              <View style={[styles.recommendationBadge, { backgroundColor: '#dcfce7' }]}>
+                <Ionicons name="sunny" size={16} color="#166534" />
+                <Text style={styles.recommendationText}>{irrigationRecommendation}</Text>
+              </View>
+            </GlassCard>
+
+            {/* Input Summary - Bento Style */}
+            <View style={styles.row}>
+              <GlassCard title="Growth" icon="sprout" style={styles.halfWidth}>
+                <Text style={styles.summaryValue}>{inputData?.growthStage || 'N/A'}</Text>
+              </GlassCard>
+              <GlassCard title="Soil Type" icon="texture-box" style={styles.halfWidth}>
+                <Text style={styles.summaryValue}>{inputData?.soilType || 'N/A'}</Text>
+              </GlassCard>
+            </View>
+
+            <View style={styles.row}>
+              <GlassCard title="Temp" icon="thermometer" style={styles.halfWidth}>
+                <Text style={styles.summaryValue}>{inputData?.temperature || 'N/A'}°C</Text>
+              </GlassCard>
+              <GlassCard title="Humidity" icon="water-percent" style={styles.halfWidth}>
+                <Text style={styles.summaryValue}>{inputData?.humidity || 'N/A'}%</Text>
+              </GlassCard>
+            </View>
+
+            {/* Irrigation Schedule */}
+            <View style={{ marginTop: 8 }}>
+              <Text style={styles.sectionHeader}>Irrigation Schedule</Text>
+              {schedule.map((item: any, idx: number) => (
+                <GlassCard key={idx} style={[styles.scheduleItem, { marginBottom: 12 }]}>
+                  <View style={styles.scheduleRow}>
+                    <View style={styles.scheduleTimeBox}>
+                      <Text style={styles.scheduleDay}>{item.day}</Text>
+                      <Text style={styles.scheduleTimeText}>{item.time}</Text>
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                      <Text style={styles.itemAmount}>{item.amount} mm</Text>
+                      <View style={styles.progressBg}>
+                        <LinearGradient
+                          colors={['#10b981', '#059669']}
+                          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                          style={[styles.progressFill, { width: `${(item.amount / 50) * 100}%` }]}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </GlassCard>
+              ))}
+            </View>
+
+            {/* Actions */}
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                onPress={() => router.back()}
+              >
+                <Feather name="refresh-cw" size={18} color={Theme.colors.primary} />
+                <Text style={styles.secondaryBtnText}>Recalculate</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.primaryBtn}
+                onPress={() => router.push('/farmer')}
+              >
+                <LinearGradient colors={['#10b981', '#059669']} style={styles.gradientBtn}>
+                  <Feather name="home" size={18} color="white" />
+                  <Text style={styles.primaryBtnText}>Done</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8FAFC',
+  },
+  decorativeLayer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  designLine: {
+    position: 'absolute',
+    width: 300,
+    height: 1,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+    gap: 16,
+  },
+  backBlur: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: Theme.colors.text,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: Theme.colors.textMuted,
   },
   scrollView: {
     flex: 1,
   },
-  header: {
-    padding: 20,
-    paddingTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  backBtn: {
-    marginRight: 16,
+  bentoGrid: {
+    gap: 16,
   },
-  headerContent: {
+  fullWidth: {
+    width: '100%',
+  },
+  halfWidth: {
     flex: 1,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
-    marginTop: 4,
-  },
-  content: {
-    padding: 16,
-  },
-  resultCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-    elevation: 4,
+  glassCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.7)',
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
   },
-  resultIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: `${Theme.colors.primary}15`,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  resultValue: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: Theme.colors.primary,
-  },
-  resultLabel: {
-    fontSize: 16,
-    color: Theme.colors.textSecondary,
-    marginTop: 8,
-  },
-  confidenceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${Theme.colors.success}15`,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginTop: 16,
-    gap: 6,
-  },
-  confidenceText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Theme.colors.success,
-  },
-  recommendationCard: {
-    backgroundColor: `${Theme.colors.primary}10`,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: Theme.colors.primary,
+  cardBlur: {
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.4)',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 12,
+  },
+  cardIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Theme.colors.text,
-  },
-  recommendationText: {
-    fontSize: 16,
-    color: Theme.colors.text,
-    lineHeight: 24,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Theme.colors.text,
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
     fontSize: 13,
-    color: Theme.colors.textSecondary,
-    marginBottom: 16,
+    fontWeight: '800',
+    color: Theme.colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  scheduleItem: {
+  mainResultRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  scheduleLeft: {
+  miniLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Theme.colors.textMuted,
+    marginBottom: 4,
+  },
+  mainValue: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: Theme.colors.primary,
+  },
+  mainUnit: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Theme.colors.textMuted,
+  },
+  confidenceCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: Theme.colors.success,
+  },
+  confBlur: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  confValue: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: Theme.colors.success,
+  },
+  confLabel: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: Theme.colors.textMuted,
+  },
+  recommendationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+  },
+  recommendationText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#166534',
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  summaryValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Theme.colors.text,
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Theme.colors.text,
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  scheduleItem: {
+    padding: 0,
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  scheduleTimeBox: {
     flex: 1,
   },
   scheduleDay: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '800',
     color: Theme.colors.text,
   },
-  scheduleTime: {
-    fontSize: 13,
-    color: Theme.colors.textSecondary,
+  scheduleTimeText: {
+    fontSize: 12,
+    color: Theme.colors.textMuted,
     marginTop: 2,
   },
-  scheduleRight: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  scheduleAmount: {
+  itemAmount: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: Theme.colors.primary,
-    marginBottom: 4,
+    marginBottom: 6,
   },
-  waterBar: {
-    width: '100%',
+  progressBg: {
     height: 6,
-    backgroundColor: '#e5e5e5',
+    width: 100,
+    backgroundColor: '#E2E8F0',
     borderRadius: 3,
     overflow: 'hidden',
   },
-  waterFill: {
+  progressFill: {
     height: '100%',
-    backgroundColor: Theme.colors.primary,
-  },
-  infoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  infoItem: {
-    width: (width - 64) / 2,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: Theme.colors.textSecondary,
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Theme.colors.text,
+    borderRadius: 3,
   },
   actions: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-    marginBottom: 24,
+    gap: 16,
+    marginTop: 24,
   },
-  secondaryButton: {
+  secondaryBtn: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 16,
-    borderRadius: 12,
+    height: 56,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: Theme.colors.primary,
-    backgroundColor: '#fff',
-  },
-  secondaryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Theme.colors.primary,
-  },
-  primaryButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: Theme.colors.primary,
+    gap: 10,
+  },
+  secondaryBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Theme.colors.primary,
+  },
+  primaryBtn: {
+    flex: 1.2,
+    height: 56,
+    borderRadius: 16,
+    overflow: 'hidden',
     elevation: 4,
     shadowColor: Theme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
   },
-  primaryButtonText: {
+  gradientBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  primaryBtnText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
+    fontWeight: '800',
+    color: 'white',
+  }
 });
