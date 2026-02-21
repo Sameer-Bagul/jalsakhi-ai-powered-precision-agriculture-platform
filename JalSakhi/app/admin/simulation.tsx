@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,6 +10,7 @@ import Slider from '@react-native-community/slider';
 
 export default function SimulationEngine() {
     const router = useRouter();
+    const { t } = useTranslation();
     const [rainfall, setRainfall] = useState(50);
     const [population, setPopulation] = useState(0);
     const [cropMix, setCropMix] = useState(false); // false = Normal, true = High Water
@@ -16,18 +18,18 @@ export default function SimulationEngine() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Simulation Engine" />
+            <AdminHeader title={t('admin.simulation.title')} />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.headerCard}>
                     <MaterialCommunityIcons name="flask-outline" size={32} color={Theme.colors.primary} />
                     <Text style={styles.introText}>
-                        Simulate future water scenarios by adjusting variables below. The AI engine will predict reservoir depletion and stress levels.
+                        {t('admin.simulation.intro')}
                     </Text>
                 </View>
 
                 <View style={styles.controlGroup}>
-                    <Text style={styles.label}>Expected Rainfall (Monsoon)</Text>
+                    <Text style={styles.label}>{t('admin.simulation.expectedRainfall')}</Text>
                     <View style={styles.sliderRow}>
                         <Text style={styles.sliderVal}>{rainfall}%</Text>
                         <Slider
@@ -42,11 +44,11 @@ export default function SimulationEngine() {
                             thumbTintColor={Theme.colors.primary}
                         />
                     </View>
-                    <Text style={styles.hint}>Percentage of normal annual rainfall.</Text>
+                    <Text style={styles.hint}>{t('admin.simulation.monsoonHint')}</Text>
                 </View>
 
                 <View style={styles.controlGroup}>
-                    <Text style={styles.label}>Population Growth</Text>
+                    <Text style={styles.label}>{t('admin.simulation.populationGrowth')}</Text>
                     <View style={styles.sliderRow}>
                         <Text style={styles.sliderVal}>+{population}%</Text>
                         <Slider
@@ -61,12 +63,12 @@ export default function SimulationEngine() {
                             thumbTintColor="#d97706"
                         />
                     </View>
-                    <Text style={styles.hint}>Projected increase in village population.</Text>
+                    <Text style={styles.hint}>{t('admin.simulation.populationHint')}</Text>
                 </View>
 
                 <View style={styles.controlGroup}>
                     <View style={styles.switchRow}>
-                        <Text style={styles.label}>High Water Crop Shift</Text>
+                        <Text style={styles.label}>{t('admin.simulation.highWaterCropShift')}</Text>
                         <Switch
                             value={cropMix}
                             onValueChange={setCropMix}
@@ -74,7 +76,7 @@ export default function SimulationEngine() {
                             thumbColor={cropMix ? Theme.colors.success : '#f4f4f5'}
                         />
                     </View>
-                    <Text style={styles.hint}>Simulate if 30% farmers switch to water-intensive crops (Rice/Sugarcane).</Text>
+                    <Text style={styles.hint}>{t('admin.simulation.cropShiftHint')}</Text>
                 </View>
 
                 <TouchableOpacity
@@ -82,7 +84,7 @@ export default function SimulationEngine() {
                     onPress={() => router.push({ pathname: '/admin/run-simulation', params: { rainfall, population, cropMix: cropMix ? 'High' : 'Normal' } })}
                 >
                     <MaterialCommunityIcons name="play" size={24} color="white" />
-                    <Text style={styles.runBtnText}>Run Simulation</Text>
+                    <Text style={styles.runBtnText}>{t('admin.simulation.run')}</Text>
                 </TouchableOpacity>
 
             </ScrollView>

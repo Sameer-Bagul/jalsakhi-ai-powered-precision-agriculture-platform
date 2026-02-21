@@ -4,9 +4,11 @@ import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { MaterialCommunityIcons, MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
     const router = useRouter();
+    const { t } = useTranslation();
 
     const handleRoleSelect = (role: 'farmer' | 'admin') => {
         if (role === 'farmer') {
@@ -26,9 +28,9 @@ export default function WelcomeScreen() {
                 <View style={styles.content}>
                     {/* Heading */}
                     <View style={styles.top}>
-                        <Text style={styles.heading}>Choose</Text>
-                        <Text style={styles.heading2}>Your Role</Text>
-                        <Text style={styles.sub}>Select how you'll use JalSakhi</Text>
+                        <Text style={styles.heading}>{t('role.chooseRole')}</Text>
+                        <Text style={styles.heading2}></Text>
+                        <Text style={styles.sub}>{t('role.selectHow')}</Text>
                     </View>
 
                     {/* Role Cards */}
@@ -42,8 +44,8 @@ export default function WelcomeScreen() {
                                 <MaterialCommunityIcons name="sprout" size={36} color={Theme.colors.primary} />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={styles.cardTitle}>Farmer</Text>
-                                <Text style={styles.cardDesc}>Monitor irrigation and farm health</Text>
+                                <Text style={styles.cardTitle}>{t('role.iAmFarmer')}</Text>
+                                <Text style={styles.cardDesc}>{t('role.farmerMonitor')}</Text>
                             </View>
                             <Feather name="arrow-right" size={20} color={Theme.colors.primary} />
                         </TouchableOpacity>
@@ -57,8 +59,8 @@ export default function WelcomeScreen() {
                                 <MaterialIcons name="admin-panel-settings" size={36} color="#3b82f6" />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={styles.cardTitle}>Village Admin</Text>
-                                <Text style={styles.cardDesc}>Manage village water distribution</Text>
+                                <Text style={styles.cardTitle}>{t('role.villageAdmin')}</Text>
+                                <Text style={styles.cardDesc}>{t('role.adminManage')}</Text>
                             </View>
                             <Feather name="arrow-right" size={20} color="#3b82f6" />
                         </TouchableOpacity>
@@ -70,12 +72,12 @@ export default function WelcomeScreen() {
                         onPress={() => router.push('/(auth)/login')}
                     >
                         <Text style={styles.loginText}>
-                            Already have an account? <Text style={{ fontWeight: '800', color: Theme.colors.primary }}>Sign In</Text>
+                            {t('role.alreadyHaveAccount')} <Text style={{ fontWeight: '800', color: Theme.colors.primary }}>{t('role.signIn')}</Text>
                         </Text>
                     </TouchableOpacity>
 
                     {/* Footer */}
-                    <Text style={styles.footer}>Made with ❤️ for farmers</Text>
+                    <Text style={styles.footer}>{t('role.madeWithLove')}</Text>
                 </View>
             </SafeAreaView>
         </ImageBackground>

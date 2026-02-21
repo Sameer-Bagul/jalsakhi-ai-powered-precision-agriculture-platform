@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ const REPORTS = [
 ];
 
 export default function WastageReports() {
+    const { t } = useTranslation();
     const renderItem = ({ item }: { item: typeof REPORTS[0] }) => (
         <View style={styles.card}>
             <View style={styles.header}>
@@ -33,7 +35,7 @@ export default function WastageReports() {
                 </View>
                 <View style={styles.headerText}>
                     <Text style={styles.location}>{item.location}</Text>
-                    <Text style={styles.meta}>{item.type} • {item.time}</Text>
+                    <Text style={styles.meta}>{t(`admin.wastage.types.${item.type.toLowerCase()}`)} • {item.time}</Text>
                 </View>
                 <View style={[
                     styles.statusBadge,
@@ -41,14 +43,14 @@ export default function WastageReports() {
                     item.status === 'In Progress' && { backgroundColor: '#fbbf24' },
                     item.status === 'Resolved' && { backgroundColor: Theme.colors.success },
                 ]}>
-                    <Text style={styles.statusText}>{item.status}</Text>
+                    <Text style={styles.statusText}>{t(`common.${item.status === 'In Progress' ? 'inProgress' : item.status.toLowerCase()}`)}</Text>
                 </View>
             </View>
 
             <View style={styles.footer}>
-                <Text style={styles.reporter}>Reported by: {item.reporter}</Text>
+                <Text style={styles.reporter}>{t('admin.wastage.reportedBy', { reporter: item.reporter === 'System Sensor' ? t('admin.wastage.reporters.systemSensor') : item.reporter })}</Text>
                 <TouchableOpacity>
-                    <Text style={styles.actionLink}>View Details</Text>
+                    <Text style={styles.actionLink}>{t('admin.wastage.viewDetails')}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -57,21 +59,21 @@ export default function WastageReports() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Wastage Reports" actionLabel="Export" onActionPress={() => { }} />
+            <AdminHeader title={t('admin.wastage.title')} actionLabel={t('admin.wastage.export')} onActionPress={() => { }} />
 
             <View style={styles.content}>
                 <View style={styles.statsRow}>
                     <View style={[styles.statCard, { backgroundColor: '#fef2f2', borderColor: '#fee2e2' }]}>
                         <Text style={[styles.statVal, { color: Theme.colors.error }]}>5</Text>
-                        <Text style={styles.statLab}>Critical Leakages</Text>
+                        <Text style={styles.statLab}>{t('admin.wastage.criticalLeakages')}</Text>
                     </View>
                     <View style={[styles.statCard, { backgroundColor: '#fffbeb', borderColor: '#fef3c7' }]}>
                         <Text style={[styles.statVal, { color: '#d97706' }]}>12%</Text>
-                        <Text style={styles.statLab}>Loss Rate</Text>
+                        <Text style={styles.statLab}>{t('admin.wastage.lossRate')}</Text>
                     </View>
                 </View>
 
-                <Text style={styles.listTitle}>Recent Incidents</Text>
+                <Text style={styles.listTitle}>{t('admin.wastage.recentIncidents')}</Text>
                 <FlatList
                     data={REPORTS}
                     keyExtractor={(item) => item.id}

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLayout() {
+    const { t } = useTranslation();
     return (
         <Tabs
             screenOptions={{
@@ -27,14 +29,14 @@ export default function AdminLayout() {
             <Tabs.Screen
                 name="dashboard"
                 options={{
-                    title: 'Home',
+                    title: t('common.home'),
                     tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="farmers-list"
                 options={{
-                    title: 'Farmers',
+                    title: t('admin.farmers'),
                     tabBarIcon: ({ color }) => <Ionicons name="people" size={24} color={color} />,
                 }}
             />

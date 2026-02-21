@@ -1,22 +1,24 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { BentoTile } from '../../components/bento/BentoTile';
+import { useTranslation } from 'react-i18next';
 import { Logger } from '../../utils/Logger';
 
 import { MaterialCommunityIcons, MaterialIcons, Feather } from '@expo/vector-icons';
 
-export default function AdminDashboard() {
+export default function AdminDashboardIndex() {
     const router = useRouter();
+    const { t } = useTranslation();
 
     const handleTilePress = (screen: string) => {
         Logger.info('AdminDashboard', `Navigating to: ${screen}`);
         if (screen === 'water-allocation') router.push('/admin/water-allocation-optimizer');
-        if (screen === 'reservoir-status') router.push('/(admin)/reservoir-status');
-        if (screen === 'village-analytics') router.push('/(admin)/village-analytics');
-        if (screen === 'farmer-management') router.push('/(admin)/farmer-management');
+        if (screen === 'reservoir-status') router.push('/admin/reservoir-status');
+        if (screen === 'village-analytics') router.push('/admin/analytics');
+        if (screen === 'farmer-management') router.push('/admin/farmers-list');
     };
 
     return (
@@ -26,36 +28,36 @@ export default function AdminDashboard() {
                     <View>
                         <View style={styles.villageRow}>
                             <MaterialIcons name="location-on" size={16} color={Theme.colors.emerald} />
-                            <Text style={styles.welcomeText}>Village: Shirur</Text>
+                            <Text style={styles.welcomeText}>{t('signup.village')}: Shirur</Text>
                         </View>
-                        <Text style={styles.userName}>Admin Dashboard</Text>
+                        <Text style={styles.userName}>{t('admin.dashboard')}</Text>
                     </View>
-                    <TouchableOpacity style={styles.profileButton} onPress={() => router.push('/(auth)/role')}>
-                        <MaterialIcons name="admin-panel-settings" size={26} color={Theme.colors.forest} />
+                    <TouchableOpacity style={styles.logoButton} onPress={() => router.push('/profile')}>
+                        <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.villageAnalysis}>
-                    <Text style={styles.sectionTitle}>Village Analysis (Feb 2026)</Text>
+                    <Text style={styles.sectionTitle}>{t('admin.villageAnalysis')} (Feb 2026)</Text>
                     <View style={styles.analysisGrid}>
                         <View style={styles.analysisItem}>
                             <Text style={styles.analysisVal}>142</Text>
-                            <Text style={styles.analysisLabel}>Farmers</Text>
+                            <Text style={styles.analysisLabel}>{t('admin.farmers')}</Text>
                         </View>
                         <View style={styles.analysisItem}>
                             <Text style={styles.analysisVal}>320</Text>
-                            <Text style={styles.analysisLabel}>Farms</Text>
+                            <Text style={styles.analysisLabel}>{t('admin.farms')}</Text>
                         </View>
                         <View style={styles.analysisItem}>
                             <Text style={styles.analysisVal}>85%</Text>
-                            <Text style={styles.analysisLabel}>Efficiency</Text>
+                            <Text style={styles.analysisLabel}>{t('common.efficiency')}</Text>
                         </View>
                     </View>
                 </View>
 
                 <View style={styles.grid}>
                     <BentoTile
-                        title="Water Allocation"
+                        title={t('admin.waterAllocation')}
                         subtitle="Current Period: Feb 17"
                         size="wide"
                         icon={<MaterialCommunityIcons name="water" size={24} color={Theme.colors.emerald} />}
@@ -64,17 +66,17 @@ export default function AdminDashboard() {
                         <View style={styles.allocationSummary}>
                             <View style={styles.allocStat}>
                                 <Text style={styles.allocValue}>850K L</Text>
-                                <Text style={styles.allocLabel}>Total Village Quota</Text>
+                                <Text style={styles.allocLabel}>{t('admin.totalVillageQuota')}</Text>
                             </View>
                             <View style={styles.allocStat}>
                                 <Text style={styles.allocValue}>520K L</Text>
-                                <Text style={styles.allocLabel}>Allocated Today</Text>
+                                <Text style={styles.allocLabel}>{t('admin.allocatedToday')}</Text>
                             </View>
                         </View>
                     </BentoTile>
 
                     <BentoTile
-                        title="Reservoir Status"
+                        title={t('admin.reservoirStatus')}
                         subtitle="75% Full"
                         size="large"
                         icon={<MaterialCommunityIcons name="waves" size={24} color={Theme.colors.emerald} />}
@@ -85,31 +87,31 @@ export default function AdminDashboard() {
                                 <View style={[styles.waterFill, { height: '75%' }]} />
                             </View>
                             <Text style={styles.focusValue}>450,000 L</Text>
-                            <Text style={styles.focusLabel}>Current Volume</Text>
+                            <Text style={styles.focusLabel}>{t('admin.currentVolume')}</Text>
                         </View>
                     </BentoTile>
 
                     <View style={styles.row}>
                         <BentoTile
-                            title="Analytics"
+                            title={t('admin.analytics')}
                             subtitle="Efficiency"
                             size="medium"
                             icon={<MaterialIcons name="analytics" size={24} color={Theme.colors.emerald} />}
                             onPress={() => handleTilePress('village-analytics')}
                         >
                             <Text style={styles.statValue}>68%</Text>
-                            <Text style={styles.statLabel}>Water Efficiency</Text>
+                            <Text style={styles.statLabel}>{t('admin.waterEfficiency')}</Text>
                         </BentoTile>
 
                         <BentoTile
-                            title="Farmers"
+                            title={t('admin.farmers')}
                             subtitle="Management"
                             size="medium"
                             icon={<MaterialIcons name="people" size={24} color={Theme.colors.emerald} />}
                             onPress={() => handleTilePress('farmer-management')}
                         >
                             <Text style={styles.statValue}>142</Text>
-                            <Text style={styles.statLabel}>Total Farmers</Text>
+                            <Text style={styles.statLabel}>{t('admin.farmers')}</Text>
                         </BentoTile>
                     </View>
                 </View>
@@ -128,12 +130,13 @@ const styles = StyleSheet.create({
     villageRow: { flexDirection: 'row', alignItems: 'center' },
     welcomeText: { fontSize: 16, color: Theme.colors.moss, marginLeft: 4 },
     userName: { fontSize: 24, fontWeight: 'bold', color: Theme.colors.forest, marginTop: 4 },
-    profileButton: {
-        width: 50, height: 50, borderRadius: 25,
-        backgroundColor: Theme.colors.card, alignItems: 'center',
+    logoButton: {
+        width: 50, height: 50, borderRadius: 16,
+        backgroundColor: '#fff', alignItems: 'center',
         justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border,
+        ...Theme.shadows.soft,
     },
-    profileIcon: { fontSize: 24 },
+    headerLogo: { width: 36, height: 36 },
     villageAnalysis: { marginBottom: 24, backgroundColor: Theme.colors.dew, padding: 20, borderRadius: 24 },
     sectionTitle: { fontSize: 16, fontWeight: '800', color: Theme.colors.forest, marginBottom: 16 },
     analysisGrid: { flexDirection: 'row', justifyContent: 'space-between' },

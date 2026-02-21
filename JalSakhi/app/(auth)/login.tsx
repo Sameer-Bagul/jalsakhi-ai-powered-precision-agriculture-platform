@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, TextInput, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, TextInput, ImageBackground, Image } from 'react-native';
 import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
     const role = (params.role as 'FARMER' | 'ADMIN') || 'FARMER';
     const { login } = useAuth();
+    const { t } = useTranslation();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,7 +22,7 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Missing Fields', 'Please enter your email and password.');
+            Alert.alert(t('auth.missingFields'), t('auth.enterEmailPassword'));
             return;
         }
 
@@ -34,7 +36,7 @@ export default function LoginScreen() {
                     router.replace('/admin/dashboard');
                 }
             } else {
-                Alert.alert('Login Failed', result.message || 'Invalid credentials.');
+                Alert.alert(t('auth.loginFailed'), result.message || t('auth.invalidCreds'));
             }
         } catch (error: any) {
             Alert.alert('Error', error.message || 'Login failed.');
@@ -65,15 +67,26 @@ export default function LoginScreen() {
                             <Feather name="arrow-left" size={22} color={Theme.colors.text} />
                         </TouchableOpacity>
 
+                        {/* Logo */}
+                        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+                            <View style={styles.logoWrap}>
+                                <Image
+                                    source={require('../../assets/images/logo.png')}
+                                    style={styles.logo}
+                                    resizeMode="contain"
+                                />
+                            </View>
+                        </View>
+
                         {/* Heading */}
-                        <Text style={styles.greeting}>Welcome</Text>
-                        <Text style={styles.greeting2}>Back 👋</Text>
+                        <Text style={styles.greeting}>{t('auth.welcome')}</Text>
+                        <Text style={styles.greeting2}>{t('auth.back')}</Text>
                         <Text style={styles.sub}>
-                            Sign into your {role === 'FARMER' ? 'farmer' : 'admin'} account
+                            {t('auth.signInTo', { role: role === 'FARMER' ? t('role.farmer').toLowerCase() : t('role.admin').toLowerCase() })}
                         </Text>
 
                         {/* Email */}
-                        <Text style={styles.label}>Email</Text>
+                        <Text style={styles.label}>{t('auth.email')}</Text>
                         <View style={styles.inputRow}>
                             <Feather name="mail" size={18} color={Theme.colors.primary} />
                             <TextInput
@@ -88,12 +101,12 @@ export default function LoginScreen() {
                         </View>
 
                         {/* Password */}
-                        <Text style={styles.label}>Password</Text>
+                        <Text style={styles.label}>{t('auth.password')}</Text>
                         <View style={styles.inputRow}>
                             <Feather name="lock" size={18} color={Theme.colors.primary} />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Enter password"
+                                placeholder={t('auth.enterPassword')}
                                 placeholderTextColor="rgba(0,0,0,0.25)"
                                 secureTextEntry={!showPassword}
                                 value={password}
@@ -106,7 +119,7 @@ export default function LoginScreen() {
 
                         {/* Login Button */}
                         <CustomButton
-                            title="Sign In"
+                            title={t('auth.signInBtn')}
                             onPress={handleLogin}
                             loading={loading}
                             style={styles.btn}
@@ -118,7 +131,7 @@ export default function LoginScreen() {
                             style={styles.linkBtn}
                         >
                             <Text style={styles.linkText}>
-                                Don't have an account? <Text style={{ fontWeight: '800', color: Theme.colors.primary }}>Sign Up</Text>
+                                {t('auth.noAccount')} <Text style={{ fontWeight: '800', color: Theme.colors.primary }}>{t('auth.signUp')}</Text>
                             </Text>
                         </TouchableOpacity>
                     </ScrollView>
@@ -147,6 +160,12 @@ const styles = StyleSheet.create({
         marginBottom: 36,
         ...Theme.shadows.soft,
     },
+    logoWrap: {
+        width: 100, height: 100, borderRadius: 30,
+        backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
+        ...Theme.shadows.medium,
+    },
+    logo: { width: 70, height: 70 },
     greeting: {
         fontSize: 38, fontWeight: '900', color: Theme.colors.text,
         letterSpacing: -1, lineHeight: 44,

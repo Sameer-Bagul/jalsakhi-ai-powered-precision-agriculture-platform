@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../constants/JalSakhiTheme';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -14,13 +15,22 @@ const NOTIFICATIONS = [
 
 export default function Notifications() {
     const router = useRouter();
+    const { t } = useTranslation();
+
+    const NOTIFICATIONS = [
+        { id: '1', title: t('notifications.waterAllocationApproved'), message: t('notifications.allocationApprovedMsg', { amount: 500 }), time: '2 mins ago', type: 'success', read: false },
+        { id: '2', title: t('notifications.criticalLowLevel'), message: t('notifications.reservoirLowMsg'), time: '1 hour ago', type: 'critical', read: false },
+        { id: '3', title: t('notifications.weatherAlert'), message: t('notifications.rainExpectedMsg'), time: '5 hours ago', type: 'info', read: true },
+        { id: '4', title: t('notifications.weeklyReportReady'), message: t('notifications.reportReadyMsg'), time: '1 day ago', type: 'info', read: true },
+    ];
+
     const [list, setList] = useState(NOTIFICATIONS);
 
     const markAllRead = () => {
         setList(list.map(n => ({ ...n, read: true })));
     };
 
-    const renderItem = ({ item }: { item: typeof NOTIFICATIONS[0] }) => (
+    const renderItem = ({ item }: { item: any }) => (
         <TouchableOpacity style={[styles.card, !item.read && styles.unreadCard]}>
             <View style={[styles.iconBox,
             item.type === 'success' && { backgroundColor: '#dcfce7' },
@@ -55,9 +65,9 @@ export default function Notifications() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <Feather name="arrow-left" size={24} color={Theme.colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Notifications</Text>
+                <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
                 <TouchableOpacity onPress={markAllRead}>
-                    <Text style={styles.actionText}>Read All</Text>
+                    <Text style={styles.actionText}>{t('notifications.readAll')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -70,7 +80,7 @@ export default function Notifications() {
                 ListEmptyComponent={
                     <View style={styles.empty}>
                         <Feather name="bell-off" size={48} color={Theme.colors.textMuted} />
-                        <Text style={styles.emptyText}>No notifications</Text>
+                        <Text style={styles.emptyText}>{t('notifications.noNotifications')}</Text>
                     </View>
                 }
             />

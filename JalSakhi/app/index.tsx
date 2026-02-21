@@ -5,11 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../constants/JalSakhiTheme';
 import { Feather, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Index() {
     const router = useRouter();
+    const { t } = useTranslation();
     const [splashLoading, setSplashLoading] = useState(true);
     const [selectedRole, setSelectedRole] = useState<'FARMER' | 'ADMIN' | null>(null);
 
@@ -46,8 +49,8 @@ export default function Index() {
                         <View style={styles.splashLogoWrap}>
                             <Image source={require('../assets/images/logo.png')} style={styles.splashLogo} resizeMode="contain" />
                         </View>
-                        <Text style={styles.splashTitle}>JalSakhi</Text>
-                        <Text style={styles.splashTagline}>Smart Water for Every Farm</Text>
+                        <Text style={styles.splashTitle}>{t('common.appName')}</Text>
+                        <Text style={styles.splashTagline}>{t('splash.tagline')}</Text>
                         <View style={styles.splashBar}><View style={styles.splashBarFill} /></View>
                     </Animated.View>
                 </LinearGradient>
@@ -65,14 +68,17 @@ export default function Index() {
             <SafeAreaView style={styles.safeArea}>
                 {/* Top section — branding */}
                 <View style={styles.topSection}>
-                    <Image source={require('../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
-                    <Text style={styles.appName}>JalSakhi</Text>
-                    <Text style={styles.tagline}>Smart Water Management for Indian Agriculture</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <Image source={require('../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+                        <LanguageSelector />
+                    </View>
+                    <Text style={styles.appName}>{t('common.appName')}</Text>
+                    <Text style={styles.tagline}>{t('common.tagline')}</Text>
                 </View>
 
                 {/* Role selection */}
                 <View style={styles.roleSection}>
-                    <Text style={styles.roleLabel}>I am a</Text>
+                    <Text style={styles.roleLabel}>{t('role.iAmA')}</Text>
 
                     <View style={styles.roleRow}>
                         {/* Farmer Card */}
@@ -89,9 +95,9 @@ export default function Index() {
                                 />
                             </View>
                             <Text style={[styles.roleTitle, selectedRole === 'FARMER' && styles.roleTitleSelected]}>
-                                Farmer
+                                {t('role.farmer')}
                             </Text>
-                            <Text style={styles.roleDesc}>Manage crops & water</Text>
+                            <Text style={styles.roleDesc}>{t('role.farmerDesc')}</Text>
                             {selectedRole === 'FARMER' && (
                                 <View style={styles.checkBadge}>
                                     <Feather name="check" size={14} color="#fff" />
@@ -113,9 +119,9 @@ export default function Index() {
                                 />
                             </View>
                             <Text style={[styles.roleTitle, selectedRole === 'ADMIN' && styles.roleTitleSelected]}>
-                                Admin
+                                {t('role.admin')}
                             </Text>
-                            <Text style={styles.roleDesc}>Village water admin</Text>
+                            <Text style={styles.roleDesc}>{t('role.adminDesc')}</Text>
                             {selectedRole === 'ADMIN' && (
                                 <View style={styles.checkBadge}>
                                     <Feather name="check" size={14} color="#fff" />
@@ -133,7 +139,7 @@ export default function Index() {
                         disabled={!selectedRole}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.primaryBtnText}>Get Started</Text>
+                        <Text style={styles.primaryBtnText}>{t('role.getStarted')}</Text>
                         <Feather name="arrow-right" size={20} color="#fff" />
                     </TouchableOpacity>
 
@@ -141,10 +147,10 @@ export default function Index() {
                         style={styles.secondaryBtn}
                         onPress={() => router.push({ pathname: '/(auth)/login', params: { role: selectedRole || 'FARMER' } })}
                     >
-                        <Text style={styles.secondaryBtnText}>Already have an account? <Text style={{ fontWeight: '800' }}>Sign In</Text></Text>
+                        <Text style={styles.secondaryBtnText}>{t('role.alreadyHaveAccount')} <Text style={{ fontWeight: '800' }}>{t('role.signIn')}</Text></Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.footerText}>Empowering villages, saving water 💧</Text>
+                    <Text style={styles.footerText}>{t('common.footer')}</Text>
                 </View>
             </SafeAreaView>
         </ImageBackground>
