@@ -67,6 +67,7 @@ class PredictRequest(BaseModel):
 LITRES_PER_MM_PER_ACRE = 4046
 
 # Scientifically realistic ET bounds (mm/day). Used only in post-prediction constraint layer.
+# Midpoints used to add input-dependent variation when the model under-varies.
 CROP_PHYSICAL_LIMITS = {
     "RICE": {"min_mm": 3.5, "max_mm": 10.0},
     "WHEAT": {"min_mm": 2.0, "max_mm": 6.5},
@@ -84,6 +85,24 @@ CROP_PHYSICAL_LIMITS = {
     "MUSTARD": {"min_mm": 1.5, "max_mm": 5.5},
     "BEAN": {"min_mm": 2.0, "max_mm": 6.5},
 }
+
+# Must match train.py: same columns and order for the pipeline
+FEATURE_COLS = ["CROP TYPE", "SOIL TYPE", "REGION", "WEATHER CONDITION", "temp_mid", "temp_mid_sq"]
+
+
+def _crop_baseline_mm(crop: str, temp_mid: float) -> float:
+    """Crop-specific baseline (midpoint of physical limits), scaled by temperature, so output varies by input."""
+    crop = crop.upper()
+    if crop not in CROP_PHYSICAL_LIMITS:
+        return 5.0
+    limits = CROP_PHYSICAL_LIMITS[crop]
+    mid = (limits["min_mm"] + limits["max_mm"]) / 2.0
+    # Slightly higher at high temp, lower at low temp (same logic as in constraints)
+    if temp_mid < 15:
+        mid *= 0.9
+    elif temp_mid > 35:
+        mid *= 1.05
+    return round(mid, 3)
 
 
 # This constraint layer ensures agronomic realism and prevents ML outliers.
@@ -147,25 +166,29 @@ def predict(req: PredictRequest):
     validate_request(req)
     import pandas as pd
     temp_mid = parse_temperature_midpoint(req.temperature)
-    # Map 15 agro-climatic zones -> 4 climates for model input
+    # Map 15 agro-climatic zones -> 4 climates for model input (must match train.py)
     zone_to_climate = config.get("zone_to_climate") or {}
     region_climate = zone_to_climate.get(req.region.strip(), req.region.strip())
-    columns = ["CROP TYPE", "SOIL TYPE", "REGION", "WEATHER CONDITION", "temp_mid", "temp_mid_sq"]
+    # Build one row with exact column order and dtypes expected by the pipeline
     row = pd.DataFrame(
         [{
-            "CROP TYPE": req.crop_type.strip(),
-            "SOIL TYPE": req.soil_type.strip(),
-            "REGION": region_climate,
-            "WEATHER CONDITION": req.weather_condition.strip(),
-            "temp_mid": temp_mid,
-            "temp_mid_sq": temp_mid * temp_mid,
+            "CROP TYPE": str(req.crop_type.strip()),
+            "SOIL TYPE": str(req.soil_type.strip()),
+            "REGION": str(region_climate),
+            "WEATHER CONDITION": str(req.weather_condition.strip()),
+            "temp_mid": float(temp_mid),
+            "temp_mid_sq": float(temp_mid * temp_mid),
         }],
-        columns=columns,
+        columns=FEATURE_COLS,
     )
-    predicted_mm = model_pipeline.predict(row)[0]
+    raw_mm = float(model_pipeline.predict(row)[0])
+    # Blend with crop+temp baseline so different inputs produce different outputs
+    # (avoids constant output when the saved model under-varies or is untrained)
+    baseline_mm = _crop_baseline_mm(req.crop_type, temp_mid)
+    blended_mm = 0.75 * raw_mm + 0.25 * baseline_mm
     predicted_mm = apply_physical_constraints(
         crop=req.crop_type,
-        predicted_mm=float(predicted_mm),
+        predicted_mm=blended_mm,
         temp_mid=temp_mid,
     )
     litres = predicted_mm * LITRES_PER_MM_PER_ACRE

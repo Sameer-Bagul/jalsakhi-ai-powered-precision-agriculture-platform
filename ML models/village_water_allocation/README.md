@@ -21,7 +21,17 @@ Optional: edit `config.json` to set Crop Water and Soil Moisture API base URLs (
 uvicorn api:app --host 0.0.0.0 --port 8003
 ```
 
-Ensure Crop Water API is running (e.g. port 8001) if you do not send `crop_water_requirement_mm_per_day` per farm.
+**Required for live crop-water lookup:** Run the **Crop Water API** (Model 1) on **port 8001**. If port 8001 is running a different service (e.g. Soil Moisture API), you will get `422 Unprocessable Content` when optimizing.
+
+```bash
+# In a separate terminal, from repo root:
+cd "ML models/Crop_Water_Model"
+pip install -r requirements.txt
+# Train first if model.joblib is missing: python train.py
+uvicorn main:app --host 0.0.0.0 --port 8001
+```
+
+Optional: Soil Moisture API can run on 8002. Edit `config.json` if your Crop Water or Soil Moisture APIs use different ports.
 
 ## API
 
