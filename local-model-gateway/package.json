@@ -4,7 +4,8 @@
   "description": "Secure local AI inference gateway for hackathon demo",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node check-unified-api.js"
   },
   "engines": {
     "node": ">=18.0.0"

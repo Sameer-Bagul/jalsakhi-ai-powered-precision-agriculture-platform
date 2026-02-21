@@ -23,13 +23,14 @@ Empty or invalid JSON body is rejected with **400 Bad Request**.
 
 ### Unified URL: ML model proxies (no API key)
 
-When the Crop Water (8001), Soil Moisture (8000), and Village Water (8003) APIs are running locally, the gateway proxies them under one base URL so a single ngrok tunnel exposes all three:
+When the Crop Water (8001), Soil Moisture (8000), Village Water (8003), and Chatbot (8004) APIs are running locally, the gateway proxies them under one base URL so a single ngrok tunnel exposes all four:
 
 | Prefix | Proxied to | Example |
 |--------|------------|--------|
 | `/crop-water/*` | Crop Water API (default `localhost:8001`) | `POST /crop-water/predict` |
 | `/soil-moisture/*` | Soil Moisture API (default `localhost:8000`) | `POST /soil-moisture/predict/sensor` |
 | `/village-water/*` | Village Water API (default `localhost:8003`) | `POST /village-water/optimize` |
+| `/chatbot/*` | Chatbot API (default `localhost:8004`) | `POST /chatbot/chat` |
 
 - **GET** `https://your-ngrok-url/crop-water/health` → Crop Water health  
 - **POST** `https://your-ngrok-url/crop-water/predict` → Crop Water predict (same body as Model 1)  
@@ -37,8 +38,10 @@ When the Crop Water (8001), Soil Moisture (8000), and Village Water (8003) APIs 
 - **POST** `https://your-ngrok-url/soil-moisture/predict/sensor` or `/soil-moisture/predict/location` → Soil Moisture predict  
 - **GET** `https://your-ngrok-url/village-water/health` → Village Water health  
 - **POST** `https://your-ngrok-url/village-water/optimize` → Village Water optimize  
+- **GET** `https://your-ngrok-url/chatbot/health` → Chatbot health  
+- **POST** `https://your-ngrok-url/chatbot/chat` → Chatbot chat (body: `{"message": "...", "language": "English"}`)  
 
-Proxy targets are configured via `CROP_WATER_API_URL`, `SOIL_MOISTURE_API_URL`, `VILLAGE_WATER_API_URL` (see `.env.example`). If a backend is down, the gateway returns **502**.
+Proxy targets are configured via `CROP_WATER_API_URL`, `SOIL_MOISTURE_API_URL`, `VILLAGE_WATER_API_URL`, `CHATBOT_API_URL` (see `.env.example`). If a backend is down, the gateway returns **502**.
 
 ## Setup
 

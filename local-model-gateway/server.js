@@ -16,6 +16,7 @@ const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 100;
 const CROP_WATER_API_URL = process.env.CROP_WATER_API_URL || 'http://localhost:8001';
 const SOIL_MOISTURE_API_URL = process.env.SOIL_MOISTURE_API_URL || 'http://localhost:8000';
 const VILLAGE_WATER_API_URL = process.env.VILLAGE_WATER_API_URL || 'http://localhost:8003';
+const CHATBOT_API_URL = process.env.CHATBOT_API_URL || 'http://localhost:8004';
 
 function log(level, message, meta = {}) {
   const entry = {
@@ -109,6 +110,20 @@ app.use(
       error: (err, req, res) => {
         log('error', 'Village Water proxy error', { error: err.message });
         res.status(502).json({ error: 'Village Water API unavailable' });
+      },
+    },
+  })
+);
+app.use(
+  '/chatbot',
+  createProxyMiddleware({
+    target: CHATBOT_API_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/chatbot': '' },
+    on: {
+      error: (err, req, res) => {
+        log('error', 'Chatbot proxy error', { error: err.message });
+        res.status(502).json({ error: 'Chatbot API unavailable' });
       },
     },
   })
