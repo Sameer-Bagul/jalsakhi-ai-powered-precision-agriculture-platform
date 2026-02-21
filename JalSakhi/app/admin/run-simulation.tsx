@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { LineChart } from 'react-native-chart-kit';
@@ -13,6 +14,7 @@ const screenWidth = Dimensions.get('window').width;
 export default function RunSimulation() {
     const params = useLocalSearchParams();
     const router = useRouter();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,8 +26,8 @@ export default function RunSimulation() {
             <SafeAreaView style={styles.loadingContainer}>
                 <Stack.Screen options={{ headerShown: false }} />
                 <ActivityIndicator size="large" color={Theme.colors.primary} />
-                <Text style={styles.loadingText}>Running AI Model...</Text>
-                <Text style={styles.loadingSub}>Calculating depletion rates based on {params.rainfall || 50}% rainfall</Text>
+                <Text style={styles.loadingText}>{t('admin.simulation.running')}</Text>
+                <Text style={styles.loadingSub}>{t('admin.simulation.calculating', { percent: params.rainfall || 50 })}</Text>
             </SafeAreaView>
         );
     }
@@ -33,19 +35,19 @@ export default function RunSimulation() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Simulation Results" />
+            <AdminHeader title={t('admin.simulation.results')} />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
                 <View style={[styles.resultBanner, { backgroundColor: '#fee2e2', borderColor: '#fecaca' }]}>
                     <Feather name="alert-triangle" size={24} color={Theme.colors.error} />
                     <View style={styles.bannerText}>
-                        <Text style={styles.bannerTitle}>CRITICAL RISK DETECTED</Text>
-                        <Text style={styles.bannerDesc}>Reservoirs deplete by early March under these conditions.</Text>
+                        <Text style={styles.bannerTitle}>{t('admin.simulation.criticalRiskDetected')}</Text>
+                        <Text style={styles.bannerDesc}>{t('admin.simulation.reservoirsDepleteBy')}</Text>
                     </View>
                 </View>
 
-                <BentoCard title="PROJECTED WATER LEVELS">
+                <BentoCard title={t('admin.simulation.projectedLevels')}>
                     <LineChart
                         data={{
                             labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -73,16 +75,16 @@ export default function RunSimulation() {
                 <View style={styles.statsRow}>
                     <View style={[styles.statItem, { borderColor: Theme.colors.error }]}>
                         <Text style={[styles.statVal, { color: Theme.colors.error }]}>-42%</Text>
-                        <Text style={styles.statLab}>Availability Gap</Text>
+                        <Text style={styles.statLab}>{t('admin.simulation.availabilityGap')}</Text>
                     </View>
                     <View style={[styles.statItem, { borderColor: '#d97706' }]}>
                         <Text style={[styles.statVal, { color: '#d97706' }]}>2.1K</Text>
-                        <Text style={styles.statLab}>Acres at Risk</Text>
+                        <Text style={styles.statLab}>{t('admin.simulation.acresAtRisk')}</Text>
                     </View>
                 </View>
 
                 <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
-                    <Text style={styles.actionBtnText}>Adjust Parameters</Text>
+                    <Text style={styles.actionBtnText}>{t('admin.simulation.adjustParams')}</Text>
                 </TouchableOpacity>
 
             </ScrollView>

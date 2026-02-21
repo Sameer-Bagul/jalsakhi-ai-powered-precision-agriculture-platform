@@ -7,10 +7,12 @@ import { CustomButton } from '../../components/shared/CustomButton';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function FarmerSignup() {
     const router = useRouter();
     const { register, verifyAccount } = useAuth();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState<'FORM' | 'OTP'>('FORM');
 
@@ -28,7 +30,7 @@ export default function FarmerSignup() {
 
     const handleRegister = async () => {
         if (!fullName || !email || !password) {
-            Alert.alert('Missing Fields', 'Please fill Name, Email, and Password.');
+            Alert.alert(t('auth.missingFields'), t('signup.fillRequired'));
             return;
         }
         setLoading(true);
@@ -38,10 +40,10 @@ export default function FarmerSignup() {
                 mobile, aadhar, gender, state, district, village, farmSize: landSize,
             });
             if (result.success) {
-                Alert.alert('OTP Sent', 'A verification code has been sent to your email.');
+                Alert.alert(t('signup.otpSent'), t('signup.otpSentMsg'));
                 setStep('OTP');
             } else {
-                Alert.alert('Error', result.message || 'Registration failed.');
+                Alert.alert(t('common.error'), result.message || t('signup.registrationFailed'));
             }
         } catch (error: any) {
             Alert.alert('Error', error.message || 'Registration failed.');
@@ -53,17 +55,17 @@ export default function FarmerSignup() {
     const handleVerifyOtp = async () => {
         const otpString = otp.join('');
         if (otpString.length < 6) {
-            Alert.alert('Invalid OTP', 'Please enter 6 digit OTP.');
+            Alert.alert(t('otp.invalidOtp'), t('otp.enter6Digit'));
             return;
         }
         setLoading(true);
         try {
             const result = await verifyAccount(otpString);
             if (result.success) {
-                Alert.alert('Success', 'Account verified! Welcome to JalSakhi.');
+                Alert.alert(t('common.success'), t('otp.accountVerified'));
                 router.replace('/farmer/dashboard');
             } else {
-                Alert.alert('Error', result.message || 'Invalid OTP.');
+                Alert.alert(t('common.error'), result.message || t('otp.invalidOtp'));
             }
         } catch (error: any) {
             Alert.alert('Error', error.message || 'Verification failed.');
@@ -100,20 +102,20 @@ export default function FarmerSignup() {
                         {step === 'FORM' ? (
                             <>
                                 {/* Heading */}
-                                <Text style={styles.heading}>Create</Text>
-                                <Text style={styles.heading2}>Account 🌱</Text>
-                                <Text style={styles.sub}>Join JalSakhi as a farmer</Text>
+                                <Text style={styles.heading}>{t('signup.create')}</Text>
+                                <Text style={styles.heading2}>{t('signup.account')}</Text>
+                                <Text style={styles.sub}>{t('signup.joinAs')}</Text>
 
                                 {/* Section: Account */}
-                                <Text style={styles.sectionLabel}>Account</Text>
-                                <CustomInput label="Full Name" placeholder="Rajesh Kumar" value={fullName} onChangeText={setFullName} />
-                                <CustomInput label="Email" placeholder="you@example.com" keyboardType="email-address" value={email} onChangeText={setEmail} />
-                                <CustomInput label="Password" placeholder="Create a password" secureTextEntry value={password} onChangeText={setPassword} />
+                                <Text style={styles.sectionLabel}>{t('signup.accountSection')}</Text>
+                                <CustomInput label={t('signup.fullName')} placeholder="Rajesh Kumar" value={fullName} onChangeText={setFullName} />
+                                <CustomInput label={t('signup.emailLabel')} placeholder="you@example.com" keyboardType="email-address" value={email} onChangeText={setEmail} />
+                                <CustomInput label={t('signup.passwordLabel')} placeholder={t('signup.createPassword')} secureTextEntry value={password} onChangeText={setPassword} />
 
                                 {/* Section: Personal */}
-                                <Text style={styles.sectionLabel}>Personal</Text>
+                                <Text style={styles.sectionLabel}>{t('signup.personalSection')}</Text>
                                 <CustomInput
-                                    label="Aadhar Number"
+                                    label={t('signup.aadhar')}
                                     placeholder="1234 5678 9012"
                                     keyboardType="number-pad"
                                     maxLength={12}
@@ -122,7 +124,7 @@ export default function FarmerSignup() {
                                     leftIcon={<MaterialIcons name="fingerprint" size={20} color={Theme.colors.textMuted} />}
                                 />
 
-                                <Text style={styles.fieldLabel}>Gender</Text>
+                                <Text style={styles.fieldLabel}>{t('signup.gender')}</Text>
                                 <View style={styles.genderRow}>
                                     {['Male', 'Female', 'Other'].map((g) => (
                                         <TouchableOpacity
@@ -130,24 +132,24 @@ export default function FarmerSignup() {
                                             style={[styles.genderPill, gender === g && styles.genderPillActive]}
                                             onPress={() => setGender(g as any)}
                                         >
-                                            <Text style={[styles.genderPillText, gender === g && styles.genderPillTextActive]}>{g}</Text>
+                                            <Text style={[styles.genderPillText, gender === g && styles.genderPillTextActive]}>{t(`signup.${g.toLowerCase()}`)}</Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
 
                                 {/* Section: Location */}
-                                <Text style={styles.sectionLabel}>Location</Text>
+                                <Text style={styles.sectionLabel}>{t('signup.locationSection')}</Text>
                                 <View style={styles.row}>
                                     <View style={{ flex: 1 }}>
-                                        <CustomInput label="State" placeholder="Maharashtra" value={state} onChangeText={setState} />
+                                        <CustomInput label={t('signup.state')} placeholder="Maharashtra" value={state} onChangeText={setState} />
                                     </View>
                                     <View style={{ flex: 1 }}>
-                                        <CustomInput label="District" placeholder="Pune" value={district} onChangeText={setDistrict} />
+                                        <CustomInput label={t('signup.district')} placeholder="Pune" value={district} onChangeText={setDistrict} />
                                     </View>
                                 </View>
-                                <CustomInput label="Village" placeholder="Indapur" value={village} onChangeText={setVillage} />
+                                <CustomInput label={t('signup.village')} placeholder="Indapur" value={village} onChangeText={setVillage} />
                                 <CustomInput
-                                    label="Land Area (Acres)"
+                                    label={t('signup.landArea')}
                                     placeholder="5.2"
                                     keyboardType="numeric"
                                     value={landSize}
@@ -156,9 +158,9 @@ export default function FarmerSignup() {
                                 />
 
                                 {/* Section: Contact */}
-                                <Text style={styles.sectionLabel}>Contact</Text>
+                                <Text style={styles.sectionLabel}>{t('signup.contactSection')}</Text>
                                 <CustomInput
-                                    label="Mobile Number"
+                                    label={t('signup.mobile')}
                                     placeholder="9876543210"
                                     keyboardType="phone-pad"
                                     maxLength={10}
@@ -168,7 +170,7 @@ export default function FarmerSignup() {
                                 />
 
                                 <CustomButton
-                                    title="Register & Verify"
+                                    title={t('signup.registerVerify')}
                                     onPress={handleRegister}
                                     loading={loading}
                                     style={styles.submitBtn}
@@ -177,9 +179,9 @@ export default function FarmerSignup() {
                         ) : (
                             /* OTP Step — also open layout, no container */
                             <>
-                                <Text style={styles.heading}>Verify</Text>
-                                <Text style={styles.heading2}>Email ✉️</Text>
-                                <Text style={styles.sub}>Enter the 6-digit code sent to {email}</Text>
+                                <Text style={styles.heading}>{t('otp.verify')}</Text>
+                                <Text style={styles.heading2}>{t('otp.yourEmail')}</Text>
+                                <Text style={styles.sub}>{t('otp.enterCodeTo', { email })}</Text>
 
                                 <View style={styles.otpRow}>
                                     {otp.map((digit, index) => (
@@ -196,14 +198,14 @@ export default function FarmerSignup() {
                                 </View>
 
                                 <CustomButton
-                                    title="Verify Account"
+                                    title={t('otp.verifyAccount')}
                                     onPress={handleVerifyOtp}
                                     loading={loading}
                                     style={styles.submitBtn}
                                 />
 
                                 <TouchableOpacity onPress={() => setStep('FORM')} style={styles.linkBtn}>
-                                    <Text style={styles.linkText}>← Edit Details</Text>
+                                    <Text style={styles.linkText}>{t('otp.editDetails')}</Text>
                                 </TouchableOpacity>
                             </>
                         )}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, FlatList } from 'react-native';
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
 import { MaterialCommunityIcons, MaterialIcons, Feather } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ const MOCK_FARMS = [
 ];
 
 export default function WaterAllocationOptimizationScreen() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [optimized, setOptimized] = useState(false);
 
@@ -30,21 +32,21 @@ export default function WaterAllocationOptimizationScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Stack.Screen options={{ title: 'AI Distributor', headerShown: true }} />
+            <Stack.Screen options={{ title: t('admin.optimizer.title'), headerShown: true }} />
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.header}>
                     <MaterialCommunityIcons name="molecule" size={40} color={Theme.colors.emerald} />
-                    <Text style={styles.title}>Water Optimizer</Text>
-                    <Text style={styles.subtitle}>AI Model 3: Fair water distribution across all village farms</Text>
+                    <Text style={styles.title}>{t('admin.optimizer.title')}</Text>
+                    <Text style={styles.subtitle}>{t('admin.optimizer.subtitle')}</Text>
                 </View>
 
                 <View style={styles.statsRow}>
                     <View style={styles.statBox}>
-                        <Text style={styles.statLabel}>Total Available</Text>
+                        <Text style={styles.statLabel}>{t('admin.optimizer.totalAvailable')}</Text>
                         <Text style={styles.statValue}>450K L</Text>
                     </View>
                     <View style={styles.statBox}>
-                        <Text style={styles.statLabel}>Total Demand</Text>
+                        <Text style={styles.statLabel}>{t('admin.optimizer.totalDemand')}</Text>
                         <Text style={styles.statValue}>520K L</Text>
                     </View>
                 </View>
@@ -53,10 +55,10 @@ export default function WaterAllocationOptimizationScreen() {
                     <View style={styles.prepCard}>
                         <Feather name="info" size={24} color={Theme.colors.moss} />
                         <Text style={styles.prepText}>
-                            System has detected a deficit of 70,000 Liters. Use AI Optimization to ensure fair distribution.
+                            {t('admin.optimizer.deficitDetected', { amount: '70,000' })}
                         </Text>
                         <CustomButton
-                            title="Run Optimization Algorithm"
+                            title={t('admin.optimizer.runOptimization')}
                             onPress={handleOptimize}
                             loading={loading}
                             icon={<MaterialCommunityIcons name="auto-fix" size={20} color="white" />}
@@ -66,15 +68,15 @@ export default function WaterAllocationOptimizationScreen() {
                     <View style={styles.resultsContainer}>
                         <View style={styles.successBadge}>
                             <MaterialIcons name="check-circle" size={20} color={Theme.colors.emerald} />
-                            <Text style={styles.successText}>Optimization Complete: 98% Efficiency</Text>
+                            <Text style={styles.successText}>{t('admin.optimizer.optimizationComplete', { efficiency: '98%' })}</Text>
                         </View>
 
-                        <Text style={styles.sectionTitle}>Farm-wise Allocation</Text>
+                        <Text style={styles.sectionTitle}>{t('admin.optimizer.farmAllocation')}</Text>
                         {MOCK_FARMS.map(farm => (
                             <View key={farm.id} style={styles.farmRow}>
                                 <View style={styles.farmInfo}>
                                     <Text style={styles.farmOwner}>{farm.owner}</Text>
-                                    <Text style={styles.farmMeta}>{farm.area} • Priority: {farm.priority}</Text>
+                                    <Text style={styles.farmMeta}>{farm.area} • {t('admin.optimizer.priority')} {t(`common.${farm.priority.toLowerCase()}`)}</Text>
                                 </View>
                                 <View style={styles.allocationBox}>
                                     <Text style={styles.allocVal}>{farm.share}</Text>
@@ -84,7 +86,7 @@ export default function WaterAllocationOptimizationScreen() {
                         ))}
 
                         <CustomButton
-                            title="Release Water to Village"
+                            title={t('admin.optimizer.releaseWater')}
                             onPress={() => Logger.info('Admin', 'Water released')}
                             style={{ marginTop: 24 }}
                             type="primary"

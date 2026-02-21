@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ const REQUESTS = [
 ];
 
 export default function Approvals() {
+    const { t } = useTranslation();
     const renderItem = ({ item }: { item: typeof REQUESTS[0] }) => (
         <View style={styles.card}>
             <View style={styles.header}>
@@ -29,11 +31,11 @@ export default function Approvals() {
             </View>
 
             <View style={styles.body}>
-                <Text style={styles.label}>Reason:</Text>
+                <Text style={styles.label}>{t('admin.approvals.reason')}</Text>
                 <Text style={styles.value}>{item.reason}</Text>
                 {item.amount !== '-' && (
                     <>
-                        <Text style={[styles.label, { marginTop: 8 }]}>Requested Amount:</Text>
+                        <Text style={[styles.label, { marginTop: 8 }]}>{t('admin.approvals.requestedAmount')}</Text>
                         <Text style={[styles.value, { color: Theme.colors.primary, fontWeight: 'bold' }]}>{item.amount}</Text>
                     </>
                 )}
@@ -42,11 +44,11 @@ export default function Approvals() {
             <View style={styles.actions}>
                 <TouchableOpacity style={[styles.btn, styles.btnReject]}>
                     <Feather name="x" size={18} color={Theme.colors.error} />
-                    <Text style={styles.btnTextReject}>Reject</Text>
+                    <Text style={styles.btnTextReject}>{t('admin.approvals.reject')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.btn, styles.btnApprove]}>
                     <Feather name="check" size={18} color="white" />
-                    <Text style={styles.btnTextApprove}>Approve</Text>
+                    <Text style={styles.btnTextApprove}>{t('admin.approvals.approve')}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -55,7 +57,7 @@ export default function Approvals() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Pending Approvals" />
+            <AdminHeader title={t('admin.approvals.title')} />
 
             <View style={styles.content}>
                 {REQUESTS.length > 0 ? (
@@ -69,7 +71,7 @@ export default function Approvals() {
                 ) : (
                     <View style={styles.emptyState}>
                         <Feather name="check-circle" size={48} color={Theme.colors.success} />
-                        <Text style={styles.emptyText}>No pending requests!</Text>
+                        <Text style={styles.emptyText}>{t('admin.approvals.noPending')}</Text>
                     </View>
                 )}
             </View>

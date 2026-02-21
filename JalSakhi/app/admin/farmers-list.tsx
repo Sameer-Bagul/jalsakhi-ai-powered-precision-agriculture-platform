@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ const FARMERS = [
 
 export default function FarmersList() {
     const router = useRouter();
+    const { t } = useTranslation();
 
     const renderItem = ({ item }: { item: typeof FARMERS[0] }) => (
         <TouchableOpacity style={styles.card} onPress={() => router.push({ pathname: '/admin/farmer-details', params: { id: item.id } })}>
@@ -27,7 +29,7 @@ export default function FarmersList() {
                 <Text style={styles.phone}>{item.phone}</Text>
                 <View style={styles.tagsRow}>
                     <View style={styles.tag}>
-                        <Text style={styles.tagText}>{item.farms} Farms</Text>
+                        <Text style={styles.tagText}>{item.farms} {t('admin.farms')}</Text>
                     </View>
                     <View style={styles.dotSeparator} />
                     <Text style={[
@@ -35,7 +37,7 @@ export default function FarmersList() {
                         item.status === 'Active' && { color: Theme.colors.success },
                         item.status === 'Warning' && { color: '#d97706' },
                         item.status === 'Critical' && { color: Theme.colors.error }
-                    ]}>{item.status}</Text>
+                    ]}>{t(`common.${item.status.toLowerCase()}`)}</Text>
                 </View>
             </View>
             <View style={styles.rightContent}>
@@ -44,7 +46,7 @@ export default function FarmersList() {
                     item.credits < 0 && { color: Theme.colors.error },
                     item.credits < 500 && item.credits >= 0 && { color: '#d97706' }
                 ]}>{item.credits}</Text>
-                <Text style={styles.creditsLabel}>Credits</Text>
+                <Text style={styles.creditsLabel}>{t('farmer.credits')}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -52,14 +54,14 @@ export default function FarmersList() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Farmers Directory" actionLabel="+ Add" onActionPress={() => { }} />
+            <AdminHeader title={t('admin.farmersDirectory')} actionLabel={t('admin.addFarmer')} onActionPress={() => { }} />
 
             <View style={styles.content}>
                 {/* Search Bar */}
                 <View style={styles.searchContainer}>
                     <Feather name="search" size={20} color={Theme.colors.textMuted} />
                     <TextInput
-                        placeholder="Search farmer name or ID..."
+                        placeholder={t('admin.searchFarmers')}
                         placeholderTextColor={Theme.colors.textMuted}
                         style={styles.input}
                     />
@@ -68,9 +70,9 @@ export default function FarmersList() {
 
                 {/* Filters */}
                 <View style={styles.filterRow}>
-                    <TouchableOpacity style={styles.filterPill}><Text style={styles.filterText}>Status ▾</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.filterPill}><Text style={styles.filterText}>Sort ▾</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.filterPill}><Text style={styles.filterText}>Area ▾</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.filterPill}><Text style={styles.filterText}>{t('admin.status')} ▾</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.filterPill}><Text style={styles.filterText}>{t('admin.sort')} ▾</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.filterPill}><Text style={styles.filterText}>{t('admin.area')} ▾</Text></TouchableOpacity>
                 </View>
 
                 {/* List */}

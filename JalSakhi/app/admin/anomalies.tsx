@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { AdminHeader } from '../../components/AdminHeader';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -17,6 +18,7 @@ const ANOMALIES = [
 ];
 
 export default function Anomalies() {
+    const { t } = useTranslation();
     const renderItem = ({ item }: { item: typeof ANOMALIES[0] }) => (
         <TouchableOpacity style={styles.card}>
             <View style={styles.row}>
@@ -40,9 +42,9 @@ export default function Anomalies() {
                         item.risk === 'Critical' && { color: Theme.colors.error },
                         item.risk === 'High' && { color: '#c2410c' },
                         item.risk === 'Medium' && { color: Theme.colors.textMuted },
-                    ]}>{item.risk} Risk</Text>
+                    ]}>{t('admin.anomalies.risk', { risk: t(`common.${item.risk.toLowerCase()}`) })}</Text>
                 </View>
-                <Text style={styles.status}>{item.status}</Text>
+                <Text style={styles.status}>{t(`common.${item.status.toLowerCase()}`)}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -50,11 +52,11 @@ export default function Anomalies() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <AdminHeader title="Anomaly Detection" />
+            <AdminHeader title={t('admin.anomalyDetection')} />
 
             <View style={styles.padding}>
                 <View style={styles.chartCard}>
-                    <Text style={styles.chartTitle}>LIVE ANOMALY MONITOR</Text>
+                    <Text style={styles.chartTitle}>{t('admin.liveAnomalyMonitor')}</Text>
                     <LineChart
                         data={{
                             labels: ["10:00", "10:10", "10:20", "10:30", "10:40", "10:50"],
@@ -76,10 +78,10 @@ export default function Anomalies() {
                         bezier
                         style={{ marginVertical: 8 }}
                     />
-                    <Text style={styles.chartSub}>Spike detected at 10:30 AM (Sector 4)</Text>
+                    <Text style={styles.chartSub}>{t('admin.anomalies.spikeDetected', { time: '10:30 AM', sector: 'Sector 4' })}</Text>
                 </View>
 
-                <Text style={styles.sectionTitle}>Detected Issues</Text>
+                <Text style={styles.sectionTitle}>{t('admin.detectedIssues')}</Text>
                 <FlatList
                     data={ANOMALIES}
                     keyExtractor={(item) => item.id}

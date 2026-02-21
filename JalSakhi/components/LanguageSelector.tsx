@@ -2,11 +2,8 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { Theme } from '../constants/JalSakhiTheme';
 import { Ionicons } from '@expo/vector-icons';
-
-interface LanguageSelectorProps {
-    selectedLanguage: string;
-    onSelectLanguage: (lang: string) => void;
-}
+import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../i18n';
 
 const LANGUAGES = [
     { code: 'en', label: 'English', native: 'English' },
@@ -14,10 +11,16 @@ const LANGUAGES = [
     { code: 'mr', label: 'Marathi', native: 'मराठी' },
 ];
 
-export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ selectedLanguage, onSelectLanguage }) => {
+export const LanguageSelector: React.FC = () => {
+    const { i18n } = useTranslation();
     const [modalVisible, setModalVisible] = React.useState(false);
 
-    const selectedLang = LANGUAGES.find(l => l.code === selectedLanguage) || LANGUAGES[0];
+    const selectedLang = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
+
+    const handleSelect = async (code: string) => {
+        await changeLanguage(code);
+        setModalVisible(false);
+    };
 
     return (
         <>
@@ -42,7 +45,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ selectedLang
                     onPress={() => setModalVisible(false)}
                 >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Select Language</Text>
+                        <Text style={styles.modalTitle}>Select Language / भाषा चुनें</Text>
                         <FlatList
                             data={LANGUAGES}
                             keyExtractor={(item) => item.code}
@@ -50,18 +53,15 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ selectedLang
                                 <TouchableOpacity
                                     style={[
                                         styles.langItem,
-                                        selectedLanguage === item.code && styles.selectedItem
+                                        i18n.language === item.code && styles.selectedItem
                                     ]}
-                                    onPress={() => {
-                                        onSelectLanguage(item.code);
-                                        setModalVisible(false);
-                                    }}
+                                    onPress={() => handleSelect(item.code)}
                                 >
                                     <View>
                                         <Text style={styles.langNative}>{item.native}</Text>
                                         <Text style={styles.langLabel}>{item.label}</Text>
                                     </View>
-                                    {selectedLanguage === item.code && (
+                                    {i18n.language === item.code && (
                                         <Ionicons name="checkmark-circle" size={20} color={Theme.colors.success} />
                                     )}
                                 </TouchableOpacity>
@@ -126,8 +126,8 @@ const styles = StyleSheet.create({
         borderColor: 'transparent',
     },
     selectedItem: {
-        backgroundColor: Theme.colors.primaryPale,
-        borderColor: Theme.colors.primaryMid,
+        backgroundColor: Theme.colors.dew,
+        borderColor: Theme.colors.primary,
     },
     langNative: {
         fontSize: 16,

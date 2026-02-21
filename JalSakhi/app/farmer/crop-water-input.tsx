@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Dimensions, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 
-// Model 1: Crop Water Requirement Input Screen
+const screenWidth = Dimensions.get('window').width;
+
 export default function CropWaterInput() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -28,297 +31,329 @@ export default function CropWaterInput() {
   const soilTypes = ['Clay', 'Sandy', 'Loamy', 'Silt', 'Peaty'];
 
   const handleSubmit = async () => {
-    // Validate required fields
     if (!formData.cropType || !formData.growthStage || !formData.soilType) {
-      Alert.alert('Error', 'Please fill all required fields (Crop Type, Growth Stage, Soil Type)');
+      Alert.alert('Error', 'Please fill all required fields');
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch('http://YOUR_SERVER_IP:5000/api/predict/crop-water-requirement', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-      
-      // Navigate to results screen with prediction data
-      router.push({
-        pathname: '/farmer/crop-water-results' as any,
-        params: { 
-          prediction: JSON.stringify(result),
-          inputData: JSON.stringify(formData)
-        },
-      });
+      // Mock API call
+      setTimeout(() => {
+        const mockResult = { suggestion: "1200L / hectare", confidence: "94%" };
+        router.push({
+          pathname: '/farmer/crop-water-results' as any,
+          params: {
+            prediction: JSON.stringify(mockResult),
+            inputData: JSON.stringify(formData)
+          },
+        });
+        setLoading(false);
+      }, 1500);
     } catch (error: any) {
-      Alert.alert('Error', 'Failed to get prediction. Please try again.');
-      console.error(error);
-    } finally {
+      Alert.alert('Error', 'Failed to get prediction.');
       setLoading(false);
     }
   };
 
+  const GlassCard = ({ title, icon, children, style }: any) => (
+    <View style={[styles.glassCard, style]}>
+      <BlurView intensity={30} tint="light" style={styles.cardBlur}>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardIconBox}>
+            <MaterialCommunityIcons name={icon} size={20} color={Theme.colors.primary} />
+          </View>
+          <Text style={styles.cardTitle}>{title}</Text>
+        </View>
+        {children}
+      </BlurView>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* Decorative Background Lines */}
+      <View style={styles.decorativeLayer} pointerEvents="none">
+        <View style={[styles.designLine, { top: '10%', right: -40, transform: [{ rotate: '-45deg' }] }]} />
+        <View style={[styles.designLine, { bottom: '20%', left: -60, width: 250, transform: [{ rotate: '30deg' }] }]} />
+      </View>
+
+      <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Feather name="arrow-left" size={24} color={Theme.colors.primary} />
+            <BlurView intensity={60} tint="light" style={styles.backBlur}>
+              <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+            </BlurView>
           </TouchableOpacity>
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Crop Water Requirement</Text>
-            <Text style={styles.subtitle}>Model 1: Predict irrigation needs</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>Crop Water</Text>
+            <Text style={styles.subtitle}>Predict precise irrigation needs</Text>
           </View>
         </View>
 
-        <View style={styles.content}>
-          {/* Crop Details Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🌾 Crop Details</Text>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Main Form Section - Bento Style */}
+          <View style={styles.bentoGrid}>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Crop Type *</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={formData.cropType}
-                  onValueChange={(value) => setFormData({ ...formData, cropType: value })}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select crop type" value="" />
-                  {cropTypes.map((crop) => (
-                    <Picker.Item key={crop} label={crop} value={crop} />
-                  ))}
-                </Picker>
+            <GlassCard title="Crop Details" icon="sprout" style={styles.fullWidth}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.miniLabel}>Crop Type</Text>
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    selectedValue={formData.cropType}
+                    onValueChange={(value) => setFormData({ ...formData, cropType: value })}
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Select crop" value="" color="#94a3b8" />
+                    {cropTypes.map(c => <Picker.Item key={c} label={c} value={c} />)}
+                  </Picker>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Growth Stage *</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={formData.growthStage}
-                  onValueChange={(value) => setFormData({ ...formData, growthStage: value })}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select growth stage" value="" />
-                  {growthStages.map((stage) => (
-                    <Picker.Item key={stage} label={stage} value={stage} />
-                  ))}
-                </Picker>
+              <View style={styles.row}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.miniLabel}>Growth Stage</Text>
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={formData.growthStage}
+                      onValueChange={(value) => setFormData({ ...formData, growthStage: value })}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Stage" value="" color="#94a3b8" />
+                      {growthStages.map(s => <Picker.Item key={s} label={s} value={s} />)}
+                    </Picker>
+                  </View>
+                </View>
+                <View style={styles.halfInput}>
+                  <Text style={styles.miniLabel}>Soil Type</Text>
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={formData.soilType}
+                      onValueChange={(value) => setFormData({ ...formData, soilType: value })}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Soil" value="" color="#94a3b8" />
+                      {soilTypes.map(s => <Picker.Item key={s} label={s} value={s} />)}
+                    </Picker>
+                  </View>
+                </View>
               </View>
-            </View>
+            </GlassCard>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Soil Type *</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={formData.soilType}
-                  onValueChange={(value) => setFormData({ ...formData, soilType: value })}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select soil type" value="" />
-                  {soilTypes.map((soil) => (
-                    <Picker.Item key={soil} label={soil} value={soil} />
-                  ))}
-                </Picker>
-              </View>
-            </View>
-          </View>
-
-          {/* Current Conditions */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🌡️ Current Conditions</Text>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Current Soil Moisture (%)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., 45"
-                keyboardType="decimal-pad"
-                value={formData.soilMoisture}
-                onChangeText={(text) => setFormData({ ...formData, soilMoisture: text })}
-              />
-              <Text style={styles.hint}>Typical range: 20-60%</Text>
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Temperature (°C)</Text>
+            <GlassCard title="Environment" icon="thermometer" style={styles.fullWidth}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.miniLabel}>Soil Moisture (%)</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g., 32"
+                  placeholder="e.g., 45"
+                  placeholderTextColor="#94a3b8"
                   keyboardType="decimal-pad"
-                  value={formData.temperature}
-                  onChangeText={(text) => setFormData({ ...formData, temperature: text })}
+                  value={formData.soilMoisture}
+                  onChangeText={(t) => setFormData({ ...formData, soilMoisture: t })}
                 />
               </View>
-
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Humidity (%)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 65"
-                  keyboardType="decimal-pad"
-                  value={formData.humidity}
-                  onChangeText={(text) => setFormData({ ...formData, humidity: text })}
-                />
+              <View style={styles.row}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.miniLabel}>Temp (°C)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., 32"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="decimal-pad"
+                    value={formData.temperature}
+                    onChangeText={(t) => setFormData({ ...formData, temperature: t })}
+                  />
+                </View>
+                <View style={styles.halfInput}>
+                  <Text style={styles.miniLabel}>Humidity (%)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., 65"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="decimal-pad"
+                    value={formData.humidity}
+                    onChangeText={(t) => setFormData({ ...formData, humidity: t })}
+                  />
+                </View>
               </View>
-            </View>
-          </View>
+            </GlassCard>
 
-          {/* Weather Data */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🌤️ Weather Data</Text>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Rainfall Last 5 Days (mm)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., 25"
-                keyboardType="decimal-pad"
-                value={formData.rainfallLast5Days}
-                onChangeText={(text) => setFormData({ ...formData, rainfallLast5Days: text })}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Rainfall Forecast Next 5 Days (mm)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., 10"
-                keyboardType="decimal-pad"
-                value={formData.rainfallForecast}
-                onChangeText={(text) => setFormData({ ...formData, rainfallForecast: text })}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Wind Speed (km/h)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 15"
-                  keyboardType="decimal-pad"
-                  value={formData.windSpeed}
-                  onChangeText={(text) => setFormData({ ...formData, windSpeed: text })}
-                />
+            <GlassCard title="Forecasting" icon="weather-cloudy" style={styles.fullWidth}>
+              <View style={[styles.inputGroup, { marginBottom: 16 }]}>
+                <Text style={styles.miniLabel}>Rainfall Forecast (5 Days)</Text>
+                <View style={styles.inputWithIcon}>
+                  <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder="mm"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="decimal-pad"
+                    value={formData.rainfallForecast}
+                    onChangeText={(t) => setFormData({ ...formData, rainfallForecast: t })}
+                  />
+                  <Ionicons name="rainy-outline" size={20} color={Theme.colors.primary} style={styles.inputIcon} />
+                </View>
               </View>
-
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Solar Radiation (MJ/m²/day)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 20"
-                  keyboardType="decimal-pad"
-                  value={formData.solarRadiation}
-                  onChangeText={(text) => setFormData({ ...formData, solarRadiation: text })}
-                />
+              <View style={styles.row}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.miniLabel}>Wind Speed</Text>
+                  <TextInput style={styles.input} placeholder="km/h" placeholderTextColor="#94a3b8" keyboardType="decimal-pad" value={formData.windSpeed} onChangeText={t => setFormData({ ...formData, windSpeed: t })} />
+                </View>
+                <View style={styles.halfInput}>
+                  <Text style={styles.miniLabel}>Solar Rad.</Text>
+                  <TextInput style={styles.input} placeholder="MJ/m²" placeholderTextColor="#94a3b8" keyboardType="decimal-pad" value={formData.solarRadiation} onChangeText={t => setFormData({ ...formData, solarRadiation: t })} />
+                </View>
               </View>
-            </View>
+            </GlassCard>
+
           </View>
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.submitBtn, loading && styles.btnDisabled]}
             onPress={handleSubmit}
             disabled={loading}
           >
-            <Feather name="droplet" size={20} color="#fff" />
-            <Text style={styles.buttonText}>
-              {loading ? 'Calculating...' : 'Get Water Requirement'}
-            </Text>
+            <LinearGradient colors={['#10b981', '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientBtn}>
+              <Feather name="zap" size={20} color="white" />
+              <Text style={styles.submitBtnText}>
+                {loading ? 'Analyzing...' : 'Get Recommendation'}
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8FAFC',
+  },
+  decorativeLayer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  designLine: {
+    position: 'absolute',
+    width: 300,
+    height: 1,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+    gap: 16,
+  },
+  backBlur: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: Theme.colors.text,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: Theme.colors.textMuted,
   },
   scrollView: {
     flex: 1,
   },
-  header: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  backBtn: {
-    marginRight: 12,
+  bentoGrid: {
+    gap: 16,
   },
-  headerText: {
-    flex: 1,
+  fullWidth: {
+    width: '100%',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Theme.colors.primary,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: Theme.colors.textSecondary,
-    marginTop: 2,
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 2,
+  glassCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.7)',
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+  cardBlur: {
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+  cardIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
     color: Theme.colors.text,
-    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  inputContainer: {
-    marginBottom: 16,
+  inputGroup: {
+    marginBottom: 12,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Theme.colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Theme.colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  hint: {
+  miniLabel: {
     fontSize: 12,
-    color: Theme.colors.textSecondary,
-    marginTop: 4,
+    fontWeight: '700',
+    color: Theme.colors.textMuted,
+    marginBottom: 6,
+    marginLeft: 4,
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: Theme.colors.border,
-    borderRadius: 8,
+  pickerWrapper: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    height: 48,
+    justifyContent: 'center',
     overflow: 'hidden',
-    backgroundColor: '#fff',
   },
   picker: {
-    height: 50,
+    height: 48,
+  },
+  input: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    height: 48,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: Theme.colors.text,
   },
   row: {
     flexDirection: 'row',
@@ -327,28 +362,40 @@ const styles = StyleSheet.create({
   halfInput: {
     flex: 1,
   },
-  button: {
-    backgroundColor: Theme.colors.primary,
-    padding: 16,
+  inputWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
     borderRadius: 12,
+    paddingRight: 12,
+  },
+  inputIcon: {
+    marginLeft: 8,
+  },
+  submitBtn: {
+    marginTop: 24,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: Theme.colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+  gradientBtn: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    marginTop: 8,
-    marginBottom: 24,
-    elevation: 4,
-    shadowColor: Theme.colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    gap: 12,
   },
-  buttonDisabled: {
-    opacity: 0.6,
+  submitBtnText: {
+    color: 'white',
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  btnDisabled: {
+    opacity: 0.7,
+  }
 });

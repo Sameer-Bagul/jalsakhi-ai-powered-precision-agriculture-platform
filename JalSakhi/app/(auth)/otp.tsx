@@ -6,29 +6,43 @@ import { CustomButton } from '../../components/shared/CustomButton';
 import { useAuth } from '../../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function OTPScreen() {
     const router = useRouter();
     const { verifyAccount, sendVerifyOtp } = useAuth();
-    const [otp, setOtp] = React.useState('');
+    const { t } = useTranslation();
+    const [otp, setOtp] = React.useState(['', '', '', '', '', '']);
     const [loading, setLoading] = React.useState(false);
 
+    // Refs for each input
+    const inputRefs = [
+        React.useRef<TextInput>(null),
+        React.useRef<TextInput>(null),
+        React.useRef<TextInput>(null),
+        React.useRef<TextInput>(null),
+        React.useRef<TextInput>(null),
+        React.useRef<TextInput>(null),
+    ];
+
+    const otpString = otp.join('');
+
     const handleVerify = async () => {
-        if (otp.length < 6) {
-            Alert.alert('Invalid OTP', 'Please enter a 6-digit OTP.');
+        if (otpString.length < 6) {
+            Alert.alert(t('otp.invalidOtp'), t('otp.enter6Digit'));
             return;
         }
         setLoading(true);
         try {
-            const result = await verifyAccount(otp);
+            const result = await verifyAccount(otpString);
             if (result.success) {
-                Alert.alert('Verified', 'Your account has been verified!');
+                Alert.alert(t('otp.verified'), t('otp.accountVerified'));
                 router.replace('/farmer/dashboard');
             } else {
-                Alert.alert('Error', result.message || 'Invalid OTP.');
+                Alert.alert(t('common.error'), result.message || t('otp.invalidOtp'));
             }
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Verification failed.');
+            Alert.alert(t('common.error'), error.message || t('otp.verificationFailed'));
         } finally {
             setLoading(false);
         }
@@ -38,12 +52,31 @@ export default function OTPScreen() {
         try {
             const result = await sendVerifyOtp();
             if (result.success) {
-                Alert.alert('Sent', 'A new OTP has been sent to your email.');
+                Alert.alert(t('otp.sent'), t('otp.newOtpSent'));
             } else {
-                Alert.alert('Error', result.message || 'Failed to resend OTP.');
+                Alert.alert(t('common.error'), result.message || t('otp.resendFailed'));
             }
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Failed to resend OTP.');
+            Alert.alert(t('common.error'), error.message || t('otp.resendFailed'));
+        }
+    };
+
+    const handleChange = (text: string, index: number) => {
+        const newOtp = [...otp];
+        // Only take the last character entered
+        newOtp[index] = text.slice(-1);
+        setOtp(newOtp);
+
+        // Move to next field if text is entered
+        if (text && index < 5) {
+            inputRefs[index + 1].current?.focus();
+        }
+    };
+
+    const handleKeyPress = (e: any, index: number) => {
+        // Move to previous field on backspace if current field is empty
+        if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
+            inputRefs[index - 1].current?.focus();
         }
     };
 
@@ -60,37 +93,44 @@ export default function OTPScreen() {
                 </TouchableOpacity>
 
                 {/* Heading */}
-                <Text style={styles.heading}>Verify</Text>
-                <Text style={styles.heading2}>Your Email ✉️</Text>
-                <Text style={styles.sub}>Enter the 6-digit code sent to your email</Text>
+                <Text style={styles.heading}>{t('otp.verify')}</Text>
+                <Text style={styles.heading2}>{t('otp.yourEmail')}</Text>
+                <Text style={styles.sub}>{t('otp.enterCode')}</Text>
 
                 {/* OTP Input */}
-                <View style={styles.otpWrap}>
-                    <TextInput
-                        style={styles.otpInput}
-                        placeholder="000000"
-                        placeholderTextColor="rgba(0,0,0,0.15)"
-                        keyboardType="number-pad"
-                        maxLength={6}
-                        value={otp}
-                        onChangeText={setOtp}
-                        autoFocus
-                    />
+                <View style={styles.otpContainer}>
+                    {otp.map((digit, index) => (
+                        <TextInput
+                            key={index}
+                            ref={inputRefs[index]}
+                            style={[
+                                styles.otpBox,
+                                digit ? styles.otpBoxActive : null
+                            ]}
+                            keyboardType="number-pad"
+                            maxLength={1}
+                            value={digit}
+                            onChangeText={(text) => handleChange(text, index)}
+                            onKeyPress={(e) => handleKeyPress(e, index)}
+                            autoFocus={index === 0}
+                            selectTextOnFocus
+                        />
+                    ))}
                 </View>
 
                 {/* Resend */}
                 <Text style={styles.resendText}>
-                    Didn't receive code?{' '}
-                    <Text style={styles.resendLink} onPress={handleResend}>Resend OTP</Text>
+                    {t('otp.didntReceive')}{' '}
+                    <Text style={styles.resendLink} onPress={handleResend}>{t('otp.resendOtp')}</Text>
                 </Text>
 
                 {/* Verify */}
                 <View style={styles.bottom}>
                     <CustomButton
-                        title="Verify Account"
+                        title={t('otp.verifyAccount')}
                         onPress={handleVerify}
                         loading={loading}
-                        disabled={otp.length < 6}
+                        disabled={otpString.length < 6}
                         size="lg"
                     />
                 </View>
@@ -121,15 +161,28 @@ const styles = StyleSheet.create({
         fontSize: 16, color: Theme.colors.textMuted,
         lineHeight: 22, marginBottom: 40,
     },
-    otpWrap: {
-        alignItems: 'center', marginBottom: 24,
+    otpContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 40,
+        gap: 8,
     },
-    otpInput: {
-        fontSize: 36, fontWeight: '800',
-        color: Theme.colors.text, textAlign: 'center',
-        letterSpacing: 16, width: '80%',
-        paddingVertical: 16,
-        borderBottomWidth: 3, borderBottomColor: 'rgba(5,150,105,0.15)',
+    otpBox: {
+        flex: 1,
+        height: 60,
+        borderRadius: 16,
+        backgroundColor: '#F8FAFC',
+        borderWidth: 2,
+        borderColor: '#E2E8F0',
+        fontSize: 24,
+        fontWeight: '800',
+        color: Theme.colors.text,
+        textAlign: 'center',
+    },
+    otpBoxActive: {
+        borderColor: Theme.colors.primary,
+        backgroundColor: '#FFFFFF',
+        ...Theme.shadows.soft,
     },
     resendText: {
         textAlign: 'center', color: Theme.colors.textMuted, fontSize: 14,
