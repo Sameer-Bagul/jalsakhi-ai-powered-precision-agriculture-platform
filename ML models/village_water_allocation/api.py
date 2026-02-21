@@ -11,6 +11,8 @@ from typing import Any
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,47 @@ def priority_weight(score: float) -> float:
     return 1.5
 
 
+# Map UI region names (DESERT, SEMI ARID, etc.) to Crop Water API's 15 agro-climatic zones
+REGION_TO_CROP_WATER_ZONE: dict[str, str] = {
+    "DESERT": "Western Dry Region",
+    "SEMI ARID": "Central Plateau & Hills Region",
+    "SEMI HUMID": "Western Himalayan Region",
+    "HUMID": "Eastern Himalayan Region",
+}
+
+
+def _crop_water_region(region: str) -> str:
+    """Return Crop Water API region string (15 India agro-climatic zones)."""
+    key = region.strip().upper()
+    return REGION_TO_CROP_WATER_ZONE.get(key, "Western Himalayan Region")
+
+
+# Crop Water API allows only these exact values (from its config.json)
+CROP_WATER_TEMPERATURES = ("10-20", "20-30", "30-40", "40-50")
+
+
+def _normalize_crop_water_request(
+    crop_type: str,
+    soil_type: str,
+    region: str,
+    temperature: str,
+    weather_condition: str,
+) -> dict[str, str]:
+    """Build request payload with values Crop Water API accepts."""
+    crop_water_region = _crop_water_region(region)
+    # Temperature must match exactly; default to 20-30 if unknown
+    temp = temperature.strip() if temperature else "20-30"
+    if temp not in CROP_WATER_TEMPERATURES:
+        temp = "20-30"
+    return {
+        "crop_type": crop_type.strip().upper(),
+        "soil_type": soil_type.strip().upper(),
+        "region": crop_water_region,
+        "temperature": temp,
+        "weather_condition": weather_condition.strip().upper(),
+    }
+
+
 async def fetch_crop_water_mm_per_day(
     base_url: str,
     crop_type: str,
@@ -53,18 +96,39 @@ async def fetch_crop_water_mm_per_day(
     weather_condition: str,
 ) -> float:
     """Call Crop Water API (Model 1) to get water requirement in mm/day."""
+    payload = _normalize_crop_water_request(
+        crop_type, soil_type, region, temperature, weather_condition
+    )
     async with httpx.AsyncClient(timeout=10.0) as client:
         r = await client.post(
             f"{base_url.rstrip('/')}/predict",
-            json={
-                "crop_type": crop_type,
-                "soil_type": soil_type,
-                "region": region,
-                "temperature": temperature,
-                "weather_condition": weather_condition,
-            },
+            json=payload,
         )
-        r.raise_for_status()
+        if r.status_code != 200:
+            err_detail = "unknown error"
+            try:
+                body = r.json()
+                d = body.get("detail")
+                if isinstance(d, str):
+                    err_detail = d
+                elif isinstance(d, list):
+                    parts = []
+                    for x in d:
+                        if isinstance(x, dict):
+                            loc = x.get("loc", [])
+                            msg = x.get("msg", str(x))
+                            parts.append(f"{'.'.join(str(l) for l in loc)}: {msg}")
+                        else:
+                            parts.append(str(x))
+                    err_detail = "; ".join(parts)
+            except Exception:
+                err_detail = r.text or str(r.status_code)
+            msg = f"Crop Water API {r.status_code}: {err_detail}"
+            if r.status_code == 422 and (
+                "sensor" in err_detail.lower() or "sm_history" in err_detail
+            ):
+                msg += " (Is the Crop Water API on this port? Port 8001 must run Crop_Water_Model, not Soil Moisture.)"
+            raise ValueError(msg)
         data = r.json()
         return float(data["water_requirement"])
 
@@ -146,6 +210,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.get("/")
+def root() -> FileResponse:
+    """Serve the test UI."""
+    index_path = STATIC_DIR / "index.html"
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="Static UI not found")
+    return FileResponse(index_path)
 
 
 @app.on_event("startup")

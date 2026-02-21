@@ -26,6 +26,8 @@ python train.py
 
 Use the **same Python environment** for training and running the API so the saved model loads correctly.
 
+If predictions look the same for every input, **retrain** so the model learns from the dataset (which has different water requirements per crop/soil/region/weather/temp). The API also blends the model output with a crop- and temperature-dependent baseline so that different crops and temperatures still produce different values even when the saved model under-varies.
+
 ## Run the API
 
 ```bash
