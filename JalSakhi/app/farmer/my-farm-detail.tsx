@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, StatusBar, Dimensions, ActivityIndicator } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { Farm, IrrigationLog } from '../../services/farms';
@@ -195,6 +195,9 @@ const styles = StyleSheet.create({
   center: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backBtn: {
+    borderRadius: 14,
   },
   decorativeLayer: {
     ...StyleSheet.absoluteFillObject,

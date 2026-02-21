@@ -15,7 +15,7 @@ export default function AdminDashboardIndex() {
 
     const handleTilePress = (screen: string) => {
         Logger.info('AdminDashboard', `Navigating to: ${screen}`);
-        if (screen === 'water-allocation') router.push('/admin/water-allocation-optimizer');
+        if (screen === 'water-allocation') router.push('/admin/water-allocation-optimizer' as any);
         if (screen === 'reservoir-status') router.push('/admin/reservoir-status');
         if (screen === 'village-analytics') router.push('/admin/analytics');
         if (screen === 'farmer-management') router.push('/admin/farmers-list');

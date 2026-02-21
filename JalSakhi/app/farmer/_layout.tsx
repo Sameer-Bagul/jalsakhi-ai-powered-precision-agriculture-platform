@@ -46,7 +46,7 @@ export default function FarmerLayout() {
                             <View style={styles.centerSpace}>
                                 <TouchableOpacity
                                     style={styles.aiButton}
-                                    onPress={() => router.push('/farmer/chatbot')}
+                                    onPress={() => router.push('/farmer/chatbot' as any)}
                                     activeOpacity={0.8}
                                 >
                                     <LinearGradient

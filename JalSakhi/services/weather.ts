@@ -1,6 +1,8 @@
 import * as Location from 'expo-location';
 import { Alert } from 'react-native';
 import { Logger } from '../utils/Logger';
+import { DEMO_MODE } from '../constants/demoMode';
+import { MockWeatherService } from './mockServices';
 
 // REPLACE WITH YOUR OPENWEATHERMAP API KEY
 const API_KEY = '22dd9d513f3a42b418bc2da4119d777e'; // Demo key, might be rate limited
@@ -12,7 +14,7 @@ export interface WeatherData {
     icon: string;
 }
 
-export const WeatherService = {
+export const _RealWeatherService = {
     /**
      * Request permission and get current location coordinates
      */
@@ -61,3 +63,6 @@ export const WeatherService = {
         }
     }
 };
+
+// Use mock or real implementation based on DEMO_MODE
+export const WeatherService = DEMO_MODE ? MockWeatherService : _RealWeatherService;

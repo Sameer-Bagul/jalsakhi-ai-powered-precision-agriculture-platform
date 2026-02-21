@@ -1,8 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthService, UserProfile, RegisterData, LoginData } from '../services/auth';
+import { MockAuthService } from '../services/mockServices';
+import { DEMO_MODE } from '../constants/demoMode';
 import { TOKEN_KEY } from '../utils/api';
 import { Logger } from '../utils/Logger';
+
+// Use mock or real auth service based on DEMO_MODE flag
+const ActiveAuthService = DEMO_MODE ? MockAuthService : AuthService;
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -29,17 +34,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const init = async () => {
             try {
                 const savedToken = await AsyncStorage.getItem(TOKEN_KEY);
-                if (savedToken) {
-                    setToken(savedToken);
-                    // Verify token is still valid
-                    const authCheck = await AuthService.isAuthenticated();
+                const authCheck = await ActiveAuthService.isAuthenticated();
+                if (savedToken || authCheck.success) {
+                    setToken(savedToken || 'demo-token');
                     if (authCheck.success) {
-                        const userData = await AuthService.getUserData();
+                        const userData = await ActiveAuthService.getUserData();
                         if (userData.success && userData.userData) {
                             setUser(userData.userData);
                         }
                     } else {
-                        // Token expired or invalid
                         await AsyncStorage.removeItem(TOKEN_KEY);
                         setToken(null);
                     }
@@ -56,11 +59,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const register = async (data: RegisterData) => {
         setIsLoading(true);
         try {
-            const result = await AuthService.register(data);
+            const result = await ActiveAuthService.register(data);
             if (result.success && result.token) {
                 setToken(result.token);
-                // Fetch user data after registration
-                const userData = await AuthService.getUserData();
+                const userData = await ActiveAuthService.getUserData();
                 if (userData.success && userData.userData) {
                     setUser(userData.userData);
                 }
@@ -77,11 +79,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = async (data: LoginData) => {
         setIsLoading(true);
         try {
-            const result = await AuthService.login(data);
+            const result = await ActiveAuthService.login(data);
             if (result.success && result.token) {
                 setToken(result.token);
-                // Fetch user data after login
-                const userData = await AuthService.getUserData();
+                const userData = await ActiveAuthService.getUserData();
                 if (userData.success && userData.userData) {
                     setUser(userData.userData);
                 }
@@ -98,9 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const verifyAccount = async (otp: string) => {
         setIsLoading(true);
         try {
-            const result = await AuthService.verifyAccount(otp);
+            const result = await ActiveAuthService.verifyAccount(otp);
             if (result.success) {
-                // Refresh user data to get updated verification status
                 await refreshUser();
             }
             return result;
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const sendVerifyOtp = async () => {
         try {
-            return await AuthService.sendVerifyOtp();
+            return await ActiveAuthService.sendVerifyOtp();
         } catch (error: any) {
             Logger.error('AuthContext', 'Send OTP error', error);
             return { success: false, message: error.message };
@@ -122,14 +122,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        await AuthService.logout();
+        await ActiveAuthService.logout();
         setUser(null);
         setToken(null);
     };
 
     const refreshUser = async () => {
         try {
-            const userData = await AuthService.getUserData();
+            const userData = await ActiveAuthService.getUserData();
             if (userData.success && userData.userData) {
                 setUser(userData.userData);
             }

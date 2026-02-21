@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { DEMO_MODE } from '../../constants/demoMode';
+
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -47,6 +49,13 @@ export default function WaterAllocationView() {
       crops: ['Rice', 'Wheat'],
       lastUpdated: new Date().toISOString(),
     };
+
+    // Skip network fetch entirely in demo mode
+    if (DEMO_MODE) {
+      setAllocation(sampleData);
+      setLoading(false);
+      return;
+    }
 
     try {
       const controller = new AbortController();
@@ -237,6 +246,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 20,
     gap: 16,
+  },
+  backBtn: {
+    borderRadius: 14,
   },
   backBlur: {
     width: 44,

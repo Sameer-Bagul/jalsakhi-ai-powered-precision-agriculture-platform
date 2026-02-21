@@ -71,7 +71,7 @@ export default function FarmerDashboard() {
                     {/* [div 3] AI Assistant - Span 2, 1 Row */}
                     <GlassTile
                         style={styles.div3}
-                        onPress={() => router.push('/farmer/chatbot')}
+                        onPress={() => router.push('/farmer/chatbot' as any)}
                         intensity={60}
                     >
                         <View style={styles.tileContentRow}>
@@ -89,7 +89,7 @@ export default function FarmerDashboard() {
                     {/* [div 4] Crop Prediction AI - Span 2, 2 Rows */}
                     <GlassTile
                         style={styles.div4}
-                        onPress={() => router.push('/farmer/crop-water-input')}
+                        onPress={() => router.push('/farmer/crop-water-input' as any)}
                     >
                         <View style={styles.fullTileContent}>
                             <View style={[styles.iconCircle, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
@@ -152,7 +152,7 @@ export default function FarmerDashboard() {
                     {/* [div 6] Water Allocation - Span 2, 2 Rows */}
                     <GlassTile
                         style={styles.div6}
-                        onPress={() => router.push('/farmer/water-allocation-view')}
+                        onPress={() => router.push('/farmer/water-allocation-view' as any)}
                     >
                         <View style={styles.tileContentRow}>
                             <LinearGradient colors={['#8b5cf6', '#6d28d9']} style={styles.tileIconBox}>

@@ -1,4 +1,6 @@
 import { Logger } from '../utils/Logger';
+import { DEMO_MODE } from '../constants/demoMode';
+import { MockMLService } from './mockServices';
 
 export interface CropPredictionInput {
     crop: string;
@@ -12,7 +14,7 @@ export interface SoilMoistureInput {
     location?: string;
 }
 
-export const MLService = {
+export const _RealMLService = {
     /**
      * Simulates the Random Forest Regressor for Crop Water Requirement
      * Logic based on crop type, soil, and area.
@@ -124,3 +126,6 @@ export const MLService = {
         return result;
     }
 }
+
+// Use mock or real implementation based on DEMO_MODE
+export const MLService = DEMO_MODE ? MockMLService : _RealMLService;

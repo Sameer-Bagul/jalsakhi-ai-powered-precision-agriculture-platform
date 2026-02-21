@@ -30,7 +30,7 @@ export default function WaterAllocationOptimizer() {
       // TODO: Replace with actual API endpoint
       const response = await fetch('http://YOUR_SERVER_IP:5000/api/admin/farmers');
       const data = await response.json();
-      
+
       // Sample data
       const sampleData = [
         {
@@ -70,7 +70,7 @@ export default function WaterAllocationOptimizer() {
           avgWaterRequirement: 150,
         },
       ];
-      
+
       setFarmersData(data || sampleData);
     } catch (error) {
       console.error('Error fetching farmers:', error);
@@ -125,11 +125,11 @@ export default function WaterAllocationOptimizer() {
       });
 
       const result = await response.json();
-      
+
       // Navigate to results screen
       router.push({
         pathname: '/admin/allocation-results' as any,
-        params: { 
+        params: {
           optimization: JSON.stringify(result),
           inputData: JSON.stringify({ ...formData, farmersCount: farmersData.length })
         },
@@ -143,8 +143,8 @@ export default function WaterAllocationOptimizer() {
   };
 
   const updateFarmerPriority = (farmerId: string, priority: string) => {
-    setFarmersData(prev => 
-      prev.map(farmer => 
+    setFarmersData(prev =>
+      prev.map(farmer =>
         farmer.id === farmerId ? { ...farmer, priority } : farmer
       )
     );
@@ -245,7 +245,7 @@ export default function WaterAllocationOptimizer() {
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={formData.timeHorizon}
-                  onValueChange={(value) => setFormData({ ...formData, timeHorizon: value })}
+                  onValueChange={(value: string) => setFormData({ ...formData, timeHorizon: value })}
                   style={styles.picker}
                 >
                   <Picker.Item label="3 Days" value="3" />

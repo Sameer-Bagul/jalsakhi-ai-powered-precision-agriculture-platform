@@ -112,7 +112,7 @@ export default function MyFarmsScreen() {
                     </View>
                     <TouchableOpacity
                         style={styles.addBtn}
-                        onPress={() => router.push('/farmer/my-farms-add-edit')}
+                        onPress={() => router.push('/farmer/my-farms-add-edit' as any)}
                     >
                         <LinearGradient colors={['#10b981', '#059669']} style={styles.addGradient}>
                             <MaterialCommunityIcons name="plus" size={28} color="white" />
@@ -135,7 +135,7 @@ export default function MyFarmsScreen() {
                                 </Text>
                                 <TouchableOpacity
                                     style={styles.emptyAddBtn}
-                                    onPress={() => router.push('/farmer/my-farms-add-edit')}
+                                    onPress={() => router.push('/farmer/my-farms-add-edit' as any)}
                                 >
                                     <Text style={styles.emptyAddText}>Register First Farm</Text>
                                 </TouchableOpacity>

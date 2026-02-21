@@ -128,7 +128,7 @@ export default function IrrigationDetailsScreen() {
 
                     <TouchableOpacity
                         style={styles.logBtn}
-                        onPress={() => router.push('/farmer/log-irrigation')}
+                        onPress={() => router.push('/farmer/log-irrigation' as any)}
                     >
                         <LinearGradient colors={['#3b82f6', '#2563eb']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientBtn}>
                             <MaterialCommunityIcons name="pencil-box-multiple-outline" size={20} color="white" />

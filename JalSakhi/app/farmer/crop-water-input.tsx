@@ -107,7 +107,7 @@ export default function CropWaterInput() {
                 <View style={styles.pickerWrapper}>
                   <Picker
                     selectedValue={formData.cropType}
-                    onValueChange={(value) => setFormData({ ...formData, cropType: value })}
+                    onValueChange={(value: string) => setFormData({ ...formData, cropType: value })}
                     style={styles.picker}
                   >
                     <Picker.Item label="Select crop" value="" color="#94a3b8" />
@@ -122,7 +122,7 @@ export default function CropWaterInput() {
                   <View style={styles.pickerWrapper}>
                     <Picker
                       selectedValue={formData.growthStage}
-                      onValueChange={(value) => setFormData({ ...formData, growthStage: value })}
+                      onValueChange={(value: string) => setFormData({ ...formData, growthStage: value })}
                       style={styles.picker}
                     >
                       <Picker.Item label="Stage" value="" color="#94a3b8" />
@@ -135,7 +135,7 @@ export default function CropWaterInput() {
                   <View style={styles.pickerWrapper}>
                     <Picker
                       selectedValue={formData.soilType}
-                      onValueChange={(value) => setFormData({ ...formData, soilType: value })}
+                      onValueChange={(value: string) => setFormData({ ...formData, soilType: value })}
                       style={styles.picker}
                     >
                       <Picker.Item label="Soil" value="" color="#94a3b8" />
@@ -279,6 +279,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  backBtn: {
+    borderRadius: 14,
   },
   scrollContent: {
     paddingHorizontal: 20,

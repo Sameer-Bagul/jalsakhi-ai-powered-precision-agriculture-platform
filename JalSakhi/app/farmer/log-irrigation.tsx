@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, StatusBar, Dimensions, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
@@ -164,6 +164,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+  },
+  backBtn: {
+    borderRadius: 14,
   },
   decorativeLayer: {
     ...StyleSheet.absoluteFillObject,

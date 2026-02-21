@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { DEMO_MODE } from '../../constants/demoMode';
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -125,6 +126,20 @@ export default function LoginScreen() {
                             style={styles.btn}
                         />
 
+                        {/* Demo credentials helper */}
+                        {DEMO_MODE && (
+                            <View style={styles.demoBox}>
+                                <Text style={styles.demoTitle}>🧪 Demo Mode — Quick Login</Text>
+                                <TouchableOpacity onPress={() => { setEmail('farmer@jalsakhi.com'); setPassword('demo123'); }}>
+                                    <Text style={styles.demoRow}>👩‍🌾 Farmer: <Text style={styles.demoVal}>farmer@jalsakhi.com / demo123</Text></Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => { setEmail('admin@jalsakhi.com'); setPassword('demo123'); }}>
+                                    <Text style={styles.demoRow}>🔑 Admin: <Text style={styles.demoVal}>admin@jalsakhi.com / demo123</Text></Text>
+                                </TouchableOpacity>
+                                <Text style={styles.demoHint}>Tap a line above to auto-fill credentials</Text>
+                            </View>
+                        )}
+
                         {/* Link */}
                         <TouchableOpacity
                             onPress={() => router.push({ pathname: '/(auth)/farmer-signup', params: { role } } as any)}
@@ -201,5 +216,28 @@ const styles = StyleSheet.create({
     },
     linkText: {
         fontSize: 14, color: Theme.colors.textMuted,
+    },
+    demoBox: {
+        marginTop: 20,
+        padding: 16,
+        borderRadius: 16,
+        backgroundColor: 'rgba(5, 150, 105, 0.07)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(5, 150, 105, 0.25)',
+        borderStyle: 'dashed',
+        gap: 6,
+    },
+    demoTitle: {
+        fontSize: 13, fontWeight: '800', color: Theme.colors.primary,
+        textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4,
+    },
+    demoRow: {
+        fontSize: 13, color: Theme.colors.text, fontWeight: '500',
+    },
+    demoVal: {
+        fontWeight: '700', color: Theme.colors.primary,
+    },
+    demoHint: {
+        fontSize: 11, color: Theme.colors.textMuted, marginTop: 4, fontStyle: 'italic',
     },
 });

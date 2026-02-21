@@ -186,6 +186,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     gap: 16,
   },
+  backBtn: {
+    borderRadius: 14,
+  },
   backBlur: {
     width: 44,
     height: 44,

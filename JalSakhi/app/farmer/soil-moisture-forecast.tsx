@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StatusBar, Dimensions } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -284,6 +285,9 @@ const styles = StyleSheet.create({
     },
     inputIcon: {
         marginLeft: 8,
+    },
+    backBtn: {
+        borderRadius: 14,
     },
     forecastBtn: {
         borderRadius: 16,

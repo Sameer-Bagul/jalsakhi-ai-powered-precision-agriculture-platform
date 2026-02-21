@@ -1,5 +1,7 @@
 import api from '../utils/api';
 import { Logger } from '../utils/Logger';
+import { DEMO_MODE } from '../constants/demoMode';
+import { MockFarmsService } from './mockServices';
 
 export interface Farm {
   id: string;
@@ -19,7 +21,7 @@ export interface IrrigationLog {
   notes?: string;
 }
 
-export const FarmsService = {
+export const _RealFarmsService = {
   /**
    * List all farms for the authenticated user.
    */
@@ -152,3 +154,6 @@ export const FarmsService = {
     }
   },
 };
+
+// Use mock or real implementation based on DEMO_MODE
+export const FarmsService = DEMO_MODE ? MockFarmsService : _RealFarmsService;

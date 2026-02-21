@@ -182,6 +182,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
+  backBtn: {
+    borderRadius: 14,
+  },
   decorativeLayer: {
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',

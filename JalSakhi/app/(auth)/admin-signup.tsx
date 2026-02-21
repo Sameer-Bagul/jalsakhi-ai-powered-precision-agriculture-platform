@@ -7,6 +7,8 @@ import { CustomButton } from '../../components/shared/CustomButton';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthService } from '../../services/auth';
+import { DEMO_MODE } from '../../constants/demoMode';
+import { MockAuthService } from '../../services/mockServices';
 
 export default function AdminSignup() {
     const router = useRouter();
@@ -36,7 +38,13 @@ export default function AdminSignup() {
 
         setLoading(true);
         try {
-            await AuthService.sendOtp(mobile);
+            if (DEMO_MODE) {
+                // In demo mode, skip OTP and go straight to next step
+                setStep('OTP');
+                setLoading(false);
+                return;
+            }
+            await (AuthService as any).sendOtp(mobile);
             setStep('OTP');
         } catch (error) {
             Alert.alert('Error', 'Failed to send OTP.');
@@ -54,10 +62,21 @@ export default function AdminSignup() {
 
         setLoading(true);
         try {
-            const result = await AuthService.verifyOtp(mobile, otpString, 'ADMIN', aadhar);
+            if (DEMO_MODE) {
+                // In demo mode, any 6-digit OTP is accepted
+                const result = await MockAuthService.verifyOtp(mobile, otpString, 'ADMIN', aadhar);
+                if (result.success) {
+                    Alert.alert('Success', 'Admin Registration Successful!');
+                    router.replace('/admin/dashboard' as any);
+                } else {
+                    Alert.alert('Error', 'Invalid OTP. Try 123456');
+                }
+                return;
+            }
+            const result = await (AuthService as any).verifyOtp(mobile, otpString, 'ADMIN', aadhar);
             if (result.success) {
                 Alert.alert('Success', 'Admin Registration Successful!');
-                router.replace('/admin/dashboard');
+                router.replace('/admin/dashboard' as any);
             } else {
                 Alert.alert('Error', 'Invalid OTP. Try 123456');
             }
