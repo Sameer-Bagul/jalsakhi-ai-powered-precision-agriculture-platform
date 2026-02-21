@@ -78,7 +78,7 @@ export default function MyFarmsScreen() {
                     onPress={() => router.push({ pathname: '/farmer/my-farms-add-edit', params: { id: item.id } } as any)}
                 >
                     <BlurView intensity={80} tint="light" style={styles.actionBlur}>
-                        <Feather name="edit-3" size={16} color={Theme.colors.text} />
+                        <MaterialCommunityIcons name="pencil-outline" size={18} color={Theme.colors.text} />
                     </BlurView>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -86,7 +86,7 @@ export default function MyFarmsScreen() {
                     onPress={() => handleDelete(item.id)}
                 >
                     <BlurView intensity={80} tint="light" style={styles.actionBlur}>
-                        <Feather name="trash-2" size={16} color="#ef4444" />
+                        <MaterialCommunityIcons name="trash-can-outline" size={18} color="#ef4444" />
                     </BlurView>
                 </TouchableOpacity>
             </View>
@@ -115,7 +115,7 @@ export default function MyFarmsScreen() {
                         onPress={() => router.push('/farmer/my-farms-add-edit')}
                     >
                         <LinearGradient colors={['#10b981', '#059669']} style={styles.addGradient}>
-                            <Feather name="plus" size={24} color="white" />
+                            <MaterialCommunityIcons name="plus" size={28} color="white" />
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>

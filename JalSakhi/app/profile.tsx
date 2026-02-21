@@ -98,7 +98,7 @@ export default function ProfileScreen() {
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <BlurView intensity={60} tint="light" style={styles.backBlur}>
-                            <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+                            <MaterialCommunityIcons name="chevron-left" size={28} color={Theme.colors.text} />
                         </BlurView>
                     </TouchableOpacity>
                     <View style={styles.headerTitles}>
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
                         <Text style={styles.headerSubtitle}>User Account & Preferences</Text>
                     </View>
                     <TouchableOpacity style={styles.editBtn}>
-                        <Feather name="edit-3" size={20} color={Theme.colors.text} />
+                        <MaterialCommunityIcons name="pencil-outline" size={22} color={Theme.colors.text} />
                     </TouchableOpacity>
                 </View>
 
@@ -150,7 +150,7 @@ export default function ProfileScreen() {
                         <GlassCard style={styles.settingsGroup}>
                             <View style={styles.settingItem}>
                                 <View style={[styles.settingIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
-                                    <Feather name="bell" size={18} color="#3b82f6" />
+                                    <MaterialCommunityIcons name="bell-outline" size={20} color="#3b82f6" />
                                 </View>
                                 <Text style={styles.settingLabel}>{t('profile.notifications')}</Text>
                                 <Switch
@@ -165,7 +165,7 @@ export default function ProfileScreen() {
 
                             <View style={styles.settingItem}>
                                 <View style={[styles.settingIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
-                                    <Feather name="moon" size={18} color="#a855f7" />
+                                    <MaterialCommunityIcons name="moon-waning-crescent" size={20} color="#a855f7" />
                                 </View>
                                 <Text style={styles.settingLabel}>{t('profile.darkMode')}</Text>
                                 <Switch
@@ -180,12 +180,12 @@ export default function ProfileScreen() {
 
                             <TouchableOpacity style={styles.settingItem} onPress={handleLanguageChange}>
                                 <View style={[styles.settingIconBox, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
-                                    <Feather name="globe" size={18} color="#f59e0b" />
+                                    <MaterialCommunityIcons name="earth" size={20} color="#f59e0b" />
                                 </View>
                                 <Text style={[styles.settingLabel, { flex: 1 }]}>{t('profile.language')}</Text>
                                 <View style={styles.settingRight}>
                                     <Text style={styles.settingValue}>{currentLanguage}</Text>
-                                    <Feather name="chevron-right" size={18} color={Theme.colors.textMuted} />
+                                    <MaterialCommunityIcons name="chevron-right" size={22} color={Theme.colors.textMuted} />
                                 </View>
                             </TouchableOpacity>
                         </GlassCard>
@@ -198,27 +198,27 @@ export default function ProfileScreen() {
                         <GlassCard style={styles.settingsGroup}>
                             <TouchableOpacity style={styles.settingItem}>
                                 <View style={[styles.settingIconBox, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
-                                    <Feather name="help-circle" size={18} color="#10b981" />
+                                    <MaterialCommunityIcons name="help-circle-outline" size={20} color="#10b981" />
                                 </View>
                                 <Text style={[styles.settingLabel, { flex: 1 }]}>{t('profile.helpFaq')}</Text>
-                                <Feather name="chevron-right" size={18} color={Theme.colors.textMuted} />
+                                <MaterialCommunityIcons name="chevron-right" size={22} color={Theme.colors.textMuted} />
                             </TouchableOpacity>
 
                             <View style={styles.settingDivider} />
 
                             <TouchableOpacity style={styles.settingItem}>
                                 <View style={[styles.settingIconBox, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
-                                    <Feather name="alert-circle" size={18} color="#ef4444" />
+                                    <MaterialCommunityIcons name="alert-circle-outline" size={20} color="#ef4444" />
                                 </View>
                                 <Text style={[styles.settingLabel, { flex: 1 }]}>{t('profile.reportIssue')}</Text>
-                                <Feather name="chevron-right" size={18} color={Theme.colors.textMuted} />
+                                <MaterialCommunityIcons name="chevron-right" size={22} color={Theme.colors.textMuted} />
                             </TouchableOpacity>
                         </GlassCard>
                     </View>
 
                     <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
                         <LinearGradient colors={['#fee2e2', '#fecaca']} style={styles.logoutGradient}>
-                            <Feather name="log-out" size={20} color="#dc2626" />
+                            <MaterialCommunityIcons name="logout" size={20} color="#dc2626" />
                             <Text style={styles.logoutText}>{t('profile.logout')}</Text>
                         </LinearGradient>
                     </TouchableOpacity>
