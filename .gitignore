@@ -4,3 +4,13 @@ soil_moisture_model/*.joblib
 __pycache__/
 *.pyc
 *.pyo
+
+
+# ML Models
+*.joblib
+ML models/
+
+# Python
+venv/
+__pycache__/
+*.pyc
