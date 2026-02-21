@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity } from 'react-native
 import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { CustomButton } from '../../components/shared/CustomButton';
+import { changeLanguage } from '../../i18n';
 import { Logger } from '../../utils/Logger';
 
 const LANGUAGES = [
@@ -15,8 +16,9 @@ export default function LanguageScreen() {
     const router = useRouter();
     const [selected, setSelected] = React.useState('en');
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         Logger.info('LanguageScreen', `Selected language: ${selected}`);
+        await changeLanguage(selected);
         router.push('/(auth)/login');
     };
 
