@@ -58,14 +58,58 @@ app.add_middleware(
 class PredictRequest(BaseModel):
     crop_type: str = Field(..., description="Crop type e.g. MAIZE, RICE")
     soil_type: str = Field(..., description="SOIL TYPE: DRY, WET, HUMID")
-    region: str = Field(..., description="REGION: DESERT, SEMI ARID, SEMI HUMID, HUMID")
+    region: str = Field(..., description="15 India agro-climatic zones (e.g. Western Himalayan Region)")
     temperature: str = Field(..., description="Temperature range e.g. 20-30")
     weather_condition: str = Field(..., description="NORMAL, SUNNY, WINDY, RAINY")
 
 
+# 1 mm depth over 1 acre ≈ 4046 L (for litre conversion)
+LITRES_PER_MM_PER_ACRE = 4046
+
+# Scientifically realistic ET bounds (mm/day). Used only in post-prediction constraint layer.
+CROP_PHYSICAL_LIMITS = {
+    "RICE": {"min_mm": 3.5, "max_mm": 10.0},
+    "WHEAT": {"min_mm": 2.0, "max_mm": 6.5},
+    "MAIZE": {"min_mm": 3.0, "max_mm": 8.0},
+    "SUGARCANE": {"min_mm": 4.0, "max_mm": 12.0},
+    "COTTON": {"min_mm": 3.0, "max_mm": 9.0},
+    "BANANA": {"min_mm": 4.0, "max_mm": 11.0},
+    "CITRUS": {"min_mm": 2.5, "max_mm": 7.5},
+    "MELON": {"min_mm": 3.0, "max_mm": 8.5},
+    "POTATO": {"min_mm": 2.5, "max_mm": 7.0},
+    "ONION": {"min_mm": 2.0, "max_mm": 6.0},
+    "CABBAGE": {"min_mm": 2.0, "max_mm": 6.5},
+    "TOMATO": {"min_mm": 3.0, "max_mm": 8.0},
+    "SOYABEAN": {"min_mm": 2.5, "max_mm": 7.0},
+    "MUSTARD": {"min_mm": 1.5, "max_mm": 5.5},
+    "BEAN": {"min_mm": 2.0, "max_mm": 6.5},
+}
+
+
+# This constraint layer ensures agronomic realism and prevents ML outliers.
+def apply_physical_constraints(crop: str, predicted_mm: float, temp_mid: float) -> float:
+    crop = crop.upper()
+    # Prevent negative outputs
+    if predicted_mm < 0:
+        predicted_mm = 0.0
+    if crop in CROP_PHYSICAL_LIMITS:
+        limits = CROP_PHYSICAL_LIMITS[crop]
+        # Clamp within agronomic bounds
+        predicted_mm = max(limits["min_mm"], predicted_mm)
+        predicted_mm = min(limits["max_mm"], predicted_mm)
+        # Temperature realism adjustment
+        if temp_mid < 15:
+            predicted_mm *= 0.8
+        elif temp_mid > 35:
+            predicted_mm *= 1.05
+    return round(predicted_mm, 3)
+
+
 class PredictResponse(BaseModel):
-    water_requirement: float
+    water_requirement: float  # mm/day
     unit: str = "mm/day"
+    water_requirement_litre_per_acre: float  # L/acre/day
+    unit_litre_per_acre: str = "L/acre/day"
 
 
 def validate_request(req: PredictRequest) -> None:
@@ -103,19 +147,32 @@ def predict(req: PredictRequest):
     validate_request(req)
     import pandas as pd
     temp_mid = parse_temperature_midpoint(req.temperature)
-    columns = ["CROP TYPE", "SOIL TYPE", "REGION", "WEATHER CONDITION", "temp_mid"]
+    # Map 15 agro-climatic zones -> 4 climates for model input
+    zone_to_climate = config.get("zone_to_climate") or {}
+    region_climate = zone_to_climate.get(req.region.strip(), req.region.strip())
+    columns = ["CROP TYPE", "SOIL TYPE", "REGION", "WEATHER CONDITION", "temp_mid", "temp_mid_sq"]
     row = pd.DataFrame(
         [{
             "CROP TYPE": req.crop_type.strip(),
             "SOIL TYPE": req.soil_type.strip(),
-            "REGION": req.region.strip(),
+            "REGION": region_climate,
             "WEATHER CONDITION": req.weather_condition.strip(),
             "temp_mid": temp_mid,
+            "temp_mid_sq": temp_mid * temp_mid,
         }],
         columns=columns,
     )
-    pred = model_pipeline.predict(row)[0]
-    return PredictResponse(water_requirement=round(float(pred), 4))
+    predicted_mm = model_pipeline.predict(row)[0]
+    predicted_mm = apply_physical_constraints(
+        crop=req.crop_type,
+        predicted_mm=float(predicted_mm),
+        temp_mid=temp_mid,
+    )
+    litres = predicted_mm * LITRES_PER_MM_PER_ACRE
+    return PredictResponse(
+        water_requirement=predicted_mm,
+        water_requirement_litre_per_acre=round(litres, 2),
+    )
 
 
 @app.get("/health")
