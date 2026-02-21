@@ -27,6 +27,7 @@ export const FarmsService = {
     try {
       const response = await api.get('/api/farms');
       if (response.data.success) {
+        Logger.info('FarmsService', `Successfully fetched ${response.data.farms.length} farms`);
         return response.data.farms.map((f: any) => ({
           id: f._id,
           name: f.name,
@@ -36,6 +37,7 @@ export const FarmsService = {
           image: f.image,
         }));
       }
+      Logger.warn('FarmsService', 'Failed to fetch farms');
       return [];
     } catch (e) {
       Logger.error('FarmsService', 'list', e);
@@ -50,6 +52,7 @@ export const FarmsService = {
     try {
       const response = await api.get(`/api/farms/${id}`);
       if (response.data.success) {
+        Logger.info('FarmsService', `Successfully fetched farm: ${id}`);
         const f = response.data.farm;
         return {
           id: f._id,
@@ -60,6 +63,7 @@ export const FarmsService = {
           image: f.image,
         };
       }
+      Logger.warn('FarmsService', `Farm not found: ${id}`);
       return undefined;
     } catch (e) {
       Logger.error('FarmsService', 'get', e);
@@ -74,6 +78,7 @@ export const FarmsService = {
     try {
       const response = await api.post('/api/farms', farm);
       if (response.data.success) {
+        Logger.info('FarmsService', `Successfully created farm: ${farm.name}`);
         const f = response.data.farm;
         return {
           id: f._id,
@@ -84,6 +89,7 @@ export const FarmsService = {
           image: f.image,
         };
       }
+      Logger.warn('FarmsService', `Failed to create farm: ${farm.name}`);
       return null;
     } catch (e) {
       Logger.error('FarmsService', 'create', e);

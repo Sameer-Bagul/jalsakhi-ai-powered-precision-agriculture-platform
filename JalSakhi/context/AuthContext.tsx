@@ -30,19 +30,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 const savedToken = await AsyncStorage.getItem(TOKEN_KEY);
                 if (savedToken) {
+                    Logger.info('AuthContext', 'Found saved token, verifying...');
                     setToken(savedToken);
                     // Verify token is still valid
                     const authCheck = await AuthService.isAuthenticated();
                     if (authCheck.success) {
+                        Logger.info('AuthContext', 'Token verified successfully');
                         const userData = await AuthService.getUserData();
                         if (userData.success && userData.userData) {
                             setUser(userData.userData);
                         }
                     } else {
+                        Logger.warn('AuthContext', 'Token verification failed or expired');
                         // Token expired or invalid
                         await AsyncStorage.removeItem(TOKEN_KEY);
                         setToken(null);
                     }
+                } else {
+                    Logger.info('AuthContext', 'No saved token found');
                 }
             } catch (error) {
                 Logger.error('AuthContext', 'Init error', error);
@@ -58,12 +63,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const result = await AuthService.register(data);
             if (result.success && result.token) {
+                Logger.info('AuthContext', 'Registration successful, updating state');
                 setToken(result.token);
                 // Fetch user data after registration
                 const userData = await AuthService.getUserData();
                 if (userData.success && userData.userData) {
                     setUser(userData.userData);
                 }
+            } else {
+                Logger.warn('AuthContext', `Registration failed: ${result.message}`);
             }
             return result;
         } catch (error: any) {
@@ -79,12 +87,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const result = await AuthService.login(data);
             if (result.success && result.token) {
+                Logger.info('AuthContext', 'Login successful, updating state');
                 setToken(result.token);
                 // Fetch user data after login
                 const userData = await AuthService.getUserData();
                 if (userData.success && userData.userData) {
                     setUser(userData.userData);
                 }
+            } else {
+                Logger.warn('AuthContext', `Login failed: ${result.message}`);
             }
             return result;
         } catch (error: any) {
