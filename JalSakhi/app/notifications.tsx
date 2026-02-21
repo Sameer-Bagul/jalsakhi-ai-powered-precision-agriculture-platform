@@ -44,9 +44,9 @@ export default function Notifications() {
                     item.type === 'critical' && { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
                     item.type === 'info' && { backgroundColor: 'rgba(59, 130, 246, 0.1)' },
                     ]}>
-                        <Feather
-                            name={item.type === 'success' ? 'check-circle' : item.type === 'critical' ? 'alert-triangle' : 'info'}
-                            size={20}
+                        <MaterialCommunityIcons
+                            name={item.type === 'success' ? 'check-circle-outline' : item.type === 'critical' ? 'alert-outline' : 'information-outline'}
+                            size={22}
                             color={
                                 item.type === 'success' ? '#10b981' :
                                     item.type === 'critical' ? '#ef4444' : '#3b82f6'
@@ -81,7 +81,7 @@ export default function Notifications() {
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <BlurView intensity={60} tint="light" style={styles.backBlur}>
-                            <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+                            <MaterialCommunityIcons name="chevron-left" size={28} color={Theme.colors.text} />
                         </BlurView>
                     </TouchableOpacity>
                     <View style={styles.headerTitles}>
@@ -102,7 +102,7 @@ export default function Notifications() {
                     ListEmptyComponent={
                         <View style={styles.empty}>
                             <BlurView intensity={20} tint="light" style={styles.emptyBlur}>
-                                <Feather name="bell-off" size={48} color={Theme.colors.textMuted} />
+                                <MaterialCommunityIcons name="bell-off-outline" size={48} color={Theme.colors.textMuted} />
                                 <Text style={styles.emptyText}>{t('notifications.noNotifications')}</Text>
                             </BlurView>
                         </View>

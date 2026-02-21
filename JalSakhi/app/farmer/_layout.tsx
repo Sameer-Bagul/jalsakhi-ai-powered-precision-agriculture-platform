@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, useRouter, usePathname } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { View, TouchableOpacity, Text, StyleSheet, Dimensions, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,13 +31,13 @@ export default function FarmerLayout() {
                     <BlurView intensity={80} tint="light" style={styles.glassBar}>
                         <View style={styles.barMain}>
                             <TabItem
-                                icon="grid"
+                                icon={pathname.includes('/dashboard') ? "home-variant" : "home-variant-outline"}
                                 label="Home"
                                 active={pathname.includes('/dashboard')}
                                 onPress={() => router.push('/farmer/dashboard')}
                             />
                             <TabItem
-                                icon="layers"
+                                icon={pathname.includes('/my-farms') ? "sprout" : "sprout-outline"}
                                 label="Farms"
                                 active={pathname.includes('/my-farms')}
                                 onPress={() => router.push('/farmer/my-farms')}
@@ -53,20 +53,20 @@ export default function FarmerLayout() {
                                         colors={['#10b981', '#059669']}
                                         style={styles.aiGradient}
                                     >
-                                        <MaterialCommunityIcons name="robot" size={24} color="white" />
+                                        <MaterialCommunityIcons name="robot-outline" size={26} color="white" />
                                     </LinearGradient>
                                 </TouchableOpacity>
-                                <Text style={styles.aiLabel}>AI Chat</Text>
+                                <Text style={styles.aiLabel}>FarmAI</Text>
                             </View>
 
                             <TabItem
-                                icon="bell"
+                                icon={pathname.includes('/notifications') ? "bell" : "bell-outline"}
                                 label="Alerts"
                                 active={pathname.includes('/notifications')}
                                 onPress={() => router.push('/notifications')}
                             />
                             <TabItem
-                                icon="user"
+                                icon={pathname.includes('/profile') ? "account" : "account-outline"}
                                 label="Profile"
                                 active={pathname.includes('/profile')}
                                 onPress={() => router.push('/profile')}
@@ -82,7 +82,7 @@ export default function FarmerLayout() {
 const TabItem = ({ icon, label, active, onPress }: any) => (
     <TouchableOpacity style={styles.tabBtn} onPress={onPress} activeOpacity={0.7}>
         <View style={[styles.iconWrapper, active && styles.activeIconWrapper]}>
-            <Feather name={icon} size={20} color={active ? Theme.colors.primary : '#64748b'} />
+            <MaterialCommunityIcons name={icon} size={22} color={active ? Theme.colors.primary : '#64748b'} />
         </View>
         <Text style={[styles.tabLabel, active && styles.activeTabLabel]}>{label}</Text>
     </TouchableOpacity>
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 70,
         borderRadius: 25,
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.5)',
         overflow: 'hidden',
@@ -131,10 +131,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     activeIconWrapper: {
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        backgroundColor: 'rgba(16, 185, 129, 0.08)',
     },
     tabLabel: {
         fontSize: 10,
@@ -148,22 +148,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: -30,
+        width: 70,
     },
     aiButton: {
-        width: 54,
-        height: 54,
-        borderRadius: 27,
+        width: 58,
+        height: 58,
+        borderRadius: 29,
         elevation: 8,
         shadowColor: Theme.colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.3,
         shadowRadius: 10,
         backgroundColor: 'white',
-        padding: 3,
+        padding: 4,
     },
     aiGradient: {
         flex: 1,
-        borderRadius: 24,
+        borderRadius: 25,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -171,6 +172,6 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '800',
         color: Theme.colors.primary,
-        marginTop: 6,
+        marginTop: 4,
     }
 });

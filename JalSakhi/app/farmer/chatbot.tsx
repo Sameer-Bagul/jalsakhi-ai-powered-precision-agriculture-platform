@@ -106,7 +106,7 @@ export default function ChatbotScreen() {
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
             <BlurView intensity={60} tint="light" style={styles.backBlur}>
-              <Feather name="chevron-left" size={24} color={Theme.colors.text} />
+              <MaterialCommunityIcons name="chevron-left" size={28} color={Theme.colors.text} />
             </BlurView>
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
@@ -120,7 +120,7 @@ export default function ChatbotScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.infoBtn}>
-            <Feather name="info" size={20} color={Theme.colors.textMuted} />
+            <MaterialCommunityIcons name="information-outline" size={22} color={Theme.colors.textMuted} />
           </TouchableOpacity>
         </View>
 

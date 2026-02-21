@@ -58,7 +58,7 @@ export default function FarmerDashboard() {
                     </View>
                     <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/notifications')}>
                         <BlurView intensity={80} tint="light" style={styles.notifBlur}>
-                            <Feather name="bell" size={22} color="white" />
+                            <MaterialCommunityIcons name="bell-outline" size={24} color="white" />
                             <View style={styles.badgeDot} />
                         </BlurView>
                     </TouchableOpacity>
