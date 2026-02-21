@@ -173,43 +173,47 @@
     document.getElementById('add-farm').onclick = () => addFarm();
 
     let optimizeAbortController = null;
+    let optimizeRequestId = 0;
 
     document.getElementById('run-optimize').onclick = async () => {
       const resultEl = document.getElementById('result');
       const runBtn = document.getElementById('run-optimize');
 
-      if (optimizeAbortController) optimizeAbortController.abort();
-      optimizeAbortController = new AbortController();
-      const signal = optimizeAbortController.signal;
-
-      runBtn.disabled = true;
-      resultEl.innerHTML = '<p>Running…</p>';
-
       const total = parseFloat(document.getElementById('total').value);
       if (isNaN(total) || total <= 0) {
         resultEl.innerHTML = '<div class="error">Please enter a valid total available water (liters).</div>';
-        runBtn.disabled = false;
         return;
       }
       const farms = collectFarms();
       if (farms.length === 0) {
         resultEl.innerHTML = '<div class="error">Add at least one farm with a valid area (ha).</div>';
-        runBtn.disabled = false;
         return;
       }
+
+      if (optimizeAbortController) optimizeAbortController.abort();
+      optimizeAbortController = new AbortController();
+      const signal = optimizeAbortController.signal;
+      const myId = ++optimizeRequestId;
+
+      runBtn.disabled = true;
+      resultEl.innerHTML = '<p>Running…</p>';
+
       try {
-        const res = await fetch('/optimize', {
+        const payload = {
+          total_available_water_liters: parseFloat(document.getElementById('total').value),
+          farms: collectFarms(),
+        };
+        const res = await fetch('/optimize?_=' + Date.now(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
-          body: JSON.stringify({ total_available_water_liters: total, farms }),
+          body: JSON.stringify(payload),
           cache: 'no-store',
           signal,
         });
         const data = await res.json().catch(() => ({}));
-        if (signal.aborted) return;
+        if (myId !== optimizeRequestId) return;
         if (!res.ok) {
           resultEl.innerHTML = '<div class="error">' + (data.detail || data.message || res.statusText) + '</div>';
-          runBtn.disabled = false;
           return;
         }
         resultEl.innerHTML = `
@@ -243,10 +247,11 @@
           </table>
         `;
       } catch (err) {
+        if (myId !== optimizeRequestId) return;
         if (err.name === 'AbortError') return;
         resultEl.innerHTML = '<div class="error">Request failed: ' + err.message + '. Is the API running on this port?</div>';
       } finally {
-        if (!signal.aborted) runBtn.disabled = false;
+        if (myId === optimizeRequestId) runBtn.disabled = false;
       }
     };
 
