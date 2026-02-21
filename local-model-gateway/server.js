@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const PORT = Number(process.env.PORT) || 5000;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
@@ -11,6 +12,10 @@ const BODY_LIMIT = process.env.BODY_LIMIT || '1mb';
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS) || 60000;
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS) || 60 * 1000;
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 100;
+
+const CROP_WATER_API_URL = process.env.CROP_WATER_API_URL || 'http://localhost:8001';
+const SOIL_MOISTURE_API_URL = process.env.SOIL_MOISTURE_API_URL || 'http://localhost:8000';
+const VILLAGE_WATER_API_URL = process.env.VILLAGE_WATER_API_URL || 'http://localhost:8003';
 
 function log(level, message, meta = {}) {
   const entry = {
@@ -65,6 +70,50 @@ function validateBody(req, res, next) {
 const app = express();
 
 app.use(helmet());
+
+app.use(
+  '/crop-water',
+  createProxyMiddleware({
+    target: CROP_WATER_API_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/crop-water': '' },
+    on: {
+      error: (err, req, res) => {
+        log('error', 'Crop Water proxy error', { error: err.message });
+        res.status(502).json({ error: 'Crop Water API unavailable' });
+      },
+    },
+  })
+);
+app.use(
+  '/soil-moisture',
+  createProxyMiddleware({
+    target: SOIL_MOISTURE_API_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/soil-moisture': '' },
+    on: {
+      error: (err, req, res) => {
+        log('error', 'Soil Moisture proxy error', { error: err.message });
+        res.status(502).json({ error: 'Soil Moisture API unavailable' });
+      },
+    },
+  })
+);
+app.use(
+  '/village-water',
+  createProxyMiddleware({
+    target: VILLAGE_WATER_API_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/village-water': '' },
+    on: {
+      error: (err, req, res) => {
+        log('error', 'Village Water proxy error', { error: err.message });
+        res.status(502).json({ error: 'Village Water API unavailable' });
+      },
+    },
+  })
+);
+
 app.use(express.json({ limit: BODY_LIMIT }));
 app.use((req, res, next) => {
   req.setTimeout(REQUEST_TIMEOUT_MS);
