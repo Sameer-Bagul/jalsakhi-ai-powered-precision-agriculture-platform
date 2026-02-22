@@ -380,14 +380,9 @@ const styles = StyleSheet.create({
     glassCard: {
         borderRadius: 24,
         overflow: 'hidden',
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.7)',
-        elevation: 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.03,
-        shadowRadius: 10,
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
     },
     cardBlur: {
         padding: 20,
@@ -432,15 +427,18 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F1F5F9',
-        borderRadius: 12,
+        backgroundColor: 'white',
+        borderRadius: 14,
         paddingRight: 16,
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
+        height: 56,
     },
     input: {
         flex: 1,
-        height: 48,
+        height: 56,
         paddingHorizontal: 16,
-        fontSize: 15,
+        fontSize: 16,
         color: Theme.colors.text,
     },
     inputIcon: {
@@ -449,6 +447,8 @@ const styles = StyleSheet.create({
     forecastBtn: {
         borderRadius: 16,
         overflow: 'hidden',
+        borderWidth: 1.5,
+        borderColor: 'rgba(16, 185, 129, 0.3)',
     },
     gradientBtn: {
         height: 48,
@@ -488,11 +488,8 @@ const styles = StyleSheet.create({
     },
     activeMode: {
         backgroundColor: 'white',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     modeText: {
         fontSize: 11,

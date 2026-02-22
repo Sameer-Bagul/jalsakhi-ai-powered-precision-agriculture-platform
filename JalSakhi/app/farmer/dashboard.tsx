@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
     gridItem: {
         borderRadius: 32,
         overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
     },
     glassBackground: {
         flex: 1,

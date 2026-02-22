@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, StatusBar, Dimensions, ActivityIndicator } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { Farm, IrrigationLog } from '../../services/farms';
@@ -214,16 +214,18 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     gap: 16,
   },
-  backBlur: {
+  backBtn: {
     width: 44,
     height: 44,
     borderRadius: 14,
+    overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.8)',
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.05)',
   },
+  backBlur: {},
   headerTitles: {
     flex: 1,
   },
@@ -257,14 +259,9 @@ const styles = StyleSheet.create({
   glassCard: {
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.7)',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   cardBlur: {
     padding: 20,
@@ -336,11 +333,9 @@ const styles = StyleSheet.create({
   logTile: {
     borderRadius: 24,
     padding: 20,
-    elevation: 4,
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
   },
   logTileContent: {
     flexDirection: 'row',
