@@ -13,7 +13,9 @@ import {
   Image,
   StatusBar,
   Dimensions,
-  ScrollView
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
@@ -137,8 +139,8 @@ export default function ChatbotScreen() {
 
         <KeyboardAvoidingView
           style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
         >
           {/* Language Selector */}
           <View style={styles.langArea}>
@@ -155,24 +157,29 @@ export default function ChatbotScreen() {
             </ScrollView>
           </View>
 
-          <FlatList
-            ref={listRef}
-            data={messages}
-            keyExtractor={(i) => i.id}
-            renderItem={renderMessage}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-          />
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+              <FlatList
+                ref={listRef}
+                data={messages}
+                keyExtractor={(i) => i.id}
+                renderItem={renderMessage}
+                contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
+                keyboardDismissMode="on-drag"
+              />
 
-          {isTyping && (
-            <View style={styles.typingRow}>
-              <BlurView intensity={30} tint="light" style={styles.typingBubble}>
-                <View style={styles.dot} />
-                <View style={[styles.dot, { opacity: 0.5 }]} />
-                <View style={[styles.dot, { opacity: 0.2 }]} />
-              </BlurView>
+              {isTyping && (
+                <View style={styles.typingRow}>
+                  <BlurView intensity={30} tint="light" style={styles.typingBubble}>
+                    <View style={styles.dot} />
+                    <View style={[styles.dot, { opacity: 0.5 }]} />
+                    <View style={[styles.dot, { opacity: 0.2 }]} />
+                  </BlurView>
+                </View>
+              )}
             </View>
-          )}
+          </TouchableWithoutFeedback>
 
           <BlurView intensity={80} tint="light" style={styles.inputArea}>
             <View style={styles.inputWrapper}>

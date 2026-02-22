@@ -99,7 +99,7 @@ export default function SoilMoistureForecast() {
         }
     };
 
-    const GlassCard = ({ title, icon, children, style, intensity = 30 }: any) => (
+    const GlassCard = ({ title, icon, children, style, intensity = 40 }: any) => (
         <View style={[styles.glassCard, style]}>
             <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
                 <View style={styles.cardHeader}>
@@ -419,8 +419,8 @@ const styles = StyleSheet.create({
     },
     miniLabel: {
         fontSize: 12,
-        fontWeight: '700',
-        color: Theme.colors.textMuted,
+        fontWeight: '800',
+        color: 'rgba(6, 78, 59, 0.7)',
         marginBottom: 8,
         marginLeft: 4,
     },
@@ -439,7 +439,8 @@ const styles = StyleSheet.create({
         height: 56,
         paddingHorizontal: 16,
         fontSize: 16,
-        color: Theme.colors.text,
+        color: '#064e3b',
+        fontWeight: '700',
     },
     inputIcon: {
         marginLeft: 8,
@@ -498,7 +499,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     activeModeText: {
-        color: Theme.colors.primary,
+        color: '#064e3b',
     },
     levelContainer: {
         alignItems: 'center',
@@ -535,9 +536,9 @@ const styles = StyleSheet.create({
     },
     adviceText: {
         fontSize: 15,
-        color: Theme.colors.forest,
+        color: '#064e3b',
         lineHeight: 24,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     sectionHeader: {
         fontSize: 16,

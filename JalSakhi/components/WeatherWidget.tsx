@@ -42,24 +42,24 @@ export const WeatherWidget = ({ style, compact = false, light = false }: Weather
             <View style={[styles.header, compact && styles.headerCompact]}>
                 <View style={compact ? styles.infoCompact : undefined}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: compact ? 0 : 4 }}>
-                        <Ionicons name="location-sharp" size={12} color="rgba(255,255,255,0.8)" />
-                        <Text style={styles.location}>
+                        <Ionicons name="location-sharp" size={12} color={light ? "rgba(6, 78, 59, 0.7)" : "rgba(255,255,255,0.8)"} />
+                        <Text style={[styles.location, light && { color: "rgba(6, 78, 59, 0.7)" }]}>
                             {compact && displayWeather.city.length > 10
                                 ? displayWeather.city.substring(0, 10) + '...'
                                 : displayWeather.city}
                         </Text>
                     </View>
-                    <Text style={[styles.temp, compact && styles.tempCompact]}>
+                    <Text style={[styles.temp, compact && styles.tempCompact, light && { color: "#064e3b" }]}>
                         {displayWeather.temp}°C
                     </Text>
-                    <Text style={[styles.condition, compact && styles.conditionCompact]}>
+                    <Text style={[styles.condition, compact && styles.conditionCompact, light && { color: "rgba(6, 78, 59, 0.8)" }]}>
                         {displayWeather.condition}
                     </Text>
                 </View>
                 <Feather
                     name={getIconName(displayWeather.condition)}
                     size={compact ? 40 : 48}
-                    color="rgba(255,255,255,0.9)"
+                    color={light ? "#064e3b" : "rgba(255,255,255,0.9)"}
                 />
             </View>
 
@@ -89,7 +89,7 @@ export const WeatherWidget = ({ style, compact = false, light = false }: Weather
         return (
             <View style={[styles.containerLight, compact && styles.containerCompact, style]}>
                 {loading && !weather ? (
-                    <ActivityIndicator color="white" />
+                    <ActivityIndicator color="#064e3b" />
                 ) : (
                     <Content />
                 )}

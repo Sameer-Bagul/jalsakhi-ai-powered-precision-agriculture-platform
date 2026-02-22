@@ -47,7 +47,7 @@ export default function LogIrrigation() {
     }
   };
 
-  const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
+  const GlassCard = ({ title, icon, children, style, intensity = 40 }: any) => (
     <View style={[styles.glassCard, style]}>
       <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
         {title && (
@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '600',
-    color: Theme.colors.text,
+    fontWeight: '700',
+    color: '#064e3b',
   },
   submitBtn: {
     marginTop: 24,

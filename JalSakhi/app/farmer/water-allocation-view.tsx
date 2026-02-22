@@ -92,7 +92,7 @@ export default function WaterAllocationView() {
     }
   };
 
-  const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
+  const GlassCard = ({ title, icon, children, style, intensity = 40 }: any) => (
     <View style={[styles.glassCard, style]}>
       <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
         {title && (
@@ -490,8 +490,8 @@ const styles = StyleSheet.create({
   },
   miniLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    color: Theme.colors.textMuted,
+    fontWeight: '800',
+    color: 'rgba(6, 78, 59, 0.7)',
     marginBottom: 4,
   },
   mainAllocationRow: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   mainValue: {
     fontSize: 36,
     fontWeight: '900',
-    color: Theme.colors.primary,
+    color: '#064e3b',
   },
   dropletIcon: {
     width: 52,
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
   resPercent: {
     fontSize: 28,
     fontWeight: '900',
-    color: Theme.colors.text,
+    color: '#064e3b',
   },
   resVolume: {
     fontSize: 11,
