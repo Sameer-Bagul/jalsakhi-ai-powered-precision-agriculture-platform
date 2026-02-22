@@ -1,7 +1,20 @@
-## JalSakhi – Smart Water Management Platform
+## JalSakhi – Smart AI-Powered Farming Assistant
 
-JalSakhi is an end-to-end smart water management platform for farmers and village administrators.  
-It combines a production-ready mobile app, multiple ML microservices, and a secure local gateway to deliver crop water recommendations, soil moisture forecasts, and village-level water allocation insights.
+<p align="center">
+  <img src="JalSakhi/assets/images/logo.png" alt="JalSakhi logo" width="160" />
+</p>
+
+JalSakhi is a **smart AI-powered farming assistant** for farmers and village administrators.  
+It combines a production-ready mobile app, multiple ML microservices, and a secure local gateway to deliver crop water recommendations, soil moisture forecasts, village-level water allocation, and an AI chatbot—all to support better farming decisions.
+
+### App at a glance
+
+Images from `JalSakhi/assets/images/`:
+
+<p align="center">
+  <img src="JalSakhi/assets/images/forest_bg.png" alt="Farmer dashboard" width="280" />
+  <img src="JalSakhi/assets/images/background.jpeg" alt="Login and onboarding" width="280" />
+</p>
 
 ## Repository overview
 
@@ -64,7 +77,7 @@ High-level structure (simplified):
 │  ├─ constants/               # Theme, colors, and shared constants
 │  ├─ context/                 # React context providers
 │  ├─ locales/, i18n.ts        # Internationalisation setup
-│  ├─ assets/                  # Icons, images, and static assets
+│  ├─ assets/images/           # Logo, backgrounds (logo.png, forest_bg.png, background.jpeg)
 │  └─ *.md                     # App-specific guides (debug, build, nav)
 │
 ├─ ML models/
