@@ -21,10 +21,6 @@ export default function CropWaterInput() {
     soilMoisture: '',
     temperature: '',
     humidity: '',
-    rainfallLast5Days: '',
-    rainfallForecast: '',
-    windSpeed: '',
-    solarRadiation: '',
     region: 'Western Himalayan Region',
     weatherCondition: 'NORMAL',
   });
@@ -32,22 +28,26 @@ export default function CropWaterInput() {
 
   const cropTypes = ['Rice', 'Wheat', 'Sugarcane', 'Cotton', 'Maize', 'Soybean', 'Vegetables', 'Pulses'];
   const growthStages = ['Seedling', 'Vegetative', 'Flowering', 'Harvest'];
-  const soilTypes = ['Clay', 'Sandy', 'Loamy', 'Silt', 'Peaty'];
+  const soilTypes = ['DRY', 'HUMID', 'WET'];
   const regions = [
-    'Western Himalayan Region',
+    'Central Plateau & Hills Region',
+    'East Coast Plains & Hills Region',
     'Eastern Himalayan Region',
-    'Lower Gangetic Plains',
-    'Middle Gangetic Plains',
-    'Upper Gangetic Plains',
-    'Trans Gangetic Plains',
-    'Eastern Plateau & Hills',
-    'Central Plateau & Hills',
-    'Western Plateau & Hills',
-    'Southern Plateau & Hills',
-    'Gujarat Plains & Hills',
-    'Western Dry Region'
+    'Eastern Plateau & Hills Region',
+    'Gujarat Plains & Hills Region',
+    'Island Region',
+    'Lower Gangetic Plain Region',
+    'Middle Gangetic Plain Region',
+    'Southern Plateau & Hills Region',
+    'Trans-Gangetic Plain Region',
+    'Upper Gangetic Plain Region',
+    'West Coast Plains & Ghats Region',
+    'Western Dry Region',
+    'Western Himalayan Region',
+    'Western Plateau & Hills Region'
   ];
-  const weatherConditions = ['NORMAL', 'DRY', 'WET', 'HUMID'];
+  const weatherConditions = ['NORMAL', 'RAINY', 'SUNNY', 'WINDY'];
+  const temperatureRanges = ['10-20', '20-30', '30-40', '40-50'];
 
   const handleSubmit = async () => {
     if (!formData.cropType || !formData.growthStage || !formData.soilType) {
@@ -57,7 +57,7 @@ export default function CropWaterInput() {
 
     setLoading(true);
     try {
-      const predictionValue = await MLService.predictWaterRequirement({
+      const mlResponse = await MLService.predictWaterRequirement({
         crop_type: formData.cropType.toUpperCase(),
         soil_type: formData.soilType.toUpperCase(),
         area_acre: 1,
@@ -66,14 +66,18 @@ export default function CropWaterInput() {
         region: formData.region
       });
 
+      const waterReqMM = mlResponse?.water_requirement || 0;
+      const waterReqLitre = mlResponse?.water_requirement_litre_per_acre || 0;
+
       const result = {
-        waterRequirement: predictionValue,
-        recommendation: predictionValue > 50 ? 'High irrigation required' : 'Standard irrigation sufficient',
+        waterRequirement: waterReqMM,
+        waterRequirementLitre: waterReqLitre,
+        recommendation: waterReqMM > 50 ? 'High irrigation required' : 'Standard irrigation sufficient',
         confidence: 90 + Math.floor(Math.random() * 8),
         schedule: [
-          { day: 'Today', amount: (predictionValue * 0.4).toFixed(1), time: 'Morning 6-8 AM' },
-          { day: 'Day 3', amount: (predictionValue * 0.3).toFixed(1), time: 'Evening 5-7 PM' },
-          { day: 'Day 7', amount: (predictionValue * 0.3).toFixed(1), time: 'Morning 6-8 AM' },
+          { day: 'Today', amount: (waterReqMM * 0.4).toFixed(1), time: 'Morning 6-8 AM' },
+          { day: 'Day 3', amount: (waterReqMM * 0.3).toFixed(1), time: 'Evening 5-7 PM' },
+          { day: 'Day 7', amount: (waterReqMM * 0.3).toFixed(1), time: 'Morning 6-8 AM' },
         ]
       };
 
@@ -173,8 +177,10 @@ export default function CropWaterInput() {
                       onValueChange={(value) => setFormData({ ...formData, soilType: value })}
                       style={styles.picker}
                     >
-                      <Picker.Item label="Soil" value="" color="#94a3b8" />
-                      {soilTypes.map(s => <Picker.Item key={s} label={s} value={s} />)}
+                      <Picker.Item label="Soil State" value="" color="#94a3b8" />
+                      <Picker.Item label="Dry Soil" value="DRY" />
+                      <Picker.Item label="Humid Soil" value="HUMID" />
+                      <Picker.Item label="Wet Soil" value="WET" />
                     </Picker>
                   </View>
                 </View>
@@ -221,15 +227,17 @@ export default function CropWaterInput() {
               </View>
               <View style={styles.row}>
                 <View style={styles.halfInput}>
-                  <Text style={styles.miniLabel}>Temp (°C)</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="e.g., 32"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="decimal-pad"
-                    value={formData.temperature}
-                    onChangeText={(t) => setFormData({ ...formData, temperature: t })}
-                  />
+                  <Text style={styles.miniLabel}>Temp (°C) Range</Text>
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={formData.temperature}
+                      onValueChange={(value) => setFormData({ ...formData, temperature: value })}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Temp" value="" color="#94a3b8" />
+                      {temperatureRanges.map(t => <Picker.Item key={t} label={t} value={t} />)}
+                    </Picker>
+                  </View>
                 </View>
                 <View style={styles.halfInput}>
                   <Text style={styles.miniLabel}>Humidity (%)</Text>
@@ -244,34 +252,6 @@ export default function CropWaterInput() {
                 </View>
               </View>
             </GlassCard>
-
-            <GlassCard title="Forecasting" icon="weather-cloudy" style={styles.fullWidth}>
-              <View style={[styles.inputGroup, { marginBottom: 16 }]}>
-                <Text style={styles.miniLabel}>Rainfall Forecast (5 Days)</Text>
-                <View style={styles.inputWithIcon}>
-                  <TextInput
-                    style={[styles.input, { flex: 1 }]}
-                    placeholder="mm"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="decimal-pad"
-                    value={formData.rainfallForecast}
-                    onChangeText={(t) => setFormData({ ...formData, rainfallForecast: t })}
-                  />
-                  <Ionicons name="rainy-outline" size={20} color={Theme.colors.primary} style={styles.inputIcon} />
-                </View>
-              </View>
-              <View style={styles.row}>
-                <View style={styles.halfInput}>
-                  <Text style={styles.miniLabel}>Wind Speed</Text>
-                  <TextInput style={styles.input} placeholder="km/h" placeholderTextColor="#94a3b8" keyboardType="decimal-pad" value={formData.windSpeed} onChangeText={t => setFormData({ ...formData, windSpeed: t })} />
-                </View>
-                <View style={styles.halfInput}>
-                  <Text style={styles.miniLabel}>Solar Rad.</Text>
-                  <TextInput style={styles.input} placeholder="MJ/m²" placeholderTextColor="#94a3b8" keyboardType="decimal-pad" value={formData.solarRadiation} onChangeText={t => setFormData({ ...formData, solarRadiation: t })} />
-                </View>
-              </View>
-            </GlassCard>
-
           </View>
 
           <TouchableOpacity
@@ -288,7 +268,7 @@ export default function CropWaterInput() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </View >
   );
 }
 

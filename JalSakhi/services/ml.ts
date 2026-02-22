@@ -3,16 +3,28 @@ import { Logger } from '../utils/Logger';
 
 export interface CropPredictionInput {
     crop_type: string;
-    soil_type: string;
+    soil_type: 'DRY' | 'HUMID' | 'WET' | string; // Model expects moisture state
     area_acre: number;
-    temperature?: string;
-    weather_condition?: string;
+    temperature?: '10-20' | '20-30' | '30-40' | '40-50' | string;
+    weather_condition?: 'NORMAL' | 'RAINY' | 'SUNNY' | 'WINDY' | string;
     region?: string;
 }
 
 export interface SoilMoistureInput {
     sensorValue?: number;
-    location?: string;
+    // Sensor fields
+    avg_pm1?: number;
+    avg_pm2?: number;
+    avg_pm3?: number;
+    avg_am?: number;
+    avg_lum?: number;
+    avg_temp?: number;
+    avg_humd?: number;
+    avg_pres?: number;
+    // Location fields
+    state?: string;
+    district?: string;
+    month?: number;
     sm_history?: number[];
 }
 
@@ -20,13 +32,13 @@ export const MLService = {
     /**
      * Calls the Random Forest Regressor via Azure Proxy
      */
-    predictWaterRequirement: async (input: CropPredictionInput): Promise<number> => {
+    predictWaterRequirement: async (input: CropPredictionInput): Promise<any> => {
         Logger.info('MLService', `Predicting water for ${input.crop_type}`);
 
         try {
             const response = await api.post('/api/ai/crop-water', input);
-            // Extract the result from the nested data.data structure returned by our proxy
-            return response.data?.data?.prediction_mm_day || 0;
+            // Return the full data object from the AI response
+            return response.data?.data || null;
         } catch (error: any) {
             Logger.error('MLService', 'Crop water prediction failed', error);
             throw error;
@@ -36,7 +48,7 @@ export const MLService = {
     /**
      * Calls the Time-Series Forecaster via Azure Proxy
      */
-    forecastSoilMoisture: async (input: SoilMoistureInput): Promise<{ level: number, advice: string, trend: 'UP' | 'DOWN' | 'STABLE' }> => {
+    forecastSoilMoisture: async (input: SoilMoistureInput): Promise<any> => {
         Logger.info('MLService', `Forecasting soil moisture`);
 
         try {
@@ -52,13 +64,7 @@ export const MLService = {
             }
 
             const response = await api.post('/api/ai/soil-moisture', payload);
-            const data = response.data?.data;
-
-            return {
-                level: data?.forecast?.[0] || data?.current_level || 0,
-                advice: data?.advice || 'Monitor soil levels regularly.',
-                trend: (data?.trend?.toUpperCase() as any) || 'STABLE'
-            };
+            return response.data?.data || null;
         } catch (error: any) {
             Logger.error('MLService', 'Soil moisture forecast failed', error);
             throw error;

@@ -21,10 +21,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 logger = logging.getLogger(__name__)
 
-# Ensure we can import Crop_Water_Model, soil_moisture_model, village_water_allocation.
+# Ensure we can import Crop_Water_Model, soil_moisture_model, village_water_allocation, Chatbot.
 # soil_moisture_model.api uses same-dir imports (features, predict), so that package dir must be on path.
 ML_MODELS_DIR = Path(__file__).resolve().parent.parent
-for path in (str(ML_MODELS_DIR / "soil_moisture_model"), str(ML_MODELS_DIR)):
+CHATBOT_DIR = ML_MODELS_DIR.parent / "Chatbot"
+for path in (str(ML_MODELS_DIR / "soil_moisture_model"), str(ML_MODELS_DIR), str(CHATBOT_DIR)):
     if path not in sys.path:
         sys.path.insert(0, path)
 
@@ -33,6 +34,13 @@ import Crop_Water_Model.main as crop_water_main
 import soil_moisture_model.api as soil_moisture_api
 import soil_moisture_model.predict as soil_predict
 import village_water_allocation.api as village_api
+try:
+    import api as chatbot_api
+    import ml_tools as chatbot_tools
+    HAS_CHATBOT = True
+except ImportError as e:
+    logger.warning("Chatbot service disabled: %s. Run 'pip install -r techathon2k26/Chatbot/requirement.txt' with --break-system-packages if needed.", e)
+    HAS_CHATBOT = False
 
 
 def _load_all_artifacts() -> None:
@@ -63,6 +71,12 @@ def _load_all_artifacts() -> None:
     village_api.config["crop_water_api_url"] = f"{base}/crop-water"
     village_api.config["soil_moisture_api_url"] = f"{base}/soil-moisture"
     logger.info("Village Water Allocation config set to use unified API at %s", base)
+
+    # Chatbot (Model 4): point tools to this server's local endpoints
+    os.environ["CROP_WATER_API_URL"] = f"{base}/crop-water"
+    os.environ["SOIL_MOISTURE_API_URL"] = f"{base}/soil-moisture"
+    os.environ["VILLAGE_WATER_API_URL"] = f"{base}/village"
+    logger.info("Chatbot tools configured to use internal endpoints at %s", base)
 
 
 @asynccontextmanager
@@ -123,6 +137,8 @@ def health() -> dict[str, Any]:
 app.mount("/crop-water", crop_water_main.app)
 app.mount("/soil-moisture", soil_moisture_api.app)
 app.mount("/village", village_api.app)
+if HAS_CHATBOT:
+    app.mount("/chatbot", chatbot_api.app)
 
 
 if __name__ == "__main__":

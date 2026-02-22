@@ -7,17 +7,27 @@ import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MLService } from '../../services/ml';
+import { Logger } from '../../utils/Logger';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function SoilMoistureForecast() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<{ level: number, advice: string, trend: string } | null>(null);
+    const [result, setResult] = useState<any>(null);
     const [mode, setMode] = useState<'sensor' | 'location'>('sensor');
 
     // Sensor values
-    const [sensorValue, setSensorValue] = useState('');
+    const [sensorData, setSensorData] = useState({
+        avg_pm1: '10',
+        avg_pm2: '20',
+        avg_pm3: '15',
+        avg_am: '0.5',
+        avg_lum: '200',
+        avg_temp: '28',
+        avg_humd: '65',
+        avg_pres: '101325'
+    });
 
     // Location values
     const [locationData, setLocationData] = useState({
@@ -33,7 +43,16 @@ export default function SoilMoistureForecast() {
         try {
             let input: any;
             if (mode === 'sensor') {
-                input = { sensorValue: sensorValue ? parseInt(sensorValue) : 45 };
+                input = {
+                    avg_pm1: parseFloat(sensorData.avg_pm1),
+                    avg_pm2: parseFloat(sensorData.avg_pm2),
+                    avg_pm3: parseFloat(sensorData.avg_pm3),
+                    avg_am: parseFloat(sensorData.avg_am),
+                    avg_lum: parseFloat(sensorData.avg_lum),
+                    avg_temp: parseFloat(sensorData.avg_temp),
+                    avg_humd: parseFloat(sensorData.avg_humd),
+                    avg_pres: parseFloat(sensorData.avg_pres)
+                };
             } else {
                 input = {
                     state: locationData.state,
@@ -42,9 +61,38 @@ export default function SoilMoistureForecast() {
                     sm_history: locationData.smHistory.split(',').map(n => parseInt(n.trim()))
                 };
             }
-            const forecast = await MLService.forecastSoilMoisture(input);
-            setResult(forecast);
+            const forecastData = await MLService.forecastSoilMoisture(input);
+
+            // Map the different API outputs to a consistent UI object
+            let mappedResult: any = {
+                level: 0,
+                advice: forecastData?.advice || 'Monitor soil levels regularly.',
+                trend: forecastData?.trend?.toUpperCase() || 'STABLE',
+                futureForecast: []
+            };
+
+            // Unified handling for predictions array (returned by both modes)
+            const predictions = forecastData?.predictions || forecastData?.forecast || [];
+            const days = forecastData?.days_ahead || [];
+
+            if (predictions.length > 0) {
+                mappedResult.level = Math.round(predictions[0]);
+                // Calculate trend based on first vs last prediction
+                const first = predictions[0];
+                const last = predictions[predictions.length - 1];
+                mappedResult.trend = last > first ? 'UP' : last < first ? 'DOWN' : 'STABLE';
+
+                mappedResult.futureForecast = predictions.map((val: number, idx: number) => ({
+                    day: `Day ${days[idx] || (idx + 1)}`,
+                    value: Math.round(val)
+                }));
+            } else if (forecastData?.current_level !== undefined) {
+                mappedResult.level = Math.round(forecastData.current_level);
+            }
+
+            setResult(mappedResult);
         } catch (error) {
+            Logger.error('SoilMoistureForecast', 'Forecast failed', error);
             Alert.alert('Error', 'Failed to forecast soil moisture.');
         } finally {
             setLoading(false);
@@ -112,19 +160,39 @@ export default function SoilMoistureForecast() {
 
                         {/* Input Section */}
                         {mode === 'sensor' ? (
-                            <GlassCard title="Real-time Sensor" icon="sensor" style={styles.fullWidth}>
-                                <View style={styles.inputContainer}>
-                                    <Text style={styles.miniLabel}>Ammonia Sensitivity (avg_am)</Text>
-                                    <View style={styles.inputWrapper}>
-                                        <TextInput
-                                            style={styles.input}
-                                            placeholder="e.g. 0.5"
-                                            placeholderTextColor="#94a3b8"
-                                            value={sensorValue}
-                                            onChangeText={setSensorValue}
-                                            keyboardType="numeric"
-                                        />
-                                        <MaterialCommunityIcons name="molecule" size={20} color={Theme.colors.primary} style={styles.inputIcon} />
+                            <GlassCard title="Environment Sensors" icon="sensor" style={styles.fullWidth}>
+                                <View style={styles.sensorGrid}>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>PM1</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_pm1} onChangeText={t => setSensorData({ ...sensorData, avg_pm1: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>PM2.5</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_pm2} onChangeText={t => setSensorData({ ...sensorData, avg_pm2: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>PM10</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_pm3} onChangeText={t => setSensorData({ ...sensorData, avg_pm3: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>Ammonia</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_am} onChangeText={t => setSensorData({ ...sensorData, avg_am: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>Luminosity</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_lum} onChangeText={t => setSensorData({ ...sensorData, avg_lum: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>Temp (°C)</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_temp} onChangeText={t => setSensorData({ ...sensorData, avg_temp: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>Humidity (%)</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_humd} onChangeText={t => setSensorData({ ...sensorData, avg_humd: t })} keyboardType="numeric" />
+                                    </View>
+                                    <View style={styles.sensorInputHalf}>
+                                        <Text style={styles.miniLabel}>Pressure (Pa)</Text>
+                                        <TextInput style={styles.input} value={sensorData.avg_pres} onChangeText={t => setSensorData({ ...sensorData, avg_pres: t })} keyboardType="numeric" />
                                     </View>
                                 </View>
                                 <TouchableOpacity
@@ -193,11 +261,11 @@ export default function SoilMoistureForecast() {
                                             </Text>
                                             <View style={[styles.trendBadge, { backgroundColor: result.trend === 'UP' ? '#dcfce7' : '#fee2e2' }]}>
                                                 <Feather
-                                                    name={result.trend === 'UP' ? 'trending-up' : 'trending-down'}
+                                                    name={result.trend === 'UP' ? 'trending-up' : (result.trend === 'DOWN' ? 'trending-down' : 'minus')}
                                                     size={14}
-                                                    color={result.trend === 'UP' ? '#166534' : '#991b1b'}
+                                                    color={result.trend === 'UP' ? '#166534' : (result.trend === 'DOWN' ? '#991b1b' : '#475569')}
                                                 />
-                                                <Text style={[styles.trendText, { color: result.trend === 'UP' ? '#166534' : '#991b1b' }]}>{result.trend}</Text>
+                                                <Text style={[styles.trendText, { color: result.trend === 'UP' ? '#166534' : (result.trend === 'DOWN' ? '#991b1b' : '#475569') }]}>{result.trend}</Text>
                                             </View>
                                         </View>
                                     </GlassCard>
@@ -221,6 +289,25 @@ export default function SoilMoistureForecast() {
                                         <Text style={styles.adviceText}>{result.advice}</Text>
                                     </View>
                                 </GlassCard>
+
+                                {result.futureForecast && result.futureForecast.length > 0 && (
+                                    <View style={{ marginTop: 8 }}>
+                                        <Text style={styles.sectionHeader}>Future Moisture Forecast</Text>
+                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20, paddingHorizontal: 20 }}>
+                                            {result.futureForecast.map((item: any, idx: number) => (
+                                                <View key={idx} style={styles.forecastItem}>
+                                                    <View style={styles.forecastDayBox}>
+                                                        <Text style={styles.forecastDayText}>{item.day}</Text>
+                                                    </View>
+                                                    <Text style={[styles.forecastValue, { color: item.value < 40 ? '#ef4444' : '#10b981' }]}>{item.value}%</Text>
+                                                    <View style={styles.miniProgressBg}>
+                                                        <View style={[styles.miniProgressFill, { width: `${item.value}%`, backgroundColor: item.value < 40 ? '#ef4444' : '#10b981' }]} />
+                                                    </View>
+                                                </View>
+                                            ))}
+                                        </ScrollView>
+                                    </View>
+                                )}
                             </>
                         )}
                     </View>
@@ -454,5 +541,55 @@ const styles = StyleSheet.create({
         color: Theme.colors.forest,
         lineHeight: 24,
         fontWeight: '500',
+    },
+    sectionHeader: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: Theme.colors.text,
+        marginBottom: 16,
+        marginLeft: 4,
+    },
+    forecastItem: {
+        width: 100,
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 12,
+        marginRight: 12,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+    },
+    forecastDayBox: {
+        marginBottom: 8,
+    },
+    forecastDayText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: Theme.colors.textMuted,
+    },
+    forecastValue: {
+        fontSize: 20,
+        fontWeight: '900',
+        marginBottom: 8,
+    },
+    miniProgressBg: {
+        height: 4,
+        width: '100%',
+        backgroundColor: '#f1f5f9',
+        borderRadius: 2,
+        overflow: 'hidden',
+    },
+    miniProgressFill: {
+        height: '100%',
+        borderRadius: 2,
+    },
+    sensorGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: 8,
+    },
+    sensorInputHalf: {
+        width: (screenWidth - 80) / 2, // Accounting for padding and gap
     },
 });

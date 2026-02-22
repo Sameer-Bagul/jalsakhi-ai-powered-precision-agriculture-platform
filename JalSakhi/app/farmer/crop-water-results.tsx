@@ -16,13 +16,10 @@ export default function CropWaterResults() {
   const prediction = params.prediction ? JSON.parse(params.prediction as string) : null;
   const inputData = params.inputData ? JSON.parse(params.inputData as string) : null;
 
-  const waterRequirement = prediction?.waterRequirement || 45.5;
+  const waterRequirement = prediction?.waterRequirement || 0;
+  const waterRequirementLitre = prediction?.waterRequirementLitre || 0;
   const irrigationRecommendation = prediction?.recommendation || 'Irrigate in next 24 hours';
-  const schedule = prediction?.schedule || [
-    { day: 'Today', amount: 25, time: 'Morning 6-8 AM' },
-    { day: 'Day 3', amount: 20, time: 'Evening 5-7 PM' },
-    { day: 'Day 7', amount: 30, time: 'Morning 6-8 AM' },
-  ];
+  const schedule = prediction?.schedule || [];
   const confidence = prediction?.confidence || 92;
 
   const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
@@ -74,9 +71,10 @@ export default function CropWaterResults() {
             {/* Main Requirement Tile */}
             <GlassCard style={styles.fullWidth} intensity={40}>
               <View style={styles.mainResultRow}>
-                <View>
-                  <Text style={styles.miniLabel}>Water Needed</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.miniLabel}>Water Requirement</Text>
                   <Text style={styles.mainValue}>{waterRequirement}<Text style={styles.mainUnit}> mm/day</Text></Text>
+                  <Text style={styles.litreValue}>≈ {waterRequirementLitre.toLocaleString()} <Text style={styles.litreUnit}>L/acre/day</Text></Text>
                 </View>
                 <View style={styles.confidenceCircle}>
                   <BlurView intensity={80} tint="light" style={styles.confBlur}>
@@ -186,6 +184,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     gap: 16,
   },
+  backBtn: {},
   backBlur: {
     width: 44,
     height: 44,
@@ -281,6 +280,17 @@ const styles = StyleSheet.create({
   },
   mainUnit: {
     fontSize: 16,
+    fontWeight: '600',
+    color: Theme.colors.textMuted,
+  },
+  litreValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Theme.colors.secondary,
+    marginTop: 4,
+  },
+  litreUnit: {
+    fontSize: 12,
     fontWeight: '600',
     color: Theme.colors.textMuted,
   },
