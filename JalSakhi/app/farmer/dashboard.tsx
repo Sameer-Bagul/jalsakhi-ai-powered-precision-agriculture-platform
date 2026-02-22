@@ -36,7 +36,7 @@ export default function FarmerDashboard() {
 
     return (
         <ImageBackground
-            source={require('../../assets/images/forest_bg.png')}
+            source={require('../../assets/images/forest_bg.jpg')}
             style={styles.container}
             resizeMode="cover"
         >
