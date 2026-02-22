@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Dimensions, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -97,7 +96,7 @@ export default function CropWaterInput() {
 
   const GlassCard = ({ title, icon, children, style }: any) => (
     <View style={[styles.glassCard, style]}>
-      <BlurView intensity={30} tint="light" style={styles.cardBlur}>
+      <BlurView intensity={40} tint="light" style={styles.cardBlur}>
         <View style={styles.cardHeader}>
           <View style={styles.cardIconBox}>
             <MaterialCommunityIcons name={icon} size={20} color={Theme.colors.primary} />
@@ -106,6 +105,33 @@ export default function CropWaterInput() {
         </View>
         {children}
       </BlurView>
+    </View>
+  );
+
+  const ChipSelector = ({ label, options, selectedValue, onValueChange, horizontal = true }: any) => (
+    <View style={styles.inputGroup}>
+      <Text style={styles.miniLabel}>{label}</Text>
+      <ScrollView
+        horizontal={horizontal}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipList}
+      >
+        {options.map((option: string) => {
+          const isSelected = selectedValue === option || (label === "Soil Type" && selectedValue === option.toUpperCase()) || (label === "Temp (°C) Range" && selectedValue === option);
+          return (
+            <TouchableOpacity
+              key={option}
+              style={[styles.chip, isSelected && styles.activeChip]}
+              onPress={() => onValueChange(option)}
+            >
+              <Text style={[styles.chipText, isSelected && styles.activeChipText]}>
+                {option}
+              </Text>
+              {isSelected && <Ionicons name="checkmark-circle" size={14} color="white" style={{ marginLeft: 6 }} />}
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 
@@ -141,78 +167,60 @@ export default function CropWaterInput() {
           <View style={styles.bentoGrid}>
 
             <GlassCard title="Crop Details" icon="sprout" style={styles.fullWidth}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.miniLabel}>Crop Type</Text>
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={formData.cropType}
-                    onValueChange={(value) => setFormData({ ...formData, cropType: value })}
-                    style={styles.picker}
-                  >
-                    <Picker.Item label="Select crop" value="" color="#94a3b8" />
-                    {cropTypes.map(c => <Picker.Item key={c} label={c} value={c} />)}
-                  </Picker>
+              <ChipSelector
+                label="Crop Type"
+                options={cropTypes}
+                selectedValue={formData.cropType}
+                onValueChange={(v: string) => setFormData({ ...formData, cropType: v })}
+              />
+
+              <View style={styles.row}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.miniLabel}>Growth Stage</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipList}>
+                    {growthStages.map(s => (
+                      <TouchableOpacity
+                        key={s}
+                        style={[styles.chip, formData.growthStage === s && styles.activeChip]}
+                        onPress={() => setFormData({ ...formData, growthStage: s })}
+                      >
+                        <Text style={[styles.chipText, formData.growthStage === s && styles.activeChipText]}>{s}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </View>
               </View>
 
-              <View style={styles.row}>
-                <View style={styles.halfInput}>
-                  <Text style={styles.miniLabel}>Growth Stage</Text>
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      selectedValue={formData.growthStage}
-                      onValueChange={(value) => setFormData({ ...formData, growthStage: value })}
-                      style={styles.picker}
+              <View style={[styles.inputGroup, { marginTop: 16 }]}>
+                <Text style={styles.miniLabel}>Soil State</Text>
+                <View style={styles.chipList}>
+                  {['DRY', 'HUMID', 'WET'].map(s => (
+                    <TouchableOpacity
+                      key={s}
+                      style={[styles.chip, formData.soilType === s && styles.activeChip]}
+                      onPress={() => setFormData({ ...formData, soilType: s })}
                     >
-                      <Picker.Item label="Stage" value="" color="#94a3b8" />
-                      {growthStages.map(s => <Picker.Item key={s} label={s} value={s} />)}
-                    </Picker>
-                  </View>
-                </View>
-                <View style={styles.halfInput}>
-                  <Text style={styles.miniLabel}>Soil Type</Text>
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      selectedValue={formData.soilType}
-                      onValueChange={(value) => setFormData({ ...formData, soilType: value })}
-                      style={styles.picker}
-                    >
-                      <Picker.Item label="Soil State" value="" color="#94a3b8" />
-                      <Picker.Item label="Dry Soil" value="DRY" />
-                      <Picker.Item label="Humid Soil" value="HUMID" />
-                      <Picker.Item label="Wet Soil" value="WET" />
-                    </Picker>
-                  </View>
+                      <Text style={[styles.chipText, formData.soilType === s && styles.activeChipText]}>{s} SOIL</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
             </GlassCard>
 
             <GlassCard title="Environment & Region" icon="thermometer" style={styles.fullWidth}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.miniLabel}>Agro-Climatic Region</Text>
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={formData.region}
-                    onValueChange={(value) => setFormData({ ...formData, region: value })}
-                    style={styles.picker}
-                  >
-                    {regions.map(r => <Picker.Item key={r} label={r} value={r} />)}
-                  </Picker>
-                </View>
-              </View>
+              <ChipSelector
+                label="Agro-Climatic Region"
+                options={regions}
+                selectedValue={formData.region}
+                onValueChange={(v: string) => setFormData({ ...formData, region: v })}
+              />
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.miniLabel}>Weather Condition</Text>
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={formData.weatherCondition}
-                    onValueChange={(value) => setFormData({ ...formData, weatherCondition: value })}
-                    style={styles.picker}
-                  >
-                    {weatherConditions.map(w => <Picker.Item key={w} label={w} value={w} />)}
-                  </Picker>
-                </View>
-              </View>
+              <ChipSelector
+                label="Weather Condition"
+                options={weatherConditions}
+                selectedValue={formData.weatherCondition}
+                onValueChange={(v: string) => setFormData({ ...formData, weatherCondition: v })}
+              />
 
               <View style={styles.inputGroup}>
                 <Text style={styles.miniLabel}>Soil Moisture (%)</Text>
@@ -226,18 +234,19 @@ export default function CropWaterInput() {
                 />
               </View>
               <View style={styles.row}>
-                <View style={styles.halfInput}>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.miniLabel}>Temp (°C) Range</Text>
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      selectedValue={formData.temperature}
-                      onValueChange={(value) => setFormData({ ...formData, temperature: value })}
-                      style={styles.picker}
-                    >
-                      <Picker.Item label="Temp" value="" color="#94a3b8" />
-                      {temperatureRanges.map(t => <Picker.Item key={t} label={t} value={t} />)}
-                    </Picker>
-                  </View>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipList}>
+                    {temperatureRanges.map(t => (
+                      <TouchableOpacity
+                        key={t}
+                        style={[styles.chip, formData.temperature === t && styles.activeChip]}
+                        onPress={() => setFormData({ ...formData, temperature: t })}
+                      >
+                        <Text style={[styles.chipText, formData.temperature === t && styles.activeChipText]}>{t}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </View>
                 <View style={styles.halfInput}>
                   <Text style={styles.miniLabel}>Humidity (%)</Text>
@@ -266,8 +275,8 @@ export default function CropWaterInput() {
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-        </ScrollView>
-      </SafeAreaView>
+        </ScrollView >
+      </SafeAreaView >
     </View >
   );
 }
@@ -335,14 +344,9 @@ const styles = StyleSheet.create({
   glassCard: {
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.7)',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   cardBlur: {
     padding: 20,
@@ -379,23 +383,43 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     marginLeft: 4,
   },
-  pickerWrapper: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    height: 48,
-    justifyContent: 'center',
-    overflow: 'hidden',
+  chipList: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingBottom: 4,
   },
-  picker: {
-    height: 48,
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: 'white',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  activeChip: {
+    backgroundColor: Theme.colors.primary,
+    borderColor: Theme.colors.primary,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748b',
+  },
+  activeChipText: {
+    color: 'white',
   },
   input: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    height: 48,
+    backgroundColor: 'white',
+    borderRadius: 14,
+    height: 56,
     paddingHorizontal: 16,
-    fontSize: 15,
-    color: Theme.colors.text,
+    fontSize: 16,
+    color: '#064e3b',
+    fontWeight: '700',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   row: {
     flexDirection: 'row',
@@ -407,9 +431,12 @@ const styles = StyleSheet.create({
   inputWithIcon: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
+    backgroundColor: 'white',
+    borderRadius: 14,
     paddingRight: 12,
+    height: 56,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   inputIcon: {
     marginLeft: 8,
@@ -418,11 +445,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
     borderRadius: 16,
     overflow: 'hidden',
-    elevation: 8,
-    shadowColor: Theme.colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
   },
   gradientBtn: {
     height: 56,

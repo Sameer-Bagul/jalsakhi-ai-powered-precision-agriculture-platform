@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, StatusBar, Dimensions, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
@@ -47,7 +47,7 @@ export default function LogIrrigation() {
     }
   };
 
-  const GlassCard = ({ title, icon, children, style, intensity = 20 }: any) => (
+  const GlassCard = ({ title, icon, children, style, intensity = 40 }: any) => (
     <View style={[styles.glassCard, style]}>
       <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
         {title && (
@@ -183,6 +183,17 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     gap: 16,
   },
+  backBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
   backBlur: {
     width: 44,
     height: 44,
@@ -222,14 +233,9 @@ const styles = StyleSheet.create({
   glassCard: {
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.7)',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   cardBlur: {
     padding: 24,
@@ -269,10 +275,12 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'white',
     borderRadius: 14,
     paddingHorizontal: 16,
     height: 56,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   inputIcon: {
     marginRight: 12,
@@ -280,18 +288,15 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '600',
-    color: Theme.colors.text,
+    fontWeight: '700',
+    color: '#064e3b',
   },
   submitBtn: {
     marginTop: 24,
     borderRadius: 20,
     overflow: 'hidden',
-    elevation: 8,
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   gradientBtn: {
     height: 60,

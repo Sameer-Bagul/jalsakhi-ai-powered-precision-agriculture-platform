@@ -13,7 +13,9 @@ import {
   Image,
   StatusBar,
   Dimensions,
-  ScrollView
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
@@ -84,9 +86,9 @@ export default function ChatbotScreen() {
     return (
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
         {!isUser && (
-          <View style={styles.assistantAvatar}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.botLogo} />
-          </View>
+          <LinearGradient colors={['#10b981', '#059669']} style={styles.assistantAvatarBox}>
+            <MaterialCommunityIcons name="robot-outline" size={20} color="white" />
+          </LinearGradient>
         )}
         <View style={[
           styles.bubble,
@@ -123,14 +125,11 @@ export default function ChatbotScreen() {
               <MaterialCommunityIcons name="chevron-left" size={28} color={Theme.colors.text} />
             </BlurView>
           </TouchableOpacity>
-          <View style={styles.headerTitleContainer}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} />
-            <View>
-              <Text style={styles.topTitle}>JalSakhi AI</Text>
-              <View style={styles.onlineStatus}>
-                <View style={styles.statusDot} />
-                <Text style={styles.statusTextLine}>Online</Text>
-              </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>JalSakhi AI</Text>
+            <View style={styles.onlineStatus}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusTextLine}>Online</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.infoBtn}>
@@ -140,8 +139,8 @@ export default function ChatbotScreen() {
 
         <KeyboardAvoidingView
           style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
         >
           {/* Language Selector */}
           <View style={styles.langArea}>
@@ -158,24 +157,29 @@ export default function ChatbotScreen() {
             </ScrollView>
           </View>
 
-          <FlatList
-            ref={listRef}
-            data={messages}
-            keyExtractor={(i) => i.id}
-            renderItem={renderMessage}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-          />
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+              <FlatList
+                ref={listRef}
+                data={messages}
+                keyExtractor={(i) => i.id}
+                renderItem={renderMessage}
+                contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
+                keyboardDismissMode="on-drag"
+              />
 
-          {isTyping && (
-            <View style={styles.typingRow}>
-              <BlurView intensity={30} tint="light" style={styles.typingBubble}>
-                <View style={styles.dot} />
-                <View style={[styles.dot, { opacity: 0.5 }]} />
-                <View style={[styles.dot, { opacity: 0.2 }]} />
-              </BlurView>
+              {isTyping && (
+                <View style={styles.typingRow}>
+                  <BlurView intensity={30} tint="light" style={styles.typingBubble}>
+                    <View style={styles.dot} />
+                    <View style={[styles.dot, { opacity: 0.5 }]} />
+                    <View style={[styles.dot, { opacity: 0.2 }]} />
+                  </BlurView>
+                </View>
+              )}
             </View>
-          )}
+          </TouchableWithoutFeedback>
 
           <BlurView intensity={80} tint="light" style={styles.inputArea}>
             <View style={styles.inputWrapper}>
@@ -232,18 +236,19 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
   },
-  headerTitleContainer: {
+  headerTextContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
   },
-  headerLogo: { width: 36, height: 36, borderRadius: 10 },
-  topTitle: { fontSize: 18, fontWeight: '900', color: Theme.colors.text, letterSpacing: -0.4 },
+  title: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: Theme.colors.text,
+    letterSpacing: -0.5,
+  },
   onlineStatus: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10b981' },
   statusTextLine: { fontSize: 12, color: Theme.colors.textMuted, fontWeight: '600' },
@@ -253,33 +258,28 @@ const styles = StyleSheet.create({
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginVertical: 8 },
   messageRowAssistant: { justifyContent: 'flex-start' },
   messageRowUser: { justifyContent: 'flex-end' },
-  assistantAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: 'white',
-    marginRight: 8,
-    alignItems: 'center',
+  assistantAvatarBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    borderColor: '#E2E8F0',
   },
-  botLogo: { width: 20, height: 20 },
   bubble: {
     maxWidth: '80%',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 20,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
   },
   bubbleAssistant: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.02)',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
   },
   bubbleUser: {
     backgroundColor: Theme.colors.primary,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   timeText: { fontSize: 10, color: Theme.colors.textMuted },
   typingRow: { paddingLeft: 56, marginBottom: 12 },
   typingBubble: {
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255,255,255,0.8)',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 15,
@@ -299,8 +299,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
   },
   dot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: Theme.colors.primary },
   inputArea: {
@@ -317,13 +317,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     paddingHorizontal: 16,
     paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   input: {
     flex: 1,

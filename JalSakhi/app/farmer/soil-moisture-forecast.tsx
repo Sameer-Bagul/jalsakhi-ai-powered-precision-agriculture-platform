@@ -29,6 +29,15 @@ export default function SoilMoistureForecast() {
         avg_pres: '101325'
     });
 
+    // List of states and months for ChipSelector
+    const states = ['Maharashtra', 'Rajasthan', 'Gujarat', 'Karnataka', 'Madhya Pradesh', 'Uttar Pradesh'];
+    const months = [
+        { label: 'Jan', value: '1' }, { label: 'Feb', value: '2' }, { label: 'Mar', value: '3' },
+        { label: 'Apr', value: '4' }, { label: 'May', value: '5' }, { label: 'Jun', value: '6' },
+        { label: 'Jul', value: '7' }, { label: 'Aug', value: '8' }, { label: 'Sep', value: '9' },
+        { label: 'Oct', value: '10' }, { label: 'Nov', value: '11' }, { label: 'Dec', value: '12' }
+    ];
+
     // Location values
     const [locationData, setLocationData] = useState({
         state: 'Maharashtra',
@@ -99,7 +108,7 @@ export default function SoilMoistureForecast() {
         }
     };
 
-    const GlassCard = ({ title, icon, children, style, intensity = 30 }: any) => (
+    const GlassCard = ({ title, icon, children, style, intensity = 40 }: any) => (
         <View style={[styles.glassCard, style]}>
             <BlurView intensity={intensity} tint="light" style={styles.cardBlur}>
                 <View style={styles.cardHeader}>
@@ -110,6 +119,35 @@ export default function SoilMoistureForecast() {
                 </View>
                 {children}
             </BlurView>
+        </View>
+    );
+
+    const ChipSelector = ({ label, options, selectedValue, onValueChange, horizontal = true }: any) => (
+        <View style={styles.inputContainer}>
+            <Text style={styles.miniLabel}>{label}</Text>
+            <ScrollView
+                horizontal={horizontal}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.chipList}
+            >
+                {options.map((option: any) => {
+                    const val = typeof option === 'string' ? option : option.value;
+                    const lab = typeof option === 'string' ? option : option.label;
+                    const isSelected = selectedValue === val;
+                    return (
+                        <TouchableOpacity
+                            key={val}
+                            style={[styles.chip, isSelected && styles.activeChip]}
+                            onPress={() => onValueChange(val)}
+                        >
+                            <Text style={[styles.chipText, isSelected && styles.activeChipText]}>
+                                {lab}
+                            </Text>
+                            {isSelected && <Ionicons name="checkmark-circle" size={14} color="white" style={{ marginLeft: 6 }} />}
+                        </TouchableOpacity>
+                    );
+                })}
+            </ScrollView>
         </View>
     );
 
@@ -164,35 +202,51 @@ export default function SoilMoistureForecast() {
                                 <View style={styles.sensorGrid}>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>PM1</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_pm1} onChangeText={t => setSensorData({ ...sensorData, avg_pm1: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_pm1} onChangeText={t => setSensorData({ ...sensorData, avg_pm1: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>PM2.5</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_pm2} onChangeText={t => setSensorData({ ...sensorData, avg_pm2: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_pm2} onChangeText={t => setSensorData({ ...sensorData, avg_pm2: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>PM10</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_pm3} onChangeText={t => setSensorData({ ...sensorData, avg_pm3: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_pm3} onChangeText={t => setSensorData({ ...sensorData, avg_pm3: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>Ammonia</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_am} onChangeText={t => setSensorData({ ...sensorData, avg_am: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_am} onChangeText={t => setSensorData({ ...sensorData, avg_am: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>Luminosity</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_lum} onChangeText={t => setSensorData({ ...sensorData, avg_lum: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_lum} onChangeText={t => setSensorData({ ...sensorData, avg_lum: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>Temp (°C)</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_temp} onChangeText={t => setSensorData({ ...sensorData, avg_temp: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_temp} onChangeText={t => setSensorData({ ...sensorData, avg_temp: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>Humidity (%)</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_humd} onChangeText={t => setSensorData({ ...sensorData, avg_humd: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_humd} onChangeText={t => setSensorData({ ...sensorData, avg_humd: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                     <View style={styles.sensorInputHalf}>
                                         <Text style={styles.miniLabel}>Pressure (Pa)</Text>
-                                        <TextInput style={styles.input} value={sensorData.avg_pres} onChangeText={t => setSensorData({ ...sensorData, avg_pres: t })} keyboardType="numeric" />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput style={styles.input} value={sensorData.avg_pres} onChangeText={t => setSensorData({ ...sensorData, avg_pres: t })} keyboardType="numeric" />
+                                        </View>
                                     </View>
                                 </View>
                                 <TouchableOpacity
@@ -208,34 +262,44 @@ export default function SoilMoistureForecast() {
                             </GlassCard>
                         ) : (
                             <GlassCard title="Location Forecast" icon="map-marker-radius" style={styles.fullWidth}>
+                                <ChipSelector
+                                    label="State"
+                                    options={states}
+                                    selectedValue={locationData.state}
+                                    onValueChange={(v: string) => setLocationData({ ...locationData, state: v })}
+                                />
+
                                 <View style={styles.row}>
                                     <View style={styles.halfInput}>
-                                        <Text style={styles.miniLabel}>State</Text>
-                                        <TextInput
-                                            style={styles.input}
-                                            placeholder="Rajasthan"
-                                            value={locationData.state}
-                                            onChangeText={t => setLocationData({ ...locationData, state: t })}
-                                        />
-                                    </View>
-                                    <View style={styles.halfInput}>
                                         <Text style={styles.miniLabel}>District</Text>
-                                        <TextInput
-                                            style={styles.input}
-                                            placeholder="Udaipur"
-                                            value={locationData.district}
-                                            onChangeText={t => setLocationData({ ...locationData, district: t })}
-                                        />
+                                        <View style={styles.inputWrapper}>
+                                            <TextInput
+                                                style={styles.input}
+                                                placeholder="Udaipur"
+                                                value={locationData.district}
+                                                onChangeText={t => setLocationData({ ...locationData, district: t })}
+                                            />
+                                        </View>
                                     </View>
                                 </View>
-                                <View style={[styles.inputContainer, { marginTop: 12 }]}>
+
+                                <ChipSelector
+                                    label="Month"
+                                    options={months}
+                                    selectedValue={locationData.month}
+                                    onValueChange={(v: string) => setLocationData({ ...locationData, month: v })}
+                                />
+
+                                <View style={[styles.inputContainer, { marginTop: 4 }]}>
                                     <Text style={styles.miniLabel}>Past 7 Days History (%)</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="42, 45, 40..."
-                                        value={locationData.smHistory}
-                                        onChangeText={t => setLocationData({ ...locationData, smHistory: t })}
-                                    />
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="42, 45, 40..."
+                                            value={locationData.smHistory}
+                                            onChangeText={t => setLocationData({ ...locationData, smHistory: t })}
+                                        />
+                                    </View>
                                 </View>
                                 <TouchableOpacity
                                     style={[styles.forecastBtn, loading && styles.btnDisabled, { marginTop: 12 }]}
@@ -380,14 +444,9 @@ const styles = StyleSheet.create({
     glassCard: {
         borderRadius: 24,
         overflow: 'hidden',
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.7)',
-        elevation: 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.03,
-        shadowRadius: 10,
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
     },
     cardBlur: {
         padding: 20,
@@ -424,24 +483,28 @@ const styles = StyleSheet.create({
     },
     miniLabel: {
         fontSize: 12,
-        fontWeight: '700',
-        color: Theme.colors.textMuted,
+        fontWeight: '800',
+        color: 'rgba(6, 78, 59, 0.7)',
         marginBottom: 8,
         marginLeft: 4,
     },
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F1F5F9',
-        borderRadius: 12,
+        backgroundColor: 'white',
+        borderRadius: 14,
         paddingRight: 16,
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
+        height: 56,
     },
     input: {
         flex: 1,
-        height: 48,
+        height: 56,
         paddingHorizontal: 16,
-        fontSize: 15,
-        color: Theme.colors.text,
+        fontSize: 16,
+        color: '#064e3b',
+        fontWeight: '700',
     },
     inputIcon: {
         marginLeft: 8,
@@ -449,6 +512,8 @@ const styles = StyleSheet.create({
     forecastBtn: {
         borderRadius: 16,
         overflow: 'hidden',
+        borderWidth: 1.5,
+        borderColor: 'rgba(16, 185, 129, 0.3)',
     },
     gradientBtn: {
         height: 48,
@@ -488,11 +553,8 @@ const styles = StyleSheet.create({
     },
     activeMode: {
         backgroundColor: 'white',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     modeText: {
         fontSize: 11,
@@ -501,7 +563,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     activeModeText: {
-        color: Theme.colors.primary,
+        color: '#064e3b',
     },
     levelContainer: {
         alignItems: 'center',
@@ -538,9 +600,9 @@ const styles = StyleSheet.create({
     },
     adviceText: {
         fontSize: 15,
-        color: Theme.colors.forest,
+        color: '#064e3b',
         lineHeight: 24,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     sectionHeader: {
         fontSize: 16,
@@ -591,5 +653,33 @@ const styles = StyleSheet.create({
     },
     sensorInputHalf: {
         width: (screenWidth - 80) / 2, // Accounting for padding and gap
+    },
+    chipList: {
+        flexDirection: 'row',
+        gap: 8,
+        paddingBottom: 8,
+    },
+    chip: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 14,
+        backgroundColor: 'white',
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 4,
+    },
+    activeChip: {
+        backgroundColor: '#064e3b',
+        borderColor: '#064e3b',
+    },
+    chipText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#64748b',
+    },
+    activeChipText: {
+        color: 'white',
     },
 });

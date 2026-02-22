@@ -43,21 +43,12 @@ export default function FarmerLayout() {
                                 onPress={() => router.push('/farmer/my-farms')}
                             />
 
-                            <View style={styles.centerSpace}>
-                                <TouchableOpacity
-                                    style={styles.aiButton}
-                                    onPress={() => router.push('/farmer/chatbot')}
-                                    activeOpacity={0.8}
-                                >
-                                    <LinearGradient
-                                        colors={['#10b981', '#059669']}
-                                        style={styles.aiGradient}
-                                    >
-                                        <MaterialCommunityIcons name="robot-outline" size={26} color="white" />
-                                    </LinearGradient>
-                                </TouchableOpacity>
-                                <Text style={styles.aiLabel}>FarmAI</Text>
-                            </View>
+                            <TabItem
+                                icon="robot-outline"
+                                label="FarmAI"
+                                active={pathname.includes('/chatbot')}
+                                onPress={() => router.push('/farmer/chatbot')}
+                            />
 
                             <TabItem
                                 icon={pathname.includes('/notifications') ? "bell" : "bell-outline"}
@@ -82,7 +73,11 @@ export default function FarmerLayout() {
 const TabItem = ({ icon, label, active, onPress }: any) => (
     <TouchableOpacity style={styles.tabBtn} onPress={onPress} activeOpacity={0.7}>
         <View style={[styles.iconWrapper, active && styles.activeIconWrapper]}>
-            <MaterialCommunityIcons name={icon} size={22} color={active ? Theme.colors.primary : '#64748b'} />
+            <MaterialCommunityIcons
+                name={icon}
+                size={22}
+                color={active ? Theme.colors.primary : '#64748b'}
+            />
         </View>
         <Text style={[styles.tabLabel, active && styles.activeTabLabel]}>{label}</Text>
     </TouchableOpacity>
@@ -103,15 +98,10 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 70,
         borderRadius: 25,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.5)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
         overflow: 'hidden',
-        elevation: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.1,
-        shadowRadius: 15,
     },
     barMain: {
         flex: 1,
@@ -144,34 +134,4 @@ const styles = StyleSheet.create({
     activeTabLabel: {
         color: Theme.colors.primary,
     },
-    centerSpace: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: -30,
-        width: 70,
-    },
-    aiButton: {
-        width: 58,
-        height: 58,
-        borderRadius: 29,
-        elevation: 8,
-        shadowColor: Theme.colors.primary,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        backgroundColor: 'white',
-        padding: 4,
-    },
-    aiGradient: {
-        flex: 1,
-        borderRadius: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    aiLabel: {
-        fontSize: 10,
-        fontWeight: '800',
-        color: Theme.colors.primary,
-        marginTop: 4,
-    }
 });

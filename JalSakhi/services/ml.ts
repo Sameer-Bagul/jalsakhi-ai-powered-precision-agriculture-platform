@@ -74,24 +74,24 @@ export const MLService = {
     /**
      * Calls the Water Allocation Optimizer via Azure Proxy
      */
-    optimizeAllocation: async (availableWater: number, farms: any[]): Promise<any[]> => {
+    optimizeAllocation: async (availableWater: number, farms: any[]): Promise<any> => {
         Logger.info('MLService', `Optimizing allocation for ${farms.length} farms`);
         try {
             const payload = {
                 total_available_water_liters: availableWater,
                 farms: farms.map(f => ({
-                    farm_id: f.id || f.farm_id,
+                    farm_id: f.id || f.farm_id || `farm_${Math.random().toString(36).substr(2, 4)}`,
                     area_ha: f.area_acre ? f.area_acre * 0.404686 : f.area_ha || 1.0,
                     crop_type: f.crop_type || 'RICE',
                     soil_type: f.soil_type || 'DRY',
-                    region: f.region || 'SEMI HUMID',
+                    region: f.region || 'DESERT',
                     temperature: f.temperature || '25-35',
                     weather_condition: f.weather_condition || 'NORMAL',
-                    priority_score: f.priority_score || 3
+                    priority_score: f.priority_score || 1
                 }))
             };
             const response = await api.post('/api/ai/village-water', payload);
-            return response.data?.data?.allocations || [];
+            return response.data?.data || null;
         } catch (error: any) {
             Logger.error('MLService', 'Allocation optimization failed', error);
             throw error;

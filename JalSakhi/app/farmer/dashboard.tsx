@@ -36,11 +36,11 @@ export default function FarmerDashboard() {
 
     return (
         <ImageBackground
-            source={require('../../assets/images/forest_bg.png')}
+            source={require('../../assets/images/forest_bg.jpg')}
             style={styles.container}
             resizeMode="cover"
         >
-            <StatusBar barStyle="light-content" />
+            <StatusBar barStyle="dark-content" />
             <SafeAreaView style={{ flex: 1 }}>
 
                 {/* Decorative Pattern Layer */}
@@ -58,7 +58,7 @@ export default function FarmerDashboard() {
                     </View>
                     <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/notifications')}>
                         <BlurView intensity={80} tint="light" style={styles.notifBlur}>
-                            <MaterialCommunityIcons name="bell-outline" size={24} color="white" />
+                            <MaterialCommunityIcons name="bell-outline" size={24} color="#064e3b" />
                             <View style={styles.badgeDot} />
                         </BlurView>
                     </TouchableOpacity>
@@ -101,7 +101,7 @@ export default function FarmerDashboard() {
                             </View>
                             <View style={styles.tileActionRow}>
                                 <Text style={styles.tileBtnText}>Analyze Now</Text>
-                                <Feather name="arrow-right-circle" size={18} color="white" />
+                                <Feather name="arrow-right-circle" size={18} color="#064e3b" />
                             </View>
                         </View>
                     </GlassTile>
@@ -121,7 +121,7 @@ export default function FarmerDashboard() {
                             </View>
                             <View style={styles.tileActionRow}>
                                 <Text style={styles.tileBtnText}>View Forecast</Text>
-                                <Feather name="arrow-right-circle" size={18} color="white" />
+                                <Feather name="arrow-right-circle" size={18} color="#064e3b" />
                             </View>
                         </View>
                     </GlassTile>
@@ -162,7 +162,7 @@ export default function FarmerDashboard() {
                                 <Text style={styles.tileTitle}>{t('dashboard.waterAllocation')}</Text>
                                 <Text style={styles.tileSub}>Optimized distribution schedule</Text>
                             </View>
-                            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.5)" />
+                            <Feather name="chevron-right" size={20} color="rgba(6, 78, 59, 0.4)" />
                         </View>
                     </GlassTile>
 
@@ -185,11 +185,11 @@ export default function FarmerDashboard() {
                                     backgroundGradientFrom: "rgba(255,255,255,0)",
                                     backgroundGradientTo: "rgba(255,255,255,0)",
                                     decimalPlaces: 0,
-                                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity * 0.7})`,
+                                    color: (opacity = 1) => `rgba(6, 78, 59, ${opacity})`,
+                                    labelColor: (opacity = 1) => `rgba(6, 78, 59, ${opacity * 0.7})`,
                                     style: { borderRadius: 16 },
                                     propsForDots: { r: "3", strokeWidth: "2", stroke: "#10b981" },
-                                    propsForBackgroundLines: { strokeDasharray: "", stroke: "rgba(255,255,255,0.1)" }
+                                    propsForBackgroundLines: { strokeDasharray: "", stroke: "rgba(6, 78, 59, 0.1)" }
                                 }}
                                 bezier
                                 withDots={true}
@@ -208,7 +208,7 @@ export default function FarmerDashboard() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#064e3b',
+        backgroundColor: '#ecfdf5',
     },
     decorativeLayer: {
         ...StyleSheet.absoluteFillObject,
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         fontSize: 16,
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: 'rgba(6, 78, 59, 0.7)',
         fontWeight: '500',
     },
     boldHeader: {
         fontSize: 32,
         fontWeight: '900',
-        color: 'white',
+        color: '#064e3b',
         letterSpacing: -0.5,
     },
     notifBtn: {
@@ -278,14 +278,14 @@ const styles = StyleSheet.create({
     gridItem: {
         borderRadius: 32,
         overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(6, 78, 59, 0.15)',
     },
     glassBackground: {
         flex: 1,
         paddingVertical: 20,
         paddingHorizontal: 24,
-        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
     },
     div3: { height: 110 },
     div4: { height: ROW_HEIGHT * 2.3 },
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
     tileTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: 'white',
+        color: '#064e3b',
     },
     tileSub: {
         fontSize: 13,
-        color: 'rgba(255, 255, 255, 0.6)',
+        color: 'rgba(6, 78, 59, 0.6)',
         marginTop: 2,
     },
     fullTileContent: {
@@ -350,12 +350,12 @@ const styles = StyleSheet.create({
     tileTitleLarge: {
         fontSize: 22,
         fontWeight: '900',
-        color: 'white',
+        color: '#064e3b',
         letterSpacing: -0.5,
     },
     tileSubText: {
         fontSize: 14,
-        color: 'rgba(255,255,255,0.6)',
+        color: 'rgba(6, 78, 59, 0.6)',
         lineHeight: 20,
         marginTop: 4,
     },
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     tileBtnText: {
         fontSize: 14,
         fontWeight: '800',
-        color: 'white',
+        color: '#064e3b',
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     metricLabel: {
         fontSize: 13,
         fontWeight: '800',
-        color: 'rgba(255, 255, 255, 0.5)',
+        color: 'rgba(6, 78, 59, 0.5)',
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
@@ -392,12 +392,12 @@ const styles = StyleSheet.create({
     metricValue: {
         fontSize: 36,
         fontWeight: '900',
-        color: 'white',
+        color: '#064e3b',
     },
     metricUnit: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: 'rgba(255, 255, 255, 0.5)',
+        color: 'rgba(6, 78, 59, 0.5)',
     },
     metricFooter: {
         flexDirection: 'row',
@@ -420,10 +420,10 @@ const styles = StyleSheet.create({
     chartTitle: {
         fontSize: 16,
         fontWeight: '900',
-        color: 'white',
+        color: '#064e3b',
     },
     chartSub: {
         fontSize: 12,
-        color: 'rgba(255,255,255,0.4)',
+        color: 'rgba(6, 78, 59, 0.4)',
     },
 });
