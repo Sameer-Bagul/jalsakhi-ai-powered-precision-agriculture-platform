@@ -1,7 +1,12 @@
 """
 FastAPI app for Jalsakhi Chatbot — headless API for the unified gateway.
-Reuses logic from app.py and ml_tools.py. Run with: uvicorn api:app --host 0.0.0.0 --port 8004
-LangChain/Groq imports are lazy so /health works without them; install deps for /chat.
+Reuses logic from app.py and ml_tools.py.
+
+Run with the project venv (required for /chat — langchain_groq, etc.):
+  ./run_api.sh
+  or: .venv/bin/python -m uvicorn api:app --host 0.0.0.0 --port 8004
+
+LangChain/Groq imports are lazy so /health works without them; /chat needs the venv.
 """
 import os
 from typing import Any
