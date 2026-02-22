@@ -12,7 +12,8 @@ import {
   ActivityIndicator,
   Image,
   StatusBar,
-  Dimensions
+  Dimensions,
+  ScrollView
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Theme } from '../../constants/JalSakhiTheme';
@@ -34,6 +35,7 @@ export default function ChatbotScreen() {
     { id: 'welcome', role: 'assistant', text: 'Hi — I can help with crop water, soil forecasts, and allocation. Ask me anything.', time: Date.now() },
   ]);
   const [input, setInput] = useState('');
+  const [language, setLanguage] = useState('English');
   const [isTyping, setIsTyping] = useState(false);
   const listRef = useRef<FlatList<Message>>(null);
 
@@ -52,7 +54,7 @@ export default function ChatbotScreen() {
     try {
       const response = await api.post('/api/ai/chat', {
         message: text,
-        language: 'English' // Could be dynamic based on app state
+        language
       });
 
       const replyText = response.data?.data?.reply || "I'm sorry, I couldn't process that right now.";
@@ -141,6 +143,21 @@ export default function ChatbotScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
+          {/* Language Selector */}
+          <View style={styles.langArea}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.langList}>
+              {['English', 'Hindi', 'Marathi', 'Gujarati', 'Tamil'].map(l => (
+                <TouchableOpacity
+                  key={l}
+                  style={[styles.langChip, language === l && styles.activeLang]}
+                  onPress={() => setLanguage(l)}
+                >
+                  <Text style={[styles.langText, language === l && styles.activeLangText]}>{l}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
           <FlatList
             ref={listRef}
             data={messages}
@@ -322,5 +339,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 10,
-  }
+  },
+  langArea: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+  },
+  langList: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  langChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: '#f1f5f9',
+  },
+  activeLang: {
+    backgroundColor: Theme.colors.primary,
+  },
+  langText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748b',
+  },
+  activeLangText: {
+    color: 'white',
+  },
 });

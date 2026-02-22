@@ -138,6 +138,24 @@ export default function AdminDashboard() {
                         </TouchableOpacity>
                     </BentoCard>
 
+                    {/* Internal AI Tools Entry */}
+                    <BentoCard colSpan={2} style={{ backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+                        <TouchableOpacity
+                            style={styles.mlCardContent}
+                            onPress={() => router.push('/admin/internal-ai' as any)}
+                        >
+                            <View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                    <MaterialCommunityIcons name="test-tube" size={24} color={Theme.colors.textMuted} />
+                                    <Text style={[styles.cardTitle, { color: Theme.colors.text }]}>Internal AI Tools</Text>
+                                </View>
+                                <Text style={styles.mlDesc}>Test experimental Model 1 & 2 endpoints with custom JSON payloads.</Text>
+                            </View>
+                            <View style={[styles.playBtn, { backgroundColor: Theme.colors.textMuted }]}>
+                                <Feather name="settings" size={20} color="white" />
+                            </View>
+                        </TouchableOpacity>
+                    </BentoCard>
 
                 </View>
             </ScrollView>

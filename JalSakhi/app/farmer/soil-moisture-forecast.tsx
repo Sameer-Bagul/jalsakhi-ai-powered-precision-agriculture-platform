@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StatusBar, Dimensions } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -13,14 +14,35 @@ export default function SoilMoistureForecast() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ level: number, advice: string, trend: string } | null>(null);
+    const [mode, setMode] = useState<'sensor' | 'location'>('sensor');
+
+    // Sensor values
     const [sensorValue, setSensorValue] = useState('');
+
+    // Location values
+    const [locationData, setLocationData] = useState({
+        state: 'Maharashtra',
+        district: 'Pune',
+        month: (new Date().getMonth() + 1).toString(),
+        smHistory: '45, 42, 40, 38, 41, 44, 46'
+    });
 
     const handleForecast = async () => {
         setLoading(true);
         setResult(null);
         try {
-            const val = sensorValue ? parseInt(sensorValue) : undefined;
-            const forecast = await MLService.forecastSoilMoisture({ sensorValue: val });
+            let input: any;
+            if (mode === 'sensor') {
+                input = { sensorValue: sensorValue ? parseInt(sensorValue) : 45 };
+            } else {
+                input = {
+                    state: locationData.state,
+                    district: locationData.district,
+                    month: parseInt(locationData.month),
+                    sm_history: locationData.smHistory.split(',').map(n => parseInt(n.trim()))
+                };
+            }
+            const forecast = await MLService.forecastSoilMoisture(input);
             setResult(forecast);
         } catch (error) {
             Alert.alert('Error', 'Failed to forecast soil moisture.');
@@ -72,42 +94,93 @@ export default function SoilMoistureForecast() {
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={styles.bentoGrid}>
-
-                        {/* Info Section */}
-                        <GlassCard title="Insights" icon="chart-timeline-variant" style={styles.fullWidth}>
-                            <Text style={styles.infoText}>
-                                Our <Text style={{ fontWeight: '900', color: Theme.colors.primary }}>Time-Series Engine</Text> syncs with sensor data to predict moisture changes over the next 7 days.
-                            </Text>
-                        </GlassCard>
+                        {/* Mode Switcher */}
+                        <View style={styles.modeSwitcher}>
+                            <TouchableOpacity
+                                style={[styles.modeBtn, mode === 'sensor' && styles.activeMode]}
+                                onPress={() => setMode('sensor')}
+                            >
+                                <Text style={[styles.modeText, mode === 'sensor' && styles.activeModeText]}>SENSORS</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modeBtn, mode === 'location' && styles.activeMode]}
+                                onPress={() => setMode('location')}
+                            >
+                                <Text style={[styles.modeText, mode === 'location' && styles.activeModeText]}>LOCATION</Text>
+                            </TouchableOpacity>
+                        </View>
 
                         {/* Input Section */}
-                        <GlassCard title="Sensor Input" icon="sensor" style={styles.fullWidth}>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.miniLabel}>Current Reading (Optional)</Text>
-                                <View style={styles.inputWrapper}>
+                        {mode === 'sensor' ? (
+                            <GlassCard title="Real-time Sensor" icon="sensor" style={styles.fullWidth}>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.miniLabel}>Ammonia Sensitivity (avg_am)</Text>
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="e.g. 0.5"
+                                            placeholderTextColor="#94a3b8"
+                                            value={sensorValue}
+                                            onChangeText={setSensorValue}
+                                            keyboardType="numeric"
+                                        />
+                                        <MaterialCommunityIcons name="molecule" size={20} color={Theme.colors.primary} style={styles.inputIcon} />
+                                    </View>
+                                </View>
+                                <TouchableOpacity
+                                    style={[styles.forecastBtn, loading && styles.btnDisabled]}
+                                    onPress={handleForecast}
+                                    disabled={loading}
+                                >
+                                    <LinearGradient colors={['#10b981', '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientBtn}>
+                                        <MaterialCommunityIcons name="lightning-bolt" size={20} color="white" />
+                                        <Text style={styles.btnText}>{loading ? 'Analyzing...' : 'Run Sensor Analysis'}</Text>
+                                    </LinearGradient>
+                                </TouchableOpacity>
+                            </GlassCard>
+                        ) : (
+                            <GlassCard title="Location Forecast" icon="map-marker-radius" style={styles.fullWidth}>
+                                <View style={styles.row}>
+                                    <View style={styles.halfInput}>
+                                        <Text style={styles.miniLabel}>State</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="Rajasthan"
+                                            value={locationData.state}
+                                            onChangeText={t => setLocationData({ ...locationData, state: t })}
+                                        />
+                                    </View>
+                                    <View style={styles.halfInput}>
+                                        <Text style={styles.miniLabel}>District</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="Udaipur"
+                                            value={locationData.district}
+                                            onChangeText={t => setLocationData({ ...locationData, district: t })}
+                                        />
+                                    </View>
+                                </View>
+                                <View style={[styles.inputContainer, { marginTop: 12 }]}>
+                                    <Text style={styles.miniLabel}>Past 7 Days History (%)</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Leave empty for auto-detect"
-                                        placeholderTextColor="#94a3b8"
-                                        value={sensorValue}
-                                        onChangeText={setSensorValue}
-                                        keyboardType="numeric"
+                                        placeholder="42, 45, 40..."
+                                        value={locationData.smHistory}
+                                        onChangeText={t => setLocationData({ ...locationData, smHistory: t })}
                                     />
-                                    <MaterialCommunityIcons name="leak" size={20} color={Theme.colors.primary} style={styles.inputIcon} />
                                 </View>
-                            </View>
-
-                            <TouchableOpacity
-                                style={[styles.forecastBtn, loading && styles.btnDisabled]}
-                                onPress={handleForecast}
-                                disabled={loading}
-                            >
-                                <LinearGradient colors={['#10b981', '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientBtn}>
-                                    <MaterialCommunityIcons name="lightning-bolt" size={20} color="white" />
-                                    <Text style={styles.btnText}>{loading ? 'Forecasting...' : 'Run Analysis'}</Text>
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </GlassCard>
+                                <TouchableOpacity
+                                    style={[styles.forecastBtn, loading && styles.btnDisabled, { marginTop: 12 }]}
+                                    onPress={handleForecast}
+                                    disabled={loading}
+                                >
+                                    <LinearGradient colors={['#3b82f6', '#2563eb']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientBtn}>
+                                        <MaterialCommunityIcons name="map-search" size={20} color="white" />
+                                        <Text style={styles.btnText}>{loading ? 'Processing...' : 'Run Location Forecast'}</Text>
+                                    </LinearGradient>
+                                </TouchableOpacity>
+                            </GlassCard>
+                        )}
 
                         {/* Results Section */}
                         {result && (
@@ -153,7 +226,7 @@ export default function SoilMoistureForecast() {
                     </View>
                 </ScrollView>
             </SafeAreaView>
-        </View>
+        </View >
     );
 }
 
@@ -180,6 +253,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         gap: 16,
     },
+    backBtn: {},
     backBlur: {
         width: 44,
         height: 44,
@@ -307,6 +381,40 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         gap: 16,
+    },
+    halfInput: {
+        flex: 1,
+    },
+    modeSwitcher: {
+        flexDirection: 'row',
+        backgroundColor: '#E2E8F0',
+        borderRadius: 14,
+        padding: 4,
+        marginBottom: 8,
+    },
+    modeBtn: {
+        flex: 1,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+    },
+    activeMode: {
+        backgroundColor: 'white',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+    },
+    modeText: {
+        fontSize: 11,
+        fontWeight: '800',
+        color: '#64748b',
+        letterSpacing: 0.5,
+    },
+    activeModeText: {
+        color: Theme.colors.primary,
     },
     levelContainer: {
         alignItems: 'center',
