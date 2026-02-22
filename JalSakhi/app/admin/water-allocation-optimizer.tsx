@@ -6,6 +6,8 @@ import { Theme } from '../../constants/JalSakhiTheme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import api from '../../utils/api';
+import { MLService } from '../../services/ml';
 
 // Model 3: Admin Water Allocation Optimizer Input Screen
 export default function WaterAllocationOptimizer() {
@@ -27,80 +29,39 @@ export default function WaterAllocationOptimizer() {
 
   const fetchFarmersData = async () => {
     try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch('http://YOUR_SERVER_IP:5000/api/admin/farmers');
-      const data = await response.json();
-      
-      // Sample data
-      const sampleData = [
-        {
-          id: 'F001',
-          name: 'Ramesh Kumar',
-          landSize: 2.5,
-          crops: ['Rice', 'Wheat'],
-          priority: 'high',
-          soilType: 'Clay',
-          avgWaterRequirement: 250,
-        },
-        {
-          id: 'F002',
-          name: 'Suresh Patil',
-          landSize: 1.8,
-          crops: ['Vegetables'],
-          priority: 'medium',
-          soilType: 'Loamy',
-          avgWaterRequirement: 180,
-        },
-        {
-          id: 'F003',
-          name: 'Mahesh Desai',
-          landSize: 3.2,
-          crops: ['Sugarcane'],
-          priority: 'high',
-          soilType: 'Sandy',
-          avgWaterRequirement: 320,
-        },
-        {
-          id: 'F004',
-          name: 'Ganesh Bhosale',
-          landSize: 1.5,
-          crops: ['Cotton'],
-          priority: 'low',
-          soilType: 'Loamy',
-          avgWaterRequirement: 150,
-        },
-      ];
-      
-      setFarmersData(data || sampleData);
+      // Use the proper API utility
+      const response = await api.get('/api/farms/all-farms');
+
+      if (response.data?.success) {
+        // Map the backend farms to what the ML model expects
+        const mappedFarms = response.data.data.map((f: any) => ({
+          farm_id: f._id,
+          name: f.name || 'Farmer',
+          area_ha: (f.area_acre || 1) * 0.4047, // Convert acre to hectare
+          crop_type: f.crop_type || 'WHEAT',
+          soil_type: f.soil_type || 'DRY',
+          priority_score: 2,
+          region: 'SEMI HUMID',
+          temperature: '20-30',
+          weather_condition: 'NORMAL'
+        }));
+        setFarmersData(mappedFarms);
+      } else {
+        throw new Error('Failed to fetch farms');
+      }
     } catch (error) {
       console.error('Error fetching farmers:', error);
+      // Fallback for demo
       setFarmersData([
-        {
-          id: 'F001',
-          name: 'Ramesh Kumar',
-          landSize: 2.5,
-          crops: ['Rice', 'Wheat'],
-          priority: 'high',
-          soilType: 'Clay',
-          avgWaterRequirement: 250,
-        },
-        {
-          id: 'F002',
-          name: 'Suresh Patil',
-          landSize: 1.8,
-          crops: ['Vegetables'],
-          priority: 'medium',
-          soilType: 'Loamy',
-          avgWaterRequirement: 180,
-        },
+        { id: 'F001', name: 'Ramesh Kumar', area_acre: 2.5, crop_type: 'RICE', priority_score: 3, soil_type: 'DRY' },
+        { id: 'F002', name: 'Suresh Patil', area_acre: 1.8, crop_type: 'WHEAT', priority_score: 2, soil_type: 'WET' },
       ]);
     }
   };
 
   const handleOptimize = async () => {
-    // Validate required fields
     if (!formData.reservoirCapacity || !formData.currentWaterLevel) {
-      Alert.alert('Error', 'Please fill required fields (Reservoir Capacity and Current Level)');
+      Alert.alert('Error', 'Please fill required fields');
       return;
     }
 
@@ -108,43 +69,31 @@ export default function WaterAllocationOptimizer() {
     const current = parseFloat(formData.currentWaterLevel);
 
     if (current > capacity) {
-      Alert.alert('Error', 'Current water level cannot exceed reservoir capacity');
+      Alert.alert('Error', 'Current level cannot exceed capacity');
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch('http://YOUR_SERVER_IP:5000/api/admin/optimize-allocation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          farmers: farmersData,
-        }),
-      });
+      const result = await MLService.optimizeAllocation(current, farmersData);
 
-      const result = await response.json();
-      
-      // Navigate to results screen
       router.push({
         pathname: '/admin/allocation-results' as any,
-        params: { 
-          optimization: JSON.stringify(result),
+        params: {
+          optimization: JSON.stringify({ allocations: result }),
           inputData: JSON.stringify({ ...formData, farmersCount: farmersData.length })
         },
       });
     } catch (error: any) {
-      Alert.alert('Error', 'Failed to optimize allocation. Please try again.');
-      console.error(error);
+      Alert.alert('Error', 'AI Optimization failed. Please check if services are online.');
     } finally {
       setLoading(false);
     }
   };
 
   const updateFarmerPriority = (farmerId: string, priority: string) => {
-    setFarmersData(prev => 
-      prev.map(farmer => 
+    setFarmersData(prev =>
+      prev.map(farmer =>
         farmer.id === farmerId ? { ...farmer, priority } : farmer
       )
     );

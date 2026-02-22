@@ -1,126 +1,83 @@
+import api from '../utils/api';
 import { Logger } from '../utils/Logger';
 
 export interface CropPredictionInput {
-    crop: string;
-    soil: string;
-    area: number; // in acres
-    stage: string;
+    crop_type: string;
+    soil_type: string;
+    area_acre: number;
+    temperature?: string;
+    weather_condition?: string;
+    region?: string;
 }
 
 export interface SoilMoistureInput {
-    sensorValue?: number; // 0-100 placeholder
+    sensorValue?: number;
     location?: string;
+    sm_history?: number[];
 }
 
 export const MLService = {
     /**
-     * Simulates the Random Forest Regressor for Crop Water Requirement
-     * Logic based on crop type, soil, and area.
+     * Calls the Random Forest Regressor via Azure Proxy
      */
     predictWaterRequirement: async (input: CropPredictionInput): Promise<number> => {
-        Logger.info('MLService', `Predicting water for ${input.crop}`);
+        Logger.info('MLService', `Predicting water for ${input.crop_type}`);
 
-        // Simulating network delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Basic heuristic logic for demo (since we can't run the .pkl file directly)
-        let baseWater = 4000; // Liters per acre per irrigation
-
-        const crop = input.crop.toLowerCase();
-        if (crop.includes('rice') || crop.includes('paddy')) {
-            baseWater = 8000;
-        } else if (crop.includes('sugarcane')) {
-            baseWater = 7000;
-        } else if (crop.includes('wheat')) {
-            baseWater = 4500;
-        } else if (crop.includes('cotton')) {
-            baseWater = 5000;
-        } else if (crop.includes('maize') || crop.includes('corn')) {
-            baseWater = 3500;
+        try {
+            const response = await api.post('/api/ai/crop-water', input);
+            // Extract the result from the nested data.data structure returned by our proxy
+            return response.data?.data?.prediction_mm_day || 0;
+        } catch (error: any) {
+            Logger.error('MLService', 'Crop water prediction failed', error);
+            throw error;
         }
-
-        const soil = input.soil.toLowerCase();
-        if (soil.includes('sandy')) {
-            baseWater *= 1.25; // Sandy soil drains fast, needs more water
-        } else if (soil.includes('clay') || soil.includes('black')) {
-            baseWater *= 0.85; // Clay/Black soil holds water
-        }
-
-        // Adjust by stage
-        const stage = input.stage.toLowerCase();
-        if (stage.includes('sowing') || stage.includes('germination')) {
-            baseWater *= 0.6;
-        } else if (stage.includes('flowering') || stage.includes('fruiting')) {
-            baseWater *= 1.2; // Critical stage
-        }
-
-        return Math.round(baseWater * input.area);
     },
 
     /**
-     * Simulates the Time-Series Forecaster for Soil Moisture
+     * Calls the Time-Series Forecaster via Azure Proxy
      */
     forecastSoilMoisture: async (input: SoilMoistureInput): Promise<{ level: number, advice: string, trend: 'UP' | 'DOWN' | 'STABLE' }> => {
         Logger.info('MLService', `Forecasting soil moisture`);
 
-        await new Promise(resolve => setTimeout(resolve, 1200));
+        try {
+            // Map single sensorValue to expected object if needed
+            const payload = input.sensorValue !== undefined ? {
+                avg_pm1: 10, avg_pm2: 20, avg_pm3: 15,
+                avg_am: input.sensorValue / 100, // Normalized
+                avg_lum: 200, avg_temp: 28, avg_humd: 65, avg_pres: 101325
+            } : input;
 
-        const level = input.sensorValue || Math.floor(Math.random() * 40) + 30; // Random 30-70% if no sensor
+            const response = await api.post('/api/ai/soil-moisture', payload);
+            const data = response.data?.data;
 
-        let advice = "Moisture is adequate.";
-        let trend: 'UP' | 'DOWN' | 'STABLE' = 'STABLE';
-
-        if (level < 35) {
-            advice = "Critical Level! Irrigation recommended immediately to prevent crop stress.";
-            trend = 'DOWN';
-        } else if (level < 50) {
-            advice = "Moisture is slightly low. Plan irrigation within 24 hours.";
-            trend = 'DOWN';
-        } else if (level > 85) {
-            advice = "Moisture is very high. Do NOT irrigate. Risk of waterlogging.";
-            trend = 'UP';
-        } else {
-            advice = "Optimal moisture levels. No action needed.";
-            trend = 'STABLE';
+            // Map backend response to frontend format
+            // Assuming backend returns { forecast: number[], advice: string, trend: string }
+            return {
+                level: data?.forecast?.[0] || data?.current_level || 0,
+                advice: data?.advice || 'Monitor soil levels regularly.',
+                trend: (data?.trend?.toUpperCase() as any) || 'STABLE'
+            };
+        } catch (error: any) {
+            Logger.error('MLService', 'Soil moisture forecast failed', error);
+            throw error;
         }
-
-        return { level, advice, trend };
     },
 
     /**
-     * Simulates the Village-Level Water Allocation Optimization Model
+     * Calls the Water Allocation Optimizer via Azure Proxy
      */
-    optimizeAllocation: async (totalWater: number, demands: { id: string, req: number, priority: string }[]): Promise<any[]> => {
+    optimizeAllocation: async (totalWater: number, farms: any[]): Promise<any[]> => {
         Logger.info('MLService', `Optimizing allocation for ${totalWater}L`);
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Simple logic: Prioritize High priority, then distribute rest
-        let remaining = totalWater;
-        const result = demands.map(d => {
-            let allocated = 0;
-            if (d.priority === 'High') {
-                allocated = d.req; // Full allocation for high priority
-            } else if (d.priority === 'Medium') {
-                allocated = Math.floor(d.req * 0.8); // 80% for medium
-            } else {
-                allocated = Math.floor(d.req * 0.5); // 50% for low
-            }
-
-            // Adjust if running out
-            if (remaining - allocated < 0) {
-                allocated = remaining;
-            }
-            remaining -= allocated;
-
-            return {
-                id: d.id,
-                allocated,
-                efficiency: '98%',
-                status: allocated >= d.req ? 'Full' : 'Partial'
-            };
-        });
-
-        return result;
+        try {
+            const response = await api.post('/api/ai/village-water', {
+                total_available_water_liters: totalWater,
+                farms: farms
+            });
+            return response.data?.data?.allocations || [];
+        } catch (error: any) {
+            Logger.error('MLService', 'Water allocation optimization failed', error);
+            throw error;
+        }
     }
 }

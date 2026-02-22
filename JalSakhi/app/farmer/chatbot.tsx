@@ -20,6 +20,9 @@ import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 
+import api from '../../utils/api';
+import { Logger } from '../../utils/Logger';
+
 const screenWidth = Dimensions.get('window').width;
 
 type Role = 'user' | 'assistant';
@@ -46,23 +49,32 @@ export default function ChatbotScreen() {
     setInput('');
 
     setIsTyping(true);
-    setTimeout(() => {
+    try {
+      const response = await api.post('/api/ai/chat', {
+        message: text,
+        language: 'English' // Could be dynamic based on app state
+      });
+
+      const replyText = response.data?.data?.reply || "I'm sorry, I couldn't process that right now.";
       const reply: Message = {
         id: `a_${Date.now()}`,
         role: 'assistant',
-        text: generateAssistantReply(text),
+        text: replyText,
         time: Date.now(),
       };
       setMessages((m) => [...m, reply]);
+    } catch (error: any) {
+      Logger.error('Chatbot', 'Failed to get reply', error);
+      const errorMsg: Message = {
+        id: `err_${Date.now()}`,
+        role: 'assistant',
+        text: "My connection is a bit unstable. Please check if the AI service is online.",
+        time: Date.now(),
+      };
+      setMessages((m) => [...m, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 900 + Math.min(1200, text.length * 20));
-  };
-
-  const generateAssistantReply = (userText: string) => {
-    if (/soil|moisture|forecast/i.test(userText)) return 'Soil moisture forecasts show moderate dryness in the next 3 days — consider light irrigation early morning.';
-    if (/crop|water|requirement/i.test(userText)) return 'Crop water requirement varies by stage — provide me crop type and days after sowing for a tailored value.';
-    if (/allocation|village|optimi/i.test(userText)) return 'Allocation suggestion: prioritize fields with lower soil moisture and critical crops like vegetables.';
-    return `I heard: "${userText}". Try asking for crop-specific water needs or soil forecasts for a location.`;
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => {

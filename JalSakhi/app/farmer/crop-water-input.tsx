@@ -8,6 +8,8 @@ import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { MLService } from '../../services/ml';
+
 const screenWidth = Dimensions.get('window').width;
 
 export default function CropWaterInput() {
@@ -38,20 +40,30 @@ export default function CropWaterInput() {
 
     setLoading(true);
     try {
-      // Mock API call
-      setTimeout(() => {
-        const mockResult = { suggestion: "1200L / hectare", confidence: "94%" };
-        router.push({
-          pathname: '/farmer/crop-water-results' as any,
-          params: {
-            prediction: JSON.stringify(mockResult),
-            inputData: JSON.stringify(formData)
-          },
-        });
-        setLoading(false);
-      }, 1500);
+      const prediction = await MLService.predictWaterRequirement({
+        crop_type: formData.cropType.toUpperCase(),
+        soil_type: formData.soilType.toUpperCase(),
+        area_acre: 1, // Defaulting to 1 for generic prediction
+        temperature: formData.temperature,
+        weather_condition: 'NORMAL', // Defaulting
+        region: 'Central Plateau & Hills Region' // Defaulting
+      });
+
+      const result = {
+        suggestion: `${prediction} mm/day`,
+        confidence: "90%+"
+      };
+
+      router.push({
+        pathname: '/farmer/crop-water-results' as any,
+        params: {
+          prediction: JSON.stringify(result),
+          inputData: JSON.stringify(formData)
+        },
+      });
     } catch (error: any) {
-      Alert.alert('Error', 'Failed to get prediction.');
+      Alert.alert('Error', 'Failed to get AI prediction. Please check your connection.');
+    } finally {
       setLoading(false);
     }
   };
@@ -254,6 +266,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     gap: 16,
   },
+  backBtn: {},
   backBlur: {
     width: 44,
     height: 44,
