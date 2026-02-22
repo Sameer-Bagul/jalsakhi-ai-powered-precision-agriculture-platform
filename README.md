@@ -9,11 +9,15 @@ It combines a production-ready mobile app, multiple ML microservices, and a secu
 
 ### App at a glance
 
-Images from `JalSakhi/assets/images/`:
+<p align="center">
+  <img src="images/WhatsApp%20Image%202026-02-22%20at%2012.13.31.jpeg" alt="JalSakhi app screenshot 1" width="220" />
+  <img src="images/WhatsApp%20Image%202026-02-22%20at%2012.13.32.jpeg" alt="JalSakhi app screenshot 2" width="220" />
+  <img src="images/WhatsApp%20Image%202026-02-22%20at%2012.13.32%20(1).jpeg" alt="JalSakhi app screenshot 3" width="220" />
+</p>
 
 <p align="center">
-  <img src="JalSakhi/assets/images/forest_bg.png" alt="Farmer dashboard" width="280" />
-  <img src="JalSakhi/assets/images/background.jpeg" alt="Login and onboarding" width="280" />
+  <img src="images/WhatsApp%20Image%202026-02-22%20at%2012.13.32%20(2).jpeg" alt="JalSakhi app screenshot 4" width="220" />
+  <img src="images/WhatsApp%20Image%202026-02-22%20at%2012.13.33.jpeg" alt="JalSakhi app screenshot 5" width="220" />
 </p>
 
 ## Repository overview
@@ -92,6 +96,7 @@ High-level structure (simplified):
 │  └─ README.md                # Gateway-specific documentation
 │
 ├─ Chatbot/                    # Chatbot / assistant service
+├─ images/                     # App screenshots (used in README)
 ├─ Docs/                       # Architecture and process documentation
 └─ ...
 ```
