@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Theme } from '../../constants/JalSakhiTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { MLService } from '../../services/ml';
+import { Logger } from '../../utils/Logger';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -20,48 +22,47 @@ export default function WaterAllocationView() {
 
   const fetchAllocation = async () => {
     setLoading(true);
-    const sampleData = {
-      farmerId: 'F001',
-      farmerName: 'Ramesh Kumar',
-      village: 'Khadki',
-      totalLand: 2.5,
-      currentAllocation: {
-        amount: 1250,
-        validFrom: '2025-01-15',
-        validUntil: '2025-01-21',
-        status: 'active',
-      },
-      schedule: [
-        { date: 'Jan 15', slot: 'Morning 6-8 AM', amount: 200, status: 'completed' },
-        { date: 'Jan 16', slot: 'Morning 6-8 AM', amount: 200, status: 'pending' },
-        { date: 'Jan 18', slot: 'Evening 5-7 PM', amount: 250, status: 'pending' },
-        { date: 'Jan 20', slot: 'Morning 6-8 AM', amount: 300, status: 'pending' },
-        { date: 'Jan 21', slot: 'Evening 5-7 PM', amount: 300, status: 'pending' },
-      ],
-      reservoirStatus: {
-        capacity: 50000,
-        currentLevel: 38500,
-        percentage: 77,
-      },
-      priority: 'medium',
-      crops: ['Rice', 'Wheat'],
-      lastUpdated: new Date().toISOString(),
-    };
-
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 2000);
-      const response = await fetch('http://YOUR_SERVER_IP:3000/api/farmer/water-allocation', { signal: controller.signal } as any);
-      clearTimeout(timeout);
+      // Village simulation with sample farms to test the AI model
+      const availableWater = 10000;
+      const farms = [
+        { id: 'F001', area_acre: 2.5, crop_type: 'RICE', soil_type: 'DRY', region: 'DESERT', priority_score: 3 },
+        { id: 'F002', area_acre: 1.5, crop_type: 'MAIZE', soil_type: 'WET', region: 'SEMI ARID', priority_score: 1 },
+        { id: 'F003', area_acre: 3.0, crop_type: 'WHEAT', soil_type: 'HUMID', region: 'HUMID', priority_score: 2 },
+      ];
 
-      if (response && response.ok) {
-        const data = await response.json();
-        setAllocation(data || sampleData);
-      } else {
-        setAllocation(sampleData);
+      const result = await MLService.optimizeAllocation(availableWater, farms);
+
+      if (result) {
+        // Map AI result to UI state
+        // We take F001 as the "current" user's farm for the main display
+        const myFarmReport = result.per_farm_report.find((r: any) => r.farm_id === 'F001');
+        const myFarmAlloc = result.allocations.find((a: any) => a.farm_id === 'F001');
+
+        setAllocation({
+          farmerId: 'F001',
+          farmerName: 'Ramesh Kumar',
+          village: 'Khadki',
+          totalLand: 2.5,
+          currentAllocation: {
+            amount: myFarmReport?.allocated_liters || 0,
+            demand: myFarmReport?.demand_liters || 0,
+            validFrom: new Date().toLocaleDateString(),
+            validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            status: myFarmReport?.status === 'met' ? 'active' : 'deficit',
+            share: myFarmAlloc?.share_percent || 0
+          },
+          efficiency: result.village_efficiency_score,
+          totalVillageDemand: result.total_demand_liters,
+          totalVillageAllocated: result.total_allocated_liters,
+          report: result.per_farm_report,
+          priority: 'high',
+          lastUpdated: new Date().toISOString(),
+        });
       }
     } catch (error) {
-      setAllocation(sampleData);
+      Logger.error('WaterAllocation', 'Fetch failed', error);
+      // Fallback remains if needed elsewhere, but we try to use live data
     } finally {
       setLoading(false);
     }
@@ -83,10 +84,13 @@ export default function WaterAllocationView() {
     </View>
   );
 
-  if (loading) {
+  if (loading || !allocation) {
     return (
       <View style={[styles.container, styles.center]}>
         <ActivityIndicator size="large" color={Theme.colors.primary} />
+        {!loading && !allocation && (
+          <Text style={{ marginTop: 10, color: Theme.colors.textMuted }}>Failed to load allocation data.</Text>
+        )}
       </View>
     );
   }
@@ -161,43 +165,45 @@ export default function WaterAllocationView() {
             </View>
 
             {/* Reservoir Progress */}
-            <GlassCard title="Village Reservoir" icon="water-percent" style={styles.fullWidth}>
+            <GlassCard title="Village Optimization" icon="water-percent" style={styles.fullWidth}>
               <View style={styles.reservoirContainer}>
                 <View style={styles.reservoirMeta}>
-                  <Text style={styles.resPercent}>{allocation.reservoirStatus.percentage}%</Text>
-                  <Text style={styles.resVolume}>{allocation.reservoirStatus.currentLevel.toLocaleString()} / {allocation.reservoirStatus.capacity.toLocaleString()} L</Text>
+                  <Text style={styles.resPercent}>{allocation.efficiency || 0}%</Text>
+                  <Text style={styles.resVolume}>
+                    Allocated: {Math.round(allocation.totalVillageAllocated).toLocaleString()} / {Math.round(allocation.totalVillageDemand).toLocaleString()} L (Demand)
+                  </Text>
                 </View>
                 <View style={styles.progressBg}>
                   <LinearGradient
                     colors={['#60a5fa', '#3b82f6']}
                     start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                    style={[styles.progressFill, { width: `${allocation.reservoirStatus.percentage}%` }]}
+                    style={[styles.progressFill, { width: `${Math.min(100, allocation.efficiency || 0)}%` }]}
                   />
                 </View>
-                <Text style={styles.resSubText}>Village backup level is {allocation.reservoirStatus.percentage > 70 ? 'Healthy' : 'Moderate'}</Text>
+                <Text style={styles.resSubText}>Village-wide efficiency score for current water distribution.</Text>
               </View>
             </GlassCard>
 
-            {/* Schedule Section */}
+            {/* Farm Report Section */}
             <View style={{ marginTop: 8 }}>
-              <Text style={styles.sectionHeader}>Irrigation Schedule</Text>
-              {allocation.schedule.map((item: any, idx: number) => (
-                <GlassCard key={idx} style={[styles.scheduleItem, { marginBottom: 12 }]} intensity={idx % 2 === 0 ? 25 : 15}>
+              <Text style={styles.sectionHeader}>Village Allocation Report</Text>
+              {(allocation.report || []).map((item: any, idx: number) => (
+                <GlassCard key={idx} style={[styles.scheduleItem, { marginBottom: 12 }]} intensity={item.farm_id === 'F001' ? 40 : 15}>
                   <View style={styles.scheduleRow}>
-                    <View style={[styles.scheduleStatus, { backgroundColor: item.status === 'completed' ? '#dcfce7' : '#F1F5F9' }]}>
+                    <View style={[styles.scheduleStatus, { backgroundColor: item.status === 'met' ? '#dcfce7' : '#fee2e2' }]}>
                       <Feather
-                        name={item.status === 'completed' ? 'check' : 'clock'}
+                        name={item.status === 'met' ? 'check' : 'alert-circle'}
                         size={18}
-                        color={item.status === 'completed' ? '#16a34a' : '#64748b'}
+                        color={item.status === 'met' ? '#16a34a' : '#ef4444'}
                       />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.scheduleDate}>{item.date}</Text>
-                      <Text style={styles.scheduleSlot}>{item.slot}</Text>
+                      <Text style={styles.scheduleDate}>{item.farm_id === 'F001' ? 'My Farm (F001)' : `Farm ${item.farm_id}`}</Text>
+                      <Text style={styles.scheduleSlot}>Demand: {Math.round(item.demand_liters)} L</Text>
                     </View>
                     <View style={styles.amountBox}>
-                      <Text style={styles.itemAmount}>{item.amount}L</Text>
-                      <Text style={styles.itemStatus}>{item.status}</Text>
+                      <Text style={styles.itemAmount}>{Math.round(item.allocated_liters)} L</Text>
+                      <Text style={[styles.itemStatus, { color: item.status === 'met' ? '#16a34a' : '#ef4444' }]}>{item.status.toUpperCase()}</Text>
                     </View>
                   </View>
                 </GlassCard>
@@ -237,6 +243,17 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 20,
     gap: 16,
+  },
+  backBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   backBlur: {
     width: 44,

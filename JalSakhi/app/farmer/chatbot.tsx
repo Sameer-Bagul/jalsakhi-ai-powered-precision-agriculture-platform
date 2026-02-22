@@ -84,9 +84,9 @@ export default function ChatbotScreen() {
     return (
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
         {!isUser && (
-          <View style={styles.assistantAvatar}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.botLogo} />
-          </View>
+          <LinearGradient colors={['#10b981', '#059669']} style={styles.assistantAvatarBox}>
+            <MaterialCommunityIcons name="robot-outline" size={20} color="white" />
+          </LinearGradient>
         )}
         <View style={[
           styles.bubble,
@@ -123,14 +123,11 @@ export default function ChatbotScreen() {
               <MaterialCommunityIcons name="chevron-left" size={28} color={Theme.colors.text} />
             </BlurView>
           </TouchableOpacity>
-          <View style={styles.headerTitleContainer}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} />
-            <View>
-              <Text style={styles.topTitle}>JalSakhi AI</Text>
-              <View style={styles.onlineStatus}>
-                <View style={styles.statusDot} />
-                <Text style={styles.statusTextLine}>Online</Text>
-              </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>JalSakhi AI</Text>
+            <View style={styles.onlineStatus}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusTextLine}>Online</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.infoBtn}>
@@ -236,14 +233,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.05)',
   },
-  headerTitleContainer: {
+  headerTextContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
   },
-  headerLogo: { width: 36, height: 36, borderRadius: 10 },
-  topTitle: { fontSize: 18, fontWeight: '900', color: Theme.colors.text, letterSpacing: -0.4 },
+  title: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: Theme.colors.text,
+    letterSpacing: -0.5,
+  },
   onlineStatus: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10b981' },
   statusTextLine: { fontSize: 12, color: Theme.colors.textMuted, fontWeight: '600' },
@@ -253,18 +251,19 @@ const styles = StyleSheet.create({
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginVertical: 8 },
   messageRowAssistant: { justifyContent: 'flex-start' },
   messageRowUser: { justifyContent: 'flex-end' },
-  assistantAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: 'white',
-    marginRight: 8,
-    alignItems: 'center',
+  assistantAvatarBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    marginRight: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  botLogo: { width: 20, height: 20 },
   bubble: {
     maxWidth: '80%',
     paddingHorizontal: 16,
