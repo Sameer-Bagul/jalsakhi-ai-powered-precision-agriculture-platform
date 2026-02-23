@@ -11,11 +11,11 @@
 
 **Smart Water Management for Sustainable Farming in India**
 
-<!-- Profile View Counter -->
-![Profile Views](https://komarev.com/ghpvc/?username=Sameer-Bagul&repo=jalsakhi-ai-powered-precision-agriculture-platform&color=brightgreen&style=for-the-badge&label=PROFILE+VIEWS)
+<!-- Repository View Counter -->
+![Repository Views](https://komarev.com/ghpvc/?username=Sameer-Bagul&repo=jalsakhi-ai-powered-precision-agriculture-platform&color=brightgreen&style=for-the-badge&label=REPO+VIEWS)
 
-<!-- Visitor Badge -->
-![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FSameer-Bagul%2Fjalsakhi-ai-powered-precision-agriculture-platform&label=Visitors&countColor=%23263759&style=for-the-badge)
+<!-- Repository Visitors -->
+![Repository Visitors](https://api.visitorbadge.io/api/visitors?path=Sameer-Bagul%2Fjalsakhi-ai-powered-precision-agriculture-platform&label=REPO+VISITORS&countColor=%23263759&style=for-the-badge)
 
 </div>
 
@@ -58,32 +58,16 @@
 
 <!-- Typing SVG -->
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=28&duration=4000&pause=1000&color=2E9EF7&center=true&vCenter=true&width=600&lines=AI-Powered+Agriculture+🌾;Smart+Water+Management+💧;50M%2B+Farmers+Targeted+👨‍🌾;4+ML+Models+Deployed+🤖;Built+for+Techathon+2026+🏆" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=28&duration=4000&pause=1000&color=2E9EF7&center=true&vCenter=true&width=600&lines=AI-Powered+Agriculture+🌾;Smart+Water+Management+💧;50M%2B+Farmers+Targeted+👨‍🌾;4+ML+Models+Deployed+🤖;Built+by+4+Passionate+Devs+💻" alt="Typing SVG" />
 </p>
 
 </div>
 
----
+## 📖 About
 
-## 📖 About JalSakhi
+**JalSakhi** (*Water Friend* in Hindi) is an AI-powered precision agriculture platform revolutionizing water management for Indian farmers. Built by 4 passionate developers, it combines ML models with an intuitive mobile interface to solve water scarcity challenges through:
 
-**JalSakhi** (*Water Friend* in Hindi) is a comprehensive AI-powered precision agriculture platform designed to revolutionize water management for Indian farmers and village administrators. Built for **Techathon 2026**, it combines cutting-edge machine learning with an intuitive mobile interface to address critical water scarcity challenges in agriculture.
-
-### 🎯 The Problem We Solve
-
-- 💧 **Water Scarcity**: India faces severe agricultural water shortages
-- 🌾 **Inefficient Irrigation**: Farmers lack data-driven watering decisions
-- ⚖️ **Unfair Distribution**: Villages struggle with equitable water allocation
-- 📊 **Limited Insights**: No real-time monitoring or predictive analytics
-
-### ✨ Our Solution
-
-JalSakhi provides:
-- 🤖 **AI-Powered Predictions** - Crop water requirements using ML models
-- 📈 **7-Day Forecasting** - Soil moisture predictions for better planning
-- ⚖️ **Smart Allocation** - Optimized village water distribution algorithms
-- 🌍 **Multilingual Support** - English, Hindi, and Marathi interfaces
-- 💬 **AI Assistant** - Context-aware chatbot using Llama 3.1 (Groq)
+🤖 **AI Predictions** • 📈 **7-Day Forecasts** • ⚖️ **Smart Allocation** • 🌍 **Multilingual (EN/HI/MR)** • 💬 **AI Chatbot**
 
 ---
 
@@ -151,27 +135,27 @@ JalSakhi provides:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    👥 End Users                           │
-│         Farmers • Administrators • Planners               │
+│                    👥 End Users                          │
+│         Farmers • Administrators • Planners              │
 └────────────────────────┬─────────────────────────────────┘
                          │
                          ▼
 ┌──────────────────────────────────────────────────────────┐
-│              📱 Mobile Application Layer                  │
+│              📱 Mobile Application Layer                 │
 │    React Native (Expo) • TypeScript • Expo Router        │
 │    Farmer Dashboard • Admin Panel • ML Integration       │
 └────────────────────────┬─────────────────────────────────┘
                          │
                          ▼
 ┌──────────────────────────────────────────────────────────┐
-│              🖥️  Backend API Layer                        │
+│              🖥️  Backend API Layer                       │
 │    Node.js • Express • MongoDB Atlas • JWT Auth          │
 │    REST APIs • Email OTP • Farm Management               │
 └────────────────────────┬─────────────────────────────────┘
                          │
                          ▼
 ┌──────────────────────────────────────────────────────────┐
-│              🛡️  ML Gateway (Security Layer)              │
+│              🛡️  ML Gateway (Security Layer)             │
 │    API Key Auth • Rate Limiting • Request Validation     │
 └────────────────────────┬─────────────────────────────────┘
                          │
@@ -252,269 +236,52 @@ The setup script will:
 - ✅ Check for required tools
 - ✅ Provide next steps guidance
 
-### Manual Setup
-
 <details>
-<summary><b>📱 1. Mobile App Setup</b></summary>
+<summary><b>🔧 Manual Setup (Click to expand)</b></summary>
 
 ```bash
-cd app
-npm install
-
-# Configure environment
-cp .env.example .env
-# Edit .env and set EXPO_PUBLIC_API_URL
-
-# Start development server
-npm start
-
-# Run on device
-# - Scan QR code with Expo Go app
-# - Press 'a' for Android emulator
-# - Press 'i' for iOS simulator
+# App: cd app && npm install && npm start
+# Server: cd server && npm install && npm start  
+# ML: cd ml-services/models && pip install -r unified_api/requirements.txt && uvicorn unified_api.main:app --port 8000
+# Gateway: cd ml-services/gateway && npm install && npm start
 ```
-
 </details>
-
-<details>
-<summary><b>🖥️  2. Backend Server Setup</b></summary>
-
-```bash
-cd server
-npm install
-
-# Configure environment
-cp .env.example .env
-# Edit .env with:
-# - MONGODB_URI
-# - JWT_SECRET
-# - EMAIL credentials (for OTP)
-
-# Start server
-npm start
-# Server runs on http://localhost:3000
-```
-
-</details>
-
-<details>
-<summary><b>🧠 3. ML Services Setup</b></summary>
-
-```bash
-cd ml-services/models
-pip install -r unified_api/requirements.txt
-
-# Train models (first time only)
-cd Crop_Water_Model && python train.py && cd ..
-cd soil_moisture_model && python train.py && cd ..
-
-# Start unified ML API
-cd ..
-uvicorn unified_api.main:app --host 0.0.0.0 --port 8000
-
-# API docs available at http://localhost:8000/docs
-```
-
-</details>
-
-<details>
-<summary><b>🛡️  4. Gateway Setup (Optional)</b></summary>
-
-```bash
-cd ml-services/gateway
-npm install
-
-# Configure environment
-cp .env.example .env
-# Edit .env with API keys and ML service URLs
-
-# Start gateway
-npm start
-# Gateway runs on http://localhost:5000
-```
-
-</details>
-
-### Running the Full Stack
-
-Open 4-5 terminal windows and run:
-
-```bash
-# Terminal 1 - Backend
-cd server && npm start
-
-# Terminal 2 - ML Services
-cd ml-services/models && uvicorn unified_api.main:app --host 0.0.0.0 --port 8000
-
-# Terminal 3 - Gateway (Optional)
-cd ml-services/gateway && npm start
-
-# Terminal 4 - Mobile App
-cd app && npm start
-```
 
 ---
 
-## 📂 Repository Structure
+## 📂 Structure
 
 ```
-jalsakhi-ai-powered-precision-agriculture-platform/
-│
-├── 📱 app/                          Mobile Application
-│   ├── app/                         Screens (Expo Router)
-│   │   ├── (auth)/                  Authentication flows
-│   │   ├── farmer/                  Farmer features
-│   │   └── admin/                   Admin features
-│   ├── components/                  Reusable components
-│   ├── services/                    API clients
-│   ├── constants/                   Theme & config
-│   └── assets/                      Images & resources
-│
-├── 🖥️  server/                       Backend API
-│   ├── controllers/                 Request handlers
-│   ├── models/                      MongoDB schemas
-│   ├── routes/                      API endpoints
-│   ├── middleware/                  Auth & validation
-│   └── config/                      Configuration
-│
-├── 🧠 ml-services/                   Machine Learning Services
-│   ├── models/                      ML Models
-│   │   ├── Crop_Water_Model/        Crop water prediction
-│   │   ├── soil_moisture_model/     Soil forecasting
-│   │   ├── village_water_allocation/ Water distribution
-│   │   └── unified_api/             Combined ML API
-│   ├── gateway/                     API Gateway (security)
-│   └── chatbot/                     AI Chatbot (Groq)
-│
-├── 📚 docs/                          Documentation
-│   ├── ARCHITECTURE.md              System design
-│   ├── API.md                       API reference
-│   ├── DEVELOPMENT.md               Dev guidelines
-│   └── GITHUB_SETUP.md              GitHub config
-│
-├── 🖼️  images/                       Assets & Screenshots
-├── ⚙️  setup.sh                      Automated setup
-├── 📄 README.md                      This file
-├── 🤝 CONTRIBUTING.md                Contribution guide
-├── 📜 CODE_OF_CONDUCT.md             Community standards
-└── ⚖️  LICENSE                       MIT License
+📱 app/          Mobile (React Native + Expo)
+🖥️  server/       Backend (Node.js + MongoDB)
+🧠 ml-services/  ML Models (4 FastAPI services + Gateway)
+📚 docs/         Documentation
+🖼️  images/       Screenshots
 ```
 
 ---
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| **[README.md](README.md)** | Project overview and quick start |
-| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Detailed system architecture |
-| **[API.md](docs/API.md)** | Complete API documentation |
-| **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** | Development best practices |
-| **[CONTRIBUTING.md](CONTRIBUTING.md)** | How to contribute |
-| **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | Community guidelines |
-| **[GITHUB_SETUP.md](docs/GITHUB_SETUP.md)** | GitHub repository setup |
+[Architecture](docs/ARCHITECTURE.md) • [API Reference](docs/API.md) • [Development Guide](docs/DEVELOPMENT.md) • [Contributing](CONTRIBUTING.md) • [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ---
 
-## 🧪 Testing
 
-Currently, the project uses manual testing. Automated testing is planned:
 
-```bash
-# Lint mobile app
-cd app && npm run lint
 
-# Test ML endpoints
-cd ml-services/models
-# Visit http://localhost:8000/docs for interactive testing
-
-# Test backend APIs
-# Use Postman or curl to test endpoints
-```
-
-**🎯 Future:** Unit tests, integration tests, E2E testing
-
----
-
-## 🚢 Deployment
-
-### Mobile App
-
-```bash
-cd app
-
-# Development build
-npm run build:dev
-
-# Preview build (for testing)
-npm run build:preview
-
-# Production build
-npm run build:prod
-```
-
-### Backend & ML Services
-
-Ready for deployment on:
-- **Azure App Service** (Backend & Gateway)
-- **Azure Container Instances** (ML Services)
-- **Heroku** (All services)
-- **AWS EC2/ECS** (All services)
-- **Docker** (Containerization ready)
-
----
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+Fork → Create branch → Commit → Push → PR. Read [Contributing Guidelines](CONTRIBUTING.md) first.
 
-1. **🍴 Fork** the repository
-2. **🌿 Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **💻 Commit** your changes (`git commit -m 'Add AmazingFeature'`)
-4. **🚀 Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **🎉 Open** a Pull Request
-
-Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
-
-### Areas We Need Help
-
-- [ ] Unit & integration tests
-- [ ] UI/UX improvements
-- [ ] Performance optimization
-- [ ] Documentation
-- [ ] Bug fixes
-- [ ] New features
-- [ ] Localization (more languages)
+**Help Wanted:** Tests, UI/UX, Performance, Docs, Bug Fixes, Features
 
 ---
 
 ## 🗺️ Roadmap
 
-### ✅ Completed (v1.0)
-
-- [x] Mobile app with farmer & admin dashboards
-- [x] Backend API with authentication
-- [x] ML models for crop water & soil moisture
-- [x] Village water allocation optimizer
-- [x] AI chatbot integration
-- [x] Multilingual support (EN, HI, MR)
-
-### 🚧 In Progress (v1.1)
-
-- [ ] Automated testing suite
-- [ ] Performance optimizations
-- [ ] Offline mode support
-- [ ] Enhanced error handling
-
-### 🔮 Future (v2.0+)
-
-- [ ] Real-time weather API integration
-- [ ] IoT sensor integration
-- [ ] Satellite imagery analysis
-- [ ] Market price predictions
-- [ ] Progressive Web App (PWA)
-- [ ] Blockchain for water credits
-- [ ] Community marketplace
+**v1.0 (Completed):** Mobile App • Backend API • 4 ML Models • Chatbot • Multilingual Support
 
 ---
 
@@ -550,28 +317,38 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct]
 
 </div>
 
-### Activity & Contribution Graph
 
-<div align="center">
-
-<!-- Contribution Activity -->
-[![Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=Sameer-Bagul&repo=jalsakhi-ai-powered-precision-agriculture-platform&theme=tokyo-night)](https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/graphs/contributors)
-
-<!-- Star History Chart -->
-[![Star History Chart](https://api.star-history.com/svg?repos=Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform&type=Date)](https://star-history.com/#Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform&Date)
-
-</div>
 
 ---
 
 ## 👥 Team & Contributors
 
-Built with ❤️ for **Techathon 2026**
+A collaborative project by developers who love to code and solve real-world problems. 💻
 
 ### Core Team
 - **[Sameer Bagul](https://github.com/Sameer-Bagul)** - Project Lead & Full Stack Developer
 
 ### Contributors Wall
+
+<div align="center">
+
+<!-- Contributors Widget -->
+<a href="https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform" />
+</a>
+
+**Thank you to all our amazing contributors!** 🎉
+
+</div>
+
+### Want to Join?
+
+We're always looking for passionate developers! Check out our [Contributing Guidelines](CONTRIBUTING.md) to get started.
+
+---
+
+## 📞 Support & Contact
+
 <div align="center">
 
 <!-- Support Badges -->
@@ -587,27 +364,7 @@ Built with ❤️ for **Techathon 2026**
 - **💡 Feature Requests**: [GitHub Issues](https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/issues/new?template=feature_request.md)
 - **💬 Questions & Discussions**: [GitHub Discussions](https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/discussions)
 - **📖 Documentation**: [Project Wiki](https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/wiki)
-- **📧 Email**: sameer.bagul@example.com (for security issues
-<!-- Contributors Widget -->
-<a href="https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform" />
-</a>
-
-**Thank you to all our amazing contributors!** 🎉
-
-</div>
-
-### Want to Join?
-
-We're always looking for passionate contributors! Check out our [Contributing Guidelines](CONTRIBUTING.md) to get started.
-
----
-
-## 📞 Support & Contact
-
-- **🐛 Issues**: [GitHub Issues](../../issues)
-- **💬 Discussions**: [GitHub Discussions](../../discussions)
-- **📖 Documentation**: [Project Wiki](../../wiki)
+- **📧 Email**: sameerbagul2004@gmail.com (for security issues)
 
 ---
 
@@ -616,33 +373,26 @@ We're always looking for passionate contributors! Check out our [Contributing Gu
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ```
-Copyright (c) 2026 JalSakhi Team - Techathon 2026
+Copyright (c) 2026 JalSakhi Development Team
 ```
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Special Thanks
 
-- **Techathon 2026** - For the platform and opportunity
-- **Indian Farmers** - The inspiration behind this project
+- **Groq** - For free Llama 3.1 API access
+- **MongoDB** - For Atlas free tier
+- **Expo** - For excellent React Native tooling
+- **FastAPI** - For high-performance ML APIs
 - **Open Source Community** - For the amazing tools and libraries
-- **Contributors** - Everyone who has contributed to this project
-
-### Special Thanks To
-
-<!-- Stargazers Widget -->
-[![Stargazers repo roster for @Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform](https://reporoster.com/stars/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform)](https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/stargazers)
-
-<!-- Forkers Widget -->
-[![Forkers repo roster for @Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform](https://reporoster.com/forks/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform)](https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform/network/members)
 
 ---
 
-### 📈 Repository Insights
+<div align="center">
 
-![Repo Insights](https://repobeats.axiom.co/api/embed/YOUR_REPOBEATS_TOKEN_HERE.svg "Repobeats analytics image")
+### 🌟 Star us on GitHub!
 
----
+If you find JalSakhi useful, please consider giving it a star ⭐
 
 **Built with passion for sustainable agriculture** 🌾💧
 
