@@ -23,14 +23,14 @@ Empty or invalid JSON body is rejected with **400 Bad Request**.
 
 ### Unified URL: ML model proxies (no API key)
 
-When the Crop Water (8001), Soil Moisture (8000), Village Water (8003), and Chatbot (8004) APIs are running locally, the gateway proxies them under one base URL so a single ngrok tunnel exposes all four:
+When the Crop Water (8001), Soil Moisture (8000), Village Water (8003), and ml-services/chatbot (8004) APIs are running locally, the gateway proxies them under one base URL so a single ngrok tunnel exposes all four:
 
 | Prefix | Proxied to | Example |
 |--------|------------|--------|
 | `/crop-water/*` | Crop Water API (default `localhost:8001`) | `POST /crop-water/predict` |
 | `/soil-moisture/*` | Soil Moisture API (default `localhost:8000`) | `POST /soil-moisture/predict/sensor` |
 | `/village-water/*` | Village Water API (default `localhost:8003`) | `POST /village-water/optimize` |
-| `/chatbot/*` | Chatbot API (default `localhost:8004`) | `POST /chatbot/chat` |
+| `/chatbot/*` | ml-services/chatbot API (default `localhost:8004`) | `POST /chatbot/chat` |
 
 - **GET** `https://your-ngrok-url/crop-water/health` → Crop Water health  
 - **POST** `https://your-ngrok-url/crop-water/predict` → Crop Water predict (same body as Model 1)  
@@ -38,8 +38,8 @@ When the Crop Water (8001), Soil Moisture (8000), Village Water (8003), and Chat
 - **POST** `https://your-ngrok-url/soil-moisture/predict/sensor` or `/soil-moisture/predict/location` → Soil Moisture predict  
 - **GET** `https://your-ngrok-url/village-water/health` → Village Water health  
 - **POST** `https://your-ngrok-url/village-water/optimize` → Village Water optimize  
-- **GET** `https://your-ngrok-url/chatbot/health` → Chatbot health  
-- **POST** `https://your-ngrok-url/chatbot/chat` → Chatbot chat (body: `{"message": "...", "language": "English"}`)  
+- **GET** `https://your-ngrok-url/chatbot/health` → ml-services/chatbot health  
+- **POST** `https://your-ngrok-url/chatbot/chat` → ml-services/chatbot chat (body: `{"message": "...", "language": "English"}`)  
 
 Proxy targets are configured via `CROP_WATER_API_URL`, `SOIL_MOISTURE_API_URL`, `VILLAGE_WATER_API_URL`, `CHATBOT_API_URL` (see `.env.example`). If a backend is down, the gateway returns **502**.
 
@@ -54,7 +54,7 @@ Proxy targets are configured via `CROP_WATER_API_URL`, `SOIL_MOISTURE_API_URL`, 
 ## Start instructions
 
 - **Initialize**: Create `.env` from `.env.example` and set `INTERNAL_API_KEY`.
-- **Install**: From the `local-model-gateway` directory run `npm install` (dependencies are local to the project).
+- **Install**: From the `ml-services/gateway` directory run `npm install` (dependencies are local to the project).
 - **Start server**: From the same directory run `npm start` or `node server.js`. Server listens on port 5000 by default.
 - **Expose with ngrok**: In a separate terminal run `ngrok http 5000` (or your configured port). Use the ngrok URL and the same `x-internal-key` value when calling the model endpoints.
 
@@ -77,7 +77,7 @@ Server handles `SIGTERM` and `SIGINT` with a graceful shutdown (closes listening
 **1. Initialize project (create .env from example and set your key)**
 
 ```bash
-cd local-model-gateway
+cd ml-services/gateway
 cp .env.example .env
 # Edit .env and set INTERNAL_API_KEY to a strong secret
 ```

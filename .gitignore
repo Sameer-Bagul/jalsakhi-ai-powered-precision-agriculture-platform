@@ -1,7 +1,209 @@
-# Trained model artifacts (large; regenerate with train.py)
-soil_moisture_model/*.joblib
-ML models/soil_moisture_model/*.joblib
-# Python
+# ========================================
+# JalSakhi - Comprehensive .gitignore
+# ========================================
+
+# ============ Security & Secrets ============
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.mobileprovision
+secrets/
+config/secrets.json
+
+# ============ Python ============
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.manifest
+*.spec
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+.python-version
+
+# ML model artifacts (regenerate with train.py)
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.pb
+*.onnx
+*.pt
+*.pth
+saved_models/
+checkpoints/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# ============ Node.js ============
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package manager lock files (optional - remove if you want to track them)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ============ React Native / Expo ============
+# Expo
+.expo/
+.expo-shared/
+expo-env.d.ts
+
+# React Native
+.react-native/
+android/.gradle/
+android/app/build/
+android/build/
+android/.idea/
+android/local.properties
+ios/Pods/
+ios/build/
+ios/*.xcworkspace
+!ios/*.xcworkspace/contents.xcworkspacedata
+*.xcuserstate
+
+# Metro bundler
+.metro-health-check*
+*.jsbundle
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+
+# ============ Databases ============
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.log
+
+# MongoDB
+data/
+mongodb/
+
+# ============ OS & Editor ============
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============ Build & Deployment ============
+# EAS Build
+eas-build-*/
+*.aab
+*.apk
+*.ipa
+
+# Deployment artifacts
+deploy/
+.deployment
+
+# ============ Testing & CI/CD ============
+.github/workflows/*.log
+test-results/
+screenshots/
+reports/
+
+# ============ Logs ============
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============ Temporary Files ============
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+.cache/
+
+# ============ Project Specific ============
+# Large datasets (document in README how to obtain)
+*.csv
+!**/DATASET*.csv
+!**/sample*.csv
+
+# Generated docs
+docs/_build/
+site/
+
+# Backup files
+*.bak
+*.backup
+*-backup.*
