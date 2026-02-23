@@ -285,43 +285,7 @@ Fork → Create branch → Commit → Push → PR. Read [Contributing Guidelines
 
 ---
 
-## 📊 Project Stats
-
-<div align="center">
-
-<!-- GitHub Stats Widget -->
-<a href="https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform">
-  <img height="180em" src="https://github-readme-stats.vercel.app/api?username=Sameer-Bagul&repo=jalsakhi-ai-powered-precision-agriculture-platform&show_icons=true&theme=tokyonight&include_all_commits=true&count_private=true"/>
-</a>
-
-<!-- Language Stats -->
-<a href="https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform">
-  <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Sameer-Bagul&repo=jalsakhi-ai-powered-precision-agriculture-platform&layout=compact&theme=tokyonight"/>
-</a>
-
-</div>
-
-### Project Metrics
-
-<div align="center">
-
-| Metric | Value |
-|--------|-------|
-| 🌾 **Target Users** | 50M+ farmers in India |
-| 🌍 **Languages Supported** | 3 (English, Hindi, Marathi) |
-| 🤖 **ML Models** | 4 specialized models |
-| 📱 **Components** | 50+ React Native components |
-| 🔌 **API Endpoints** | 25+ REST endpoints |
-| 📊 **Lines of Code** | 10,000+ |
-| 🎯 **Code Quality** | Production-ready |
-
-</div>
-
-
-
----
-
-## 👥 Team & Contributors
+##  Team & Contributors
 
 A collaborative project by developers who love to code and solve real-world problems. 💻
 
