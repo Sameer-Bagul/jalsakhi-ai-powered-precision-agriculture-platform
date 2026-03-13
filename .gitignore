@@ -5,3 +5,4 @@ ML models/soil_moisture_model/*.joblib
 __pycache__/
 *.pyc
 *.pyo
+.env
