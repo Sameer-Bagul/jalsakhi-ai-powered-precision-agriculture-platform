@@ -77,6 +77,10 @@
 
 ### Mobile Application
 
+<img src="jalsakhi.png" alt="JalSakhi Showcase" width="800"/>
+
+<br/>
+
 <img src="images/WhatsApp-Image-2026-02-22-at-12.13.31.jpeg" width="250" alt="Farmer Dashboard" />
 <img src="images/WhatsApp-Image-2026-02-22-at-12.13.32.jpeg" width="250" alt="Crop Water Analysis" />
 <img src="images/WhatsApp-Image-2026-02-22-at-12.13.32-1.jpeg" width="250" alt="Soil Predictions" />
