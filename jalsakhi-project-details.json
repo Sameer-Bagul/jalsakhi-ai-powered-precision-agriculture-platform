@@ -1,0 +1,103 @@
+{
+  "_id": "jalsakhi-precision-agriculture",
+  "title": "JalSakhi 🌾💧",
+  "slug": "jalsakhi-precision-agriculture",
+  "shortDescription": "An AI-powered precision agriculture platform revolutionizing water management for Indian farmers through predictive ML models and smart allocation.",
+  "description": "JalSakhi (Water Friend) is a comprehensive, AI-driven precision agriculture ecosystem designed to tackle acute water scarcity challenges faced by Indian farmers. Built as a scalable cross-platform mobile application, it bridges the gap between advanced Machine Learning technologies and grassroots farming practices. The platform aggregates local environmental data to deliver actionable insights—ranging from hyper-local 7-day soil moisture forecasts to intelligent crop water predictions. By providing dedicated interfaces for both individual farmers and regional administrators, JalSakhi facilitates not only on-the-ground irrigation efficiency but also macro-level village water allocation, ultimately driving sustainable agricultural practices at scale.",
+  "category": "mobile-app",
+  "isFeatured": true,
+  "status": "Completed",
+  "role": "Project Lead & Full Stack Developer",
+  "clientOrCompany": "Personal Project",
+  "duration": "2026",
+  "targetAudience": "Farmers / Regional Administrators",
+  "techStackBreakdown": {
+    "frontend": [
+      "React Native",
+      "Expo",
+      "TypeScript",
+      "Axios"
+    ],
+    "backend": [
+      "Node.js",
+      "Express",
+      "MongoDB Atlas",
+      "JWT"
+    ],
+    "infrastructure": [
+      "Python",
+      "FastAPI",
+      "Scikit-Learn",
+      "TensorFlow",
+      "Groq Llama 3.1",
+      "Ngrok"
+    ]
+  },
+  "myContributions": [
+    "Architected and developed a fully responsive cross-platform mobile application using React Native and Expo, ensuring a seamless user experience across varied mobile devices.",
+    "Engineered a robust Node.js and Express backend REST API, utilizing MongoDB Atlas for scalable data persistence and JWT for secure, role-based access control.",
+    "Designed and implemented a secure ML Gateway that effectively manages API Key authentication and implements rate limiting, shielding the Python ML services from unauthorized access.",
+    "Deployed a suite of four highly specialized FastAPI ML microservices to handle complex operations: Crop Water Prediction, Soil Moisture Forecasting, Village Water Allocation, and AI Chatbot interactions.",
+    "Integrated a high-performance Groq-powered Llama 3.1 LLM chatbot, meticulously tailored to provide real-time, context-aware agricultural advice in English, Hindi, and Marathi.",
+    "Established a secure local development workflow utilizing Ngrok tunneling to facilitate real-time mobile testing against local AI microservices."
+  ],
+  "image": "jalsakhi.png",
+  "gallery": [
+    {
+      "url": "jalsakhi.png",
+      "caption": "JalSakhi Mobile Application Showcase"
+    },
+    {
+      "url": "images/appflow.png",
+      "caption": "JalSakhi User Flow & Navigation Diagram"
+    },
+    {
+      "url": "images/MLservice.png",
+      "caption": "JalSakhi Three-Tier Architecture & ML Services"
+    }
+  ],
+  "architectureDiagram": "graph TD\n    subgraph Mobile_Application_Layer[\"Mobile Application Layer (React Native)\"]\n        FARMER_UI[\"Farmer Dashboard (React Native/Expo)\"]\n        ADMIN_UI[\"Admin Panel (React Native/Expo)\"]\n        FARMER_UI <--> BACKEND\n        ADMIN_UI <--> BACKEND\n    end\n\n    subgraph Backend_API_Layer[\"Backend API Layer\"]\n        BACKEND[\"Node.js + Express REST API\"]\n        MONGO[(\"MongoDB Atlas\")]\n        BACKEND <--> MONGO\n    end\n\n    subgraph ML_Intelligence_Layer[\"ML Gateway & AI Services\"]\n        GATEWAY[\"Security ML Gateway (Auth/Rate Limiting)\"]\n        CROP_MODEL[\"Crop Water Prediction (RandomForest)\"]\n        SOIL_MODEL[\"Soil Moisture Forecast (Prophet/LSTM)\"]\n        VILLAGE_MODEL[\"Village Water Allocation (Heuristic)\"]\n        CHATBOT[\"AI Chatbot (Groq Llama 3.1)\"]\n        \n        BACKEND <--> GATEWAY\n        GATEWAY --> CROP_MODEL\n        GATEWAY --> SOIL_MODEL\n        GATEWAY --> VILLAGE_MODEL\n        GATEWAY --> CHATBOT\n    end\n\n    classDef frontend fill:#1a202c,stroke:#38b2ac,stroke-width:2px,color:#fff;\n    classDef backend fill:#2d3748,stroke:#9f7aea,stroke-width:2px,color:#fff;\n    classDef ml fill:#2b6cb0,stroke:#63b3ed,stroke-width:2px,color:#fff;\n    \n    class FARMER_UI,ADMIN_UI frontend;\n    class BACKEND,MONGO backend;\n    class GATEWAY,CROP_MODEL,SOIL_MODEL,VILLAGE_MODEL,CHATBOT ml;",
+  "liveUrl": "",
+  "githubUrl": "https://github.com/Sameer-Bagul/jalsakhi-ai-powered-precision-agriculture-platform",
+  "apiDocsUrl": "",
+  "contributors": [
+    "Sameer Bagul"
+  ],
+  "features": [
+    "Smart Crop Management: Empowers farmers to seamlessly track multiple farms, crop life cycles, and historical irrigation logs.",
+    "AI-Driven Water Predictions: Leverages RandomForest models to provide highly accurate, data-driven irrigation recommendations, preventing over-watering.",
+    "7-Day Soil Moisture Forecast: Utilizes advanced time-series forecasting (Prophet/LSTM) to predict soil conditions up to a week in advance, allowing for proactive planning.",
+    "Multilingual AI Chatbot: An integrated, Groq-powered Llama 3.1 assistant delivering instant, culturally relevant agricultural guidance in Hindi, Marathi, and English.",
+    "Intelligent Water Allocation: Features heuristic AI-optimized distribution logic for administrators to equitably manage water resources across entire communities.",
+    "Village Analytics Dashboard: Provides administrators with real-time insights, systemic anomaly detection, and reservoir monitoring to ensure regional sustainability."
+  ],
+  "challenges": [
+    "Architectural Complexity: Seamlessly integrating four distinct, computationally heavy Machine Learning models via Python FastAPI into a unified, responsive React Native mobile experience.",
+    "Data Security & API Integrity: Implementing a robust ML Gateway to securely route traffic between the Node.js backend and Python microservices while preventing abuse through rate limiting.",
+    "Predictive Accuracy: Ensuring the 7-day soil moisture forecasts and crop water predictions remained accurate despite utilizing disparate environmental data sources and varying regional inputs.",
+    "Multilingual LLM Performance: Tuning prompts and context windows for the Groq Llama 3.1 model to consistently return accurate agricultural advice in multiple regional Indian languages without hallucination."
+  ],
+  "learnings": [
+    "Mastered the design and orchestration of a multi-tier microservice architecture, effectively bridging a React Native frontend with specialized Python FastAPI AI services via a secure Node.js Gateway.",
+    "Deepened expertise in applying time-series forecasting (LSTM/Prophet) and classification models (RandomForest) to solve real-world agricultural problems.",
+    "Gained significant experience in building highly accessible, multilingual user interfaces tailored specifically for diverse and often non-technical userbases in rural India.",
+    "Learned advanced LLM integration techniques, specifically optimizing prompt engineering for domain-specific tasks using the Groq API."
+  ],
+  "metrics": [
+    "Architected to scale and target a potential user base of 50M+ Indian Farmers.",
+    "Successfully deployed and orchestrated 4 distinct Machine Learning models operating concurrently in production.",
+    "Achieved comprehensive multilingual support covering 3 major languages (English, Hindi, Marathi) for maximum regional accessibility."
+  ],
+  "clientTestimonial": {
+    "name": "Sameer Bagul",
+    "role": "Project Lead & Full Stack Developer",
+    "quote": "Building JalSakhi was driven by a deep passion to solve critical real-world water scarcity problems. By merging scalable AI microservices with accessible, multilingual mobile interfaces, we created a tool that genuinely empowers Indian farmers."
+  },
+  "relatedBlogs": [],
+  "futureRoadmap": [
+    "Expand external weather API integrations to provide hyper-local, real-time meteorological forecasting.",
+    "Transition from purely predictive modeling to integrating physical IoT sensors for real-time field data ingestion.",
+    "Expand native language support to include more regional Indian dialects to widen the platform's accessibility footprint.",
+    "Implement a community-driven forum feature allowing farmers to share insights and best practices directly within the app."
+  ]
+}
